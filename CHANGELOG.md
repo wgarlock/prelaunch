@@ -1,6 +1,7 @@
 # 1.8.1
 
 - Recalculate secondary dependencies between rounds (#378)
+- Exclude irrelevant pip constraints (#417)
 
 
 # 1.8.0
