@@ -1,8 +1,12 @@
 # 1.8.1
 
 - Recalculate secondary dependencies between rounds (#378)
+- Add "--emit-trusted-host/--no-trusted-host" option
+- Deduplicate the option lines of output
 - `pip-compile` now excludes packages required only by unsafe packages when
   `--allow-unsafe` is not in use.
+- Ignore pkg-resources
+- Support pinned VCS dependencies
 
 
 # 1.8.0
