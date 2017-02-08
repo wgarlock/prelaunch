@@ -124,7 +124,9 @@ class OutputWriter(object):
 
         if ignored_packages:
             yield ''
-            yield comment('# The following packages are required only by packages considered to be unsafe in a requirements file:')
+            yield comment(
+                '# The following packages are required only by packages'
+                ' considered to be unsafe in a requirements file:')
 
             for ireq in ignored_packages:
                 line = self._format_requirement(

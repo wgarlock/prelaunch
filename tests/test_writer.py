@@ -77,7 +77,8 @@ def test_iter_lines_ignores_dependencies_of_unsafe(from_line, writer):
         '\x1b[32m# The following packages are considered to be unsafe in a requirements file:\x1b[0m',
         '\x1b[32m# setuptools                \x1b[32m# via test\x1b[0m\x1b[0m',
         '',
-        '\x1b[32m# The following packages are required only by packages considered to be unsafe in a requirements file:\x1b[0m',
+        ('\x1b[32m# The following packages are required only by packages'
+         ' considered to be unsafe in a requirements file:\x1b[0m'),
         '\x1b[32m# appdirs                   \x1b[32m# via setuptools\x1b[0m\x1b[0m',
     ]
     assert list(lines) == expected
