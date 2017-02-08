@@ -1,4 +1,4 @@
-# Unreleased
+# 0.180.2
 
 - Recalculate secondary dependencies between rounds (#378)
 - Add "--emit-trusted-host/--no-trusted-host" option
