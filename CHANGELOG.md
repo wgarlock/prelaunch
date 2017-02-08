@@ -1,6 +1,8 @@
 # 1.8.1
 
 - Recalculate secondary dependencies between rounds (#378)
+- `pip-compile` now excludes packages required only by unsafe packages when
+  `--allow-unsafe` is not in use.
 
 
 # 1.8.0
