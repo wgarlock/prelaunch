@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add support for "pip-requ --version"
+
 # 0.180.2
 
 - Recalculate secondary dependencies between rounds (#378)
