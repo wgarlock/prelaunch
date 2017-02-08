@@ -8,7 +8,7 @@ import sys
 import pip
 
 from .. import click, sync
-from ..exceptions import PipToolsError
+from ..exceptions import PipRequError
 from ..logging import log
 from ..utils import assert_compatible_pip_version, flat_map
 
@@ -50,7 +50,7 @@ def cli(dry_run, force, find_links, index_url, extra_index_url, no_index, src_fi
 
     try:
         requirements = sync.merge(requirements, ignore_conflicts=force)
-    except PipToolsError as e:
+    except PipRequError as e:
         log.error(str(e))
         sys.exit(2)
 

@@ -4,7 +4,7 @@ from textwrap import dedent
 from click.testing import CliRunner
 
 import pytest
-from piptools.scripts.compile import cli
+from pip_requ.scripts.compile import cli
 
 
 @pytest.yield_fixture

@@ -1,8 +1,8 @@
 from collections import Counter
 
 import pytest
-from piptools.exceptions import IncompatibleRequirements
-from piptools.sync import dependency_tree, diff, merge
+from pip_requ.exceptions import IncompatibleRequirements
+from pip_requ.sync import dependency_tree, diff, merge
 
 
 @pytest.mark.parametrize(
@@ -10,24 +10,24 @@ from piptools.sync import dependency_tree, diff, merge
 
     [
         ([],
-            'pip-tools', []),
+            'pip-requ', []),
 
-        ([('pip-tools==1', [])],
-            'pip-tools', ['pip-tools']),
+        ([('pip-requ==1', [])],
+            'pip-requ', ['pip-requ']),
 
-        ([('pip-tools==1', []),
+        ([('pip-requ==1', []),
           ('django==1.7', [])],
-            'pip-tools', ['pip-tools']),
+            'pip-requ', ['pip-requ']),
 
-        ([('pip-tools==1', ['click>=2']),
+        ([('pip-requ==1', ['click>=2']),
           ('django==1.7', []),
           ('click==3', [])],
-            'pip-tools', ['pip-tools', 'click']),
+            'pip-requ', ['pip-requ', 'click']),
 
-        ([('pip-tools==1', ['click>=2']),
+        ([('pip-requ==1', ['click>=2']),
           ('django==1.7', []),
           ('click==1', [])],
-            'pip-tools', ['pip-tools']),
+            'pip-requ', ['pip-requ']),
 
         ([('root==1', ['child==2']),
           ('child==2', ['grandchild==3']),
@@ -124,13 +124,13 @@ def test_diff_leave_packaging_packages_alone(fake_dist, from_line):
     assert to_uninstall == {'first'}
 
 
-def test_diff_leave_piptools_alone(fake_dist, from_line):
-    # Suppose an env contains Django, and pip-tools itself (including all of
+def test_diff_leave_pip_requ_alone(fake_dist, from_line):
+    # Suppose an env contains Django, and pip-requ itself (including all of
     # its dependencies)
     installed = [
         fake_dist('django==1.7'),
         fake_dist('first==2.0.1'),
-        fake_dist('pip-tools==1.1.1', [
+        fake_dist('pip-requ==1.1.1', [
             'click>=4',
             'first',
             'six',

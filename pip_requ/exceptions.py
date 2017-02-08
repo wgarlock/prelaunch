@@ -1,8 +1,8 @@
-class PipToolsError(Exception):
+class PipRequError(Exception):
     pass
 
 
-class NoCandidateFound(PipToolsError):
+class NoCandidateFound(PipRequError):
     def __init__(self, ireq, candidates_tried):
         self.ireq = ireq
         self.candidates_tried = candidates_tried
@@ -16,7 +16,7 @@ class NoCandidateFound(PipToolsError):
         return '\n'.join(lines)
 
 
-class UnsupportedConstraint(PipToolsError):
+class UnsupportedConstraint(PipRequError):
     def __init__(self, message, constraint):
         super(UnsupportedConstraint, self).__init__(message)
         self.constraint = constraint
@@ -26,7 +26,7 @@ class UnsupportedConstraint(PipToolsError):
         return '{} (constraint was: {})'.format(message, str(self.constraint))
 
 
-class IncompatibleRequirements(PipToolsError):
+class IncompatibleRequirements(PipRequError):
     def __init__(self, ireq_a, ireq_b):
         self.ireq_a = ireq_a
         self.ireq_b = ireq_b

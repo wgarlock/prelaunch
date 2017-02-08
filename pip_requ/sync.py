@@ -9,7 +9,7 @@ from .utils import flat_map, key_from_req
 
 PACKAGES_TO_IGNORE = [
     'pip',
-    'pip-tools',
+    'pip-requ',
     'pip-review',
     'setuptools',
     'wheel',
@@ -54,9 +54,9 @@ def dependency_tree(installed_keys, root_key):
 def get_dists_to_ignore(installed):
     """
     Returns a collection of package names to ignore when performing pip-sync,
-    based on the currently installed environment.  For example, when pip-tools
+    based on the currently installed environment.  For example, when pip-requ
     is installed in the local environment, it should be ignored, including all
-    of its dependencies (e.g. click).  When pip-tools is not installed
+    of its dependencies (e.g. click).  When pip-requ is not installed
     locally, click should also be installed/uninstalled depending on the given
     requirements.
     """

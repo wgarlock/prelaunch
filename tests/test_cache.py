@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 
 from pytest import raises
 
-from piptools.cache import read_cache_file, CorruptCacheError, DependencyCache
+from pip_requ.cache import read_cache_file, CorruptCacheError, DependencyCache
 
 
 @contextmanager

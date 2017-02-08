@@ -1,8 +1,8 @@
 from pytest import fixture
 
 from pip.index import FormatControl
-from piptools.utils import comment
-from piptools.writer import OutputWriter
+from pip_requ.utils import comment
+from pip_requ.writer import OutputWriter
 
 
 @fixture

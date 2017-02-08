@@ -1,6 +1,6 @@
 import pytest
-from piptools.repositories import LocalRequirementsRepository
-from piptools.utils import name_from_req
+from pip_requ.repositories import LocalRequirementsRepository
+from pip_requ.utils import name_from_req
 
 
 @pytest.mark.parametrize(

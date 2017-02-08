@@ -1,15 +1,15 @@
 """
-pip-tools keeps your pinned dependencies fresh.
+Pip Requ keeps your pinned dependencies fresh.
 """
 from setuptools import find_packages, setup
 
 setup(
-    name='pip-tools',
-    version='1.8.0',
-    url='https://github.com/nvie/pip-tools/',
+    name='pip-requ',
+    version='0.180.0dev0',
+    url='https://github.com/suutari-ai/pip-requ/',
     license='BSD',
-    author='Vincent Driessen',
-    author_email='me@nvie.com',
+    maintainer='Tuomas Suutari',
+    maintainer_email='tuomas.suutari@anders.fi',
     description=__doc__,
     packages=find_packages(exclude=['tests']),
     install_requires=[
@@ -20,8 +20,8 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'pip-compile = piptools.scripts.compile:cli',
-            'pip-sync = piptools.scripts.sync:cli',
+            'pip-compile = pip_requ.scripts.compile:cli',
+            'pip-sync = pip_requ.scripts.sync:cli',
         ],
     },
     platforms='any',

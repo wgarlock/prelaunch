@@ -1,6 +1,6 @@
 from pytest import raises
 
-from piptools.utils import as_tuple, format_requirement, format_specifier, flat_map
+from pip_requ.utils import as_tuple, format_requirement, format_specifier, flat_map
 
 
 def test_format_requirement(from_line):
