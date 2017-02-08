@@ -1,5 +1,7 @@
 # Unreleased
 
+- Exclude irrelevant pip constraints (#417)
+
 # 0.180.5
 
 - Fix "pip-requ compile-all" to handle "-e" and "-c" lines correctly
