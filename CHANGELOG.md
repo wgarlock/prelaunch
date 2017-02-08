@@ -1,4 +1,4 @@
-# Unreleased
+# 0.180.6
 
 - Exclude irrelevant pip constraints (#417)
 
