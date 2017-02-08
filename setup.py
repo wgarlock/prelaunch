@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='pip-requ',
-    version='0.180.4',
+    version='0.180.4.post0.dev0',
     url='https://github.com/suutari-ai/pip-requ/',
     license='BSD',
     maintainer='Tuomas Suutari',
