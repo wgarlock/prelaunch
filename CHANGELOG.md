@@ -7,6 +7,7 @@
   `--allow-unsafe` is not in use.
 - Ignore pkg-resources
 - Support pinned VCS dependencies
+- Exclude irrelevant pip constraints (#417)
 
 
 # 1.8.0
