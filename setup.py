@@ -20,9 +20,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'pip-compile = pip_requ.scripts.compile:cli',
             'pip-requ = pip_requ.scripts.pip_requ:main',
-            'pip-sync = pip_requ.scripts.sync:cli',
         ],
     },
     platforms='any',

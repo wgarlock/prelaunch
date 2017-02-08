@@ -127,7 +127,7 @@ class Resolver(object):
         for constraint in chain(self.our_constraints, self.their_constraints):
             if ((is_vcs_link(constraint) and not constraint.editable and
                  not is_pinned_requirement(constraint))):
-                msg = 'pip-compile does not support non-editable vcs URLs that are not pinned to one version.'
+                msg = 'Pip Requ does not support non-editable vcs URLs that are not pinned to one version.'
                 raise UnsupportedConstraint(msg, constraint)
 
     def _group_constraints(self, constraints):

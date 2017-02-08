@@ -1,6 +1,7 @@
 # Unreleased
 
 - Fix "pip-requ compile-all" to handle "-e" and "-c" lines correctly
+- Remove "pip-compile" and "pip-sync" commands
 
 # 0.180.4
 
