@@ -1,5 +1,7 @@
 # Unreleased
 
+- Recalculate secondary dependencies between rounds (#378)
+
 # 0.180.1
 
 - Add "pip-requ" command
