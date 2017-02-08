@@ -25,10 +25,15 @@ def compile_all_requirements():
 
 
 def get_option_lines(filename):
+    ignored = (
+        '-r', '--requirement',
+        '-e', '--editable',
+        '-c', '--constraint',
+    )
     with open(filename, 'rt', encoding='utf-8') as fp:
         for line in fp:
             cleaned = line.strip()
-            if cleaned.startswith('-') and not cleaned.startswith('-r'):
+            if cleaned.startswith('-') and not cleaned.startswith(ignored):
                 yield cleaned
 
 

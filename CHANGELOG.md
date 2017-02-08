@@ -1,5 +1,7 @@
 # Unreleased
 
+- Fix "pip-requ compile-all" to handle "-e" and "-c" lines correctly
+
 # 0.180.4
 
 - Fix "pip-requ compile --no-annotate"
