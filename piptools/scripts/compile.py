@@ -221,9 +221,7 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
     #
     #              self[as_name_version_tuple(ireq)] = {'click>=3.0', 'six'}
     #
-    reverse_dependencies = None
-    if annotate:
-        reverse_dependencies = resolver.reverse_dependencies(results)
+    reverse_dependencies = resolver.reverse_dependencies(results)
 
     writer = OutputWriter(src_files, dst_file, dry_run=dry_run,
                           emit_header=header, emit_index=index,
