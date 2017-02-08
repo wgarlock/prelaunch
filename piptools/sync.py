@@ -5,7 +5,7 @@ from subprocess import check_call
 
 from . import click
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
-from .utils import flat_map, key_from_req
+from .utils import flat_map, key_from_req, is_pinned_requirement, is_vcs_link
 
 PACKAGES_TO_IGNORE = [
     'pip',
@@ -69,9 +69,8 @@ def merge(requirements, ignore_conflicts):
     by_key = {}
 
     for ireq in requirements:
-        if ireq.link is not None and not ireq.editable:
-            msg = ('pip-compile does not support URLs as packages, unless they are editable. '
-                   'Perhaps add -e option?')
+        if ((is_vcs_link(ireq) and not ireq.editable and not is_pinned_requirement(ireq))):
+            msg = 'pip-compile does not support non-editable vcs URLs that are not pinned to one version.'
             raise UnsupportedConstraint(msg, ireq)
 
         key = ireq.link or key_from_req(ireq.req)
@@ -95,7 +94,7 @@ def diff(compiled_requirements, installed_dists):
     Calculate which packages should be installed or uninstalled, given a set
     of compiled requirements and a list of currently installed modules.
     """
-    requirements_lut = {r.link or key_from_req(r.req): r for r in compiled_requirements}
+    requirements_lut = {r.link if r.editable else key_from_req(r.req): r for r in compiled_requirements}
 
     satisfied = set()  # holds keys
     to_install = set()  # holds keys-and-versions
