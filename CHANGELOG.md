@@ -1,5 +1,8 @@
 # Unreleased
 
+- Fix resolver when toplevel requirements are also in pinned
+  subdependency (#450)
+
 # 0.180.6
 
 - Exclude irrelevant pip constraints (#417)
