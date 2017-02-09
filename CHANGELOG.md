@@ -8,6 +8,8 @@
 - Ignore pkg-resources
 - Support pinned VCS dependencies
 - Exclude irrelevant pip constraints (#417)
+- Fix resolver when toplevel requirements are also in pinned
+  subdependency (#450)
 
 
 # 1.8.0
