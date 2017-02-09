@@ -13,7 +13,7 @@ Installation
 ============
 
 ```console
-$ pip install --upgrade pip  # Pip Requ needs pip==6.1 or higher (!)
+$ pip install --upgrade pip  # Pip Requ needs pip==8.0 or higher (!)
 $ pip install pip-requ
 ```
 
