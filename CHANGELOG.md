@@ -1,11 +1,11 @@
 # Unreleased
 
-- Fix resolver when toplevel requirements are also in pinned
-  subdependency (#450)
+- (nvie/pip-tools#450) Fix resolver when toplevel requirements are also
+  in pinned subdependency
 
 # 0.180.6
 
-- Exclude irrelevant pip constraints (#417)
+- (nvie/pip-tools#417) Exclude irrelevant pip constraints
 
 # 0.180.5
 
@@ -22,13 +22,12 @@
 
 # 0.180.2
 
-- Recalculate secondary dependencies between rounds (#378)
-- Add "--emit-trusted-host/--no-trusted-host" option
-- Deduplicate the option lines of output
-- `pip-compile` now excludes packages required only by unsafe packages when
-  `--allow-unsafe` is not in use.
-- Ignore pkg-resources
-- Support pinned VCS dependencies
+- (nvie/pip-tools#378) Recalculate secondary dependencies between rounds
+- (nvie/pip-tools#448) Add "--no-trusted-host" option to fix #382
+- (nvie/pip-tools#448) Deduplicate the option lines of output
+- (nvie/pip-tools#441) Exclude packages required only by unsafe packages
+- (nvie/pip-tools#389) Ignore pkg-resources
+- (nvie/pip-tools#355) Support non-editable pinned VCS dependencies
 
 # 0.180.1
 
