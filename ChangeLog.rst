@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.180.7
+-------
 
 - (nvie/pip-tools#450) Fix resolver when toplevel requirements are also
   in pinned subdependency

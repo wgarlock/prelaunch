@@ -11,7 +11,7 @@ def get_long_description():
 
 setup(
     name='pip-requ',
-    version='0.180.6.post0.dev0',
+    version='0.180.7',
     url='https://github.com/suutari-ai/pip-requ/',
     license='BSD',
     maintainer='Tuomas Suutari',
