@@ -1,7 +1,13 @@
 """
-Pip Requ keeps your pinned dependencies fresh.
+Pip Requ helps managing your Python requirements files.
 """
 from setuptools import find_packages, setup
+
+
+def get_long_description():
+    with open('README.rst') as fp:
+        return fp.read()
+
 
 setup(
     name='pip-requ',
@@ -10,7 +16,8 @@ setup(
     license='BSD',
     maintainer='Tuomas Suutari',
     maintainer_email='tuomas.suutari@anders.fi',
-    description=__doc__,
+    description=__doc__.strip(),
+    long_description=get_long_description(),
     packages=find_packages(exclude=['tests']),
     install_requires=[
         'click>=6',
@@ -25,26 +32,11 @@ setup(
     },
     platforms='any',
     classifiers=[
-        # As from https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        # 'Development Status :: 1 - Planning',
-        # 'Development Status :: 2 - Pre-Alpha',
-        # 'Development Status :: 3 - Alpha',
-        # 'Development Status :: 4 - Beta',
         'Development Status :: 5 - Production/Stable',
-        # 'Development Status :: 6 - Mature',
-        # 'Development Status :: 7 - Inactive',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        # 'Programming Language :: Python :: 2.3',
-        # 'Programming Language :: Python :: 2.4',
-        # 'Programming Language :: Python :: 2.5',
-        # 'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        # 'Programming Language :: Python :: 3.0',
-        # 'Programming Language :: Python :: 3.1',
-        # 'Programming Language :: Python :: 3.2',
-        # 'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Intended Audience :: Developers',

@@ -3,6 +3,8 @@ Unreleased
 
 - (nvie/pip-tools#450) Fix resolver when toplevel requirements are also
   in pinned subdependency
+- Convert README and ChangeLog to restructured text (ReST)
+- Include README as package long description in setup.py
 
 0.180.6
 -------
