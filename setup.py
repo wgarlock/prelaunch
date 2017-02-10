@@ -8,7 +8,7 @@ def get_long_description():
 
 setup(
     name='prequ',
-    version='0.180.7.post0.dev0',
+    version='0.180.8',
     url='https://github.com/suutari-ai/prequ/',
     license='BSD',
     maintainer='Tuomas Suutari',
