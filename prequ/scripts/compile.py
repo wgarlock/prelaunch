@@ -11,7 +11,7 @@ import pip
 from pip.req import InstallRequirement, parse_requirements
 
 from .. import click
-from ..exceptions import PipRequError
+from ..exceptions import PrequError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository, PyPIRepository
 from ..resolver import Resolver
@@ -196,7 +196,7 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
             hashes = resolver.resolve_hashes(results)
         else:
             hashes = None
-    except PipRequError as e:
+    except PrequError as e:
         log.error(str(e))
         sys.exit(2)
 
@@ -221,7 +221,7 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
     #            then, when ireq is editable, it would store in
     #
     #              editables[egg_name][link_without_fragment] = deps
-    #              editables['pip-requ']['git+...ols.git@future'] = {'click>=3.0', 'six'}
+    #              editables['prequ']['git+...ols.git@future'] = {'click>=3.0', 'six'}
     #
     #            otherwise:
     #

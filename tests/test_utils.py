@@ -1,6 +1,6 @@
 from pytest import raises
 
-from pip_requ.utils import (
+from prequ.utils import (
     as_tuple, format_requirement, format_specifier, flat_map, dedup)
 
 

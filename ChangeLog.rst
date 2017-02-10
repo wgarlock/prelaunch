@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- Rename Pip Requ to Prequ
+
 0.180.7
 -------
 

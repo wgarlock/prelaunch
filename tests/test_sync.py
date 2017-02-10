@@ -1,8 +1,8 @@
 from collections import Counter
 
 import pytest
-from pip_requ.exceptions import IncompatibleRequirements
-from pip_requ.sync import dependency_tree, diff, merge
+from prequ.exceptions import IncompatibleRequirements
+from prequ.sync import dependency_tree, diff, merge
 
 
 @pytest.mark.parametrize(
@@ -10,24 +10,24 @@ from pip_requ.sync import dependency_tree, diff, merge
 
     [
         ([],
-            'pip-requ', []),
+            'prequ', []),
 
-        ([('pip-requ==1', [])],
-            'pip-requ', ['pip-requ']),
+        ([('prequ==1', [])],
+            'prequ', ['prequ']),
 
-        ([('pip-requ==1', []),
+        ([('prequ==1', []),
           ('django==1.7', [])],
-            'pip-requ', ['pip-requ']),
+            'prequ', ['prequ']),
 
-        ([('pip-requ==1', ['click>=2']),
+        ([('prequ==1', ['click>=2']),
           ('django==1.7', []),
           ('click==3', [])],
-            'pip-requ', ['pip-requ', 'click']),
+            'prequ', ['prequ', 'click']),
 
-        ([('pip-requ==1', ['click>=2']),
+        ([('prequ==1', ['click>=2']),
           ('django==1.7', []),
           ('click==1', [])],
-            'pip-requ', ['pip-requ']),
+            'prequ', ['prequ']),
 
         ([('root==1', ['child==2']),
           ('child==2', ['grandchild==3']),
@@ -124,13 +124,13 @@ def test_diff_leave_packaging_packages_alone(fake_dist, from_line):
     assert to_uninstall == {'first'}
 
 
-def test_diff_leave_pip_requ_alone(fake_dist, from_line):
-    # Suppose an env contains Django, and pip-requ itself (including all of
+def test_diff_leave_prequ_alone(fake_dist, from_line):
+    # Suppose an env contains Django, and prequ itself (including all of
     # its dependencies)
     installed = [
         fake_dist('django==1.7'),
         fake_dist('first==2.0.1'),
-        fake_dist('pip-requ==1.1.1', [
+        fake_dist('prequ==1.1.1', [
             'click>=4',
             'first',
             'six',

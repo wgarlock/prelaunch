@@ -1,5 +1,5 @@
 """
-Pip Requ helps managing your Python requirements files.
+Prequ helps managing your Python requirements files.
 """
 from setuptools import find_packages, setup
 
@@ -10,9 +10,9 @@ def get_long_description():
 
 
 setup(
-    name='pip-requ',
+    name='prequ',
     version='0.180.7.post0.dev0',
-    url='https://github.com/suutari-ai/pip-requ/',
+    url='https://github.com/suutari-ai/prequ/',
     license='BSD',
     maintainer='Tuomas Suutari',
     maintainer_email='tuomas.suutari@anders.fi',
@@ -27,7 +27,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'pip-requ = pip_requ.scripts.pip_requ:main',
+            'prequ = prequ.scripts.prequ:main',
         ],
     },
     platforms='any',

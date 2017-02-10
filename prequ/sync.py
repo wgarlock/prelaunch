@@ -9,7 +9,7 @@ from .utils import flat_map, key_from_req, is_pinned_requirement, is_vcs_link
 
 PACKAGES_TO_IGNORE = [
     'pip',
-    'pip-requ',
+    'prequ',
     'pip-review',
     'setuptools',
     'wheel',
@@ -54,10 +54,10 @@ def dependency_tree(installed_keys, root_key):
 
 def get_dists_to_ignore(installed):
     """
-    Returns a collection of package names to ignore when performing pip-requ sync,
-    based on the currently installed environment.  For example, when pip-requ
+    Returns a collection of package names to ignore when performing prequ sync,
+    based on the currently installed environment.  For example, when prequ
     is installed in the local environment, it should be ignored, including all
-    of its dependencies (e.g. click).  When pip-requ is not installed
+    of its dependencies (e.g. click).  When prequ is not installed
     locally, click should also be installed/uninstalled depending on the given
     requirements.
     """
@@ -70,7 +70,7 @@ def merge(requirements, ignore_conflicts):
 
     for ireq in requirements:
         if ((is_vcs_link(ireq) and not ireq.editable and not is_pinned_requirement(ireq))):
-            msg = 'Pip Requ does not support non-editable vcs URLs that are not pinned to one version.'
+            msg = 'Prequ does not support non-editable vcs URLs that are not pinned to one version.'
             raise UnsupportedConstraint(msg, ireq)
 
         key = ireq.link or key_from_req(ireq.req)
@@ -135,7 +135,7 @@ def sync(to_install, to_uninstall, verbose=False, dry_run=False, pip_flags=None,
         # find pip via PATH
         pip = 'pip'
     else:
-        # find pip in same directory as pip-requ entry-point script
+        # find pip in same directory as prequ entry-point script
         pip = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'pip')
 
     if to_uninstall:

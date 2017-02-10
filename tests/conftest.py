@@ -6,11 +6,11 @@ from pip._vendor.pkg_resources import Requirement
 from pip.req import InstallRequirement
 from pytest import fixture
 
-from pip_requ.cache import DependencyCache
-from pip_requ.repositories.base import BaseRepository
-from pip_requ.resolver import Resolver
-from pip_requ.utils import as_tuple, key_from_req, make_install_requirement
-from pip_requ.exceptions import NoCandidateFound
+from prequ.cache import DependencyCache
+from prequ.repositories.base import BaseRepository
+from prequ.resolver import Resolver
+from prequ.utils import as_tuple, key_from_req, make_install_requirement
+from prequ.exceptions import NoCandidateFound
 
 
 class FakeRepository(BaseRepository):

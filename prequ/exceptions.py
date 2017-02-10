@@ -1,8 +1,8 @@
-class PipRequError(Exception):
+class PrequError(Exception):
     pass
 
 
-class NoCandidateFound(PipRequError):
+class NoCandidateFound(PrequError):
     def __init__(self, ireq, candidates_tried):
         self.ireq = ireq
         self.candidates_tried = candidates_tried
@@ -16,7 +16,7 @@ class NoCandidateFound(PipRequError):
         return '\n'.join(lines)
 
 
-class UnsupportedConstraint(PipRequError):
+class UnsupportedConstraint(PrequError):
     def __init__(self, message, constraint):
         super(UnsupportedConstraint, self).__init__(message)
         self.constraint = constraint
@@ -26,7 +26,7 @@ class UnsupportedConstraint(PipRequError):
         return '{} (constraint was: {})'.format(message, str(self.constraint))
 
 
-class IncompatibleRequirements(PipRequError):
+class IncompatibleRequirements(PrequError):
     def __init__(self, ireq_a, ireq_b):
         self.ireq_a = ireq_a
         self.ireq_b = ireq_b

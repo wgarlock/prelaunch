@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from pip_requ.utils import as_tuple, key_from_req, make_install_requirement
+from prequ.utils import as_tuple, key_from_req, make_install_requirement
 from .base import BaseRepository
 
 

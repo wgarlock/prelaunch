@@ -131,7 +131,7 @@ class Resolver(object):
         for constraint in constraints:
             if ((is_vcs_link(constraint) and not constraint.editable and
                  not is_pinned_requirement(constraint))):
-                msg = 'Pip Requ does not support non-editable vcs URLs that are not pinned to one version.'
+                msg = 'Prequ does not support non-editable vcs URLs that are not pinned to one version.'
                 raise UnsupportedConstraint(msg, constraint)
 
     def _group_constraints(self, constraints):

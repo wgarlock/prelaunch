@@ -5,7 +5,7 @@ from .click import secho
 from pip.utils.appdirs import user_cache_dir
 
 # The user_cache_dir helper comes straight from pip itself
-CACHE_DIR = user_cache_dir('pip-requ')
+CACHE_DIR = user_cache_dir('prequ')
 
 # NOTE
 # We used to store the cache dir under ~/.pip-tools, which is not the

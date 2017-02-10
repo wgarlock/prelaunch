@@ -8,12 +8,12 @@ import sys
 
 from pkg_resources import Requirement
 
-from .exceptions import PipRequError
+from .exceptions import PrequError
 from .locations import CACHE_DIR
 from .utils import as_tuple, key_from_req, lookup_table
 
 
-class CorruptCacheError(PipRequError):
+class CorruptCacheError(PrequError):
     def __init__(self, path):
         self.path = path
 
@@ -44,7 +44,7 @@ class DependencyCache(object):
     The cache file is written to the appropriate user cache dir for the
     current platform, i.e.
 
-        ~/.cache/pip-requ/depcache-pyX.Y.json
+        ~/.cache/prequ/depcache-pyX.Y.json
 
     Where X.Y indicates the Python version.
     """
