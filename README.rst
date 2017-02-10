@@ -1,12 +1,34 @@
 Prequ
 =====
 
-A set of command line tools to help you keep your pip-based packages
-fresh, even when you've pinned them.  `You do pin them, right?`__
+Tools for Python requirement handling.  Helps in keeping your
+requirements files complete and up-to-date.
 
-__ http://nvie.com/posts/pin-your-packages
+Background
+----------
 
-Prequ is a fork of pip-tools_ by Vincent Driessen.
+Every non-library Python project should have a ``requirements.txt`` file
+which lists required Python packages for the project, i.e. its
+dependencies.  It would be easy to just list the dependencies with their
+minimum and maximum versions in there, but that's not a good practice.
+If versions of the dependencies are not pinned to exact versions, it's
+uncertain which version of the packages get installed.  Even pinning the
+direct dependencies is not enough, since project dependencies might have
+their own dependencies (project's indirect dependencies) and those
+should be pinned too.  That's where Prequ comes in: it makes it easy to
+generate the list of those pinned direct and indirect dependencies from
+the non-pinned requirements.
+
+There is also `a good article by Vincent Driessen
+<http://nvie.com/posts/pin-your-packages>`_ which explains it more
+thoroughly why you should pin your packages.
+
+Prequ is a fork of pip-tools_ by Vincent Driessen.  Pip-tools was a fine
+project, but I wanted to add couple new features and make some changes
+to existing workflows.  There were also couple bugs that I needed to be
+fixed sooner than later.  Most of those bugs were already fixed in
+GitHub pull requests, but weren't merged to pip-tools.  That's why I
+decided to create my own fork.
 
 .. _pip-tools: https://github.com/nvie/pip-tools
 

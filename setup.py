@@ -1,6 +1,3 @@
-"""
-Prequ helps managing your Python requirements files.
-"""
 from setuptools import find_packages, setup
 
 
@@ -16,7 +13,7 @@ setup(
     license='BSD',
     maintainer='Tuomas Suutari',
     maintainer_email='tuomas.suutari@anders.fi',
-    description=__doc__.strip(),
+    description="Prequ -- Python requirement handling",
     long_description=get_long_description(),
     packages=find_packages(exclude=['tests']),
     install_requires=[
