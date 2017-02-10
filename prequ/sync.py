@@ -55,9 +55,9 @@ def dependency_tree(installed_keys, root_key):
 def get_dists_to_ignore(installed):
     """
     Returns a collection of package names to ignore when performing prequ sync,
-    based on the currently installed environment.  For example, when prequ
+    based on the currently installed environment.  For example, when Prequ
     is installed in the local environment, it should be ignored, including all
-    of its dependencies (e.g. click).  When prequ is not installed
+    of its dependencies (e.g. click).  When Prequ is not installed
     locally, click should also be installed/uninstalled depending on the given
     requirements.
     """
