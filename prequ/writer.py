@@ -47,7 +47,7 @@ class OutputWriter(object):
                 params += ["--generate-hashes"]
             params += ['--output-file', self.dst_file]
             params += self.src_files
-            yield comment('#   prequ compile {}'.format(' '.join(params)))
+            yield comment('#   prequ compile-in {}'.format(' '.join(params)))
             yield comment('#')
 
     def write_index_options(self):

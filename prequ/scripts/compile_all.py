@@ -19,7 +19,7 @@ def compile_all_requirements():
     for src_file in src_reqs:
         txt_file = src_file.replace('.in', '.txt')
         print('*** Compiling {} to {}'.format(src_file, txt_file))
-        call('prequ compile --no-index --no-header --no-annotate {r}',
+        call('prequ compile-in --no-index --no-header --no-annotate {r}',
              r=src_file, stdout=DEVNULL)
         postprocess_requirement_file(txt_file, option_lines)
 
