@@ -230,6 +230,7 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
                           index_urls=repository.finder.index_urls,
                           trusted_hosts=pip_options.trusted_hosts,
                           format_control=repository.finder.format_control,
+                          find_links=repository.finder.find_links,
                           allow_unsafe=allow_unsafe)
     writer.write(results=results,
                  reverse_dependencies=reverse_dependencies,
