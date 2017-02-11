@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- (nvie/pip-tools#453) Write relative find-links opts to output file
+
 0.180.8
 -------
 
