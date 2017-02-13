@@ -130,4 +130,3 @@ def test_trusted_host_no_emit(pip_conf):
                                   '--no-trusted-host'])
         print(out.output)
         assert '--trusted-host example.com' not in out.output
-        assert '--no-trusted-host' in out.output
