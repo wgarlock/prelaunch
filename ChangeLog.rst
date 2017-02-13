@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.180.9
+-------
 
 - (nvie/pip-tools#453) Write relative find-links opts to output file
 - Add "--silent" option for the compile command
