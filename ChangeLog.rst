@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- Rename "prequ compile-all" to "prequ compile"
+
 0.180.9
 -------
 

@@ -1,6 +1,6 @@
 from .. import click
 from . import build_wheels
-from . import compile_all
+from . import compile
 
 
 @click.command()
@@ -8,7 +8,7 @@ from . import compile_all
 @click.pass_context
 def main(ctx, verbose):
     """
-    Build wheels and compile all requirements.
+    Build wheels and compile requirements.
     """
     ctx.invoke(build_wheels.main)
-    ctx.invoke(compile_all.main, verbose=verbose)
+    ctx.invoke(compile.main, verbose=verbose)

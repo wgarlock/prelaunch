@@ -11,7 +11,7 @@ from . import compile_in
 @click.pass_context
 def main(ctx, verbose):
     """
-    Compile all requirements files (*.in).
+    Compile requirements from pre-requirements.
     """
     prereq = PreRequirements.from_file('requirements.pre')
     for (mode, requirements) in prereq.get_requirements():
