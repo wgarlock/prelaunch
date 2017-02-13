@@ -19,6 +19,7 @@ setup(
     install_requires=[
         'click>=6',
         'first',
+        'pyyaml',
         'six',
     ],
     zip_safe=False,
