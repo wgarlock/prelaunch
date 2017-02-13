@@ -8,6 +8,11 @@ requirements files complete and up-to-date.
    :alt: Build Status
    :target: https://travis-ci.org/suutari-ai/prequ
 
+.. image::
+   https://coveralls.io/repos/github/suutari-ai/prequ/badge.svg?branch=master
+   :alt: Coverage
+   :target: https://coveralls.io/github/suutari-ai/prequ?branch=master
+
 Background
 ----------
 
