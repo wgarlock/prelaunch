@@ -12,7 +12,7 @@ class OutputWriter(object):
     def __init__(self, src_files, dst_file, dry_run, emit_header, emit_index,
                  emit_trusted_host, annotate, generate_hashes,
                  default_index_url, index_urls, trusted_hosts, find_links,
-                 format_control, allow_unsafe=False):
+                 format_control, allow_unsafe=False, silent=False):
         self.src_files = src_files
         self.dst_file = dst_file
         self.dry_run = dry_run
@@ -27,6 +27,7 @@ class OutputWriter(object):
         self.find_links = find_links
         self.format_control = format_control
         self.allow_unsafe = allow_unsafe
+        self.silent = silent
 
     def _sort_key(self, ireq):
         return (not ireq.editable, str(ireq.req).lower())
@@ -157,7 +158,8 @@ class OutputWriter(object):
                 f = stack.enter_context(AtomicSaver(self.dst_file))
 
             for line in self._iter_lines(results, reverse_dependencies, primary_packages, hashes):
-                log.info(line)
+                if not self.silent:
+                    log.info(line)
                 if f:
                     f.write(unstyle(line).encode('utf-8'))
                     f.write(os.linesep.encode('utf-8'))
