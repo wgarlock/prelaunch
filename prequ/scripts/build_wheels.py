@@ -1,16 +1,9 @@
-import io
 import os
-import re
+import subprocess
 from glob import glob
 
 from .. import click
-from ._utils import call
-
-WHEEL_DIR = 'wheels'
-
-WHEEL_LINE_RX = re.compile(
-    '^\s*(?P<pkg>(\w|-)+)(?P<verspec>\S*)\s+'
-    '#\s*wheel:\s*(?P<wheel_spec>\S.*)$')
+from ..prereqfile import PreRequirements
 
 
 @click.command()
@@ -22,49 +15,32 @@ def main():
 
 
 def build_wheels():
-    to_build = list(get_packages_to_build())
+    prereq = PreRequirements.from_file('requirements.pre')
+    to_build = list(prereq.get_wheels_to_build())
     for (pkg, ver, url) in to_build:
-        build_wheel(pkg, ver, url)
+        build_wheel(prereq, pkg, ver, url)
 
 
-def get_packages_to_build():
-    for requirement_file in glob('requirements*.in'):
-        with io.open(requirement_file, 'rt', encoding='utf-8') as fp:
-            for line in fp:
-                if line.lstrip().startswith('#'):
-                    continue
-                m = WHEEL_LINE_RX.match(line)
-                if m:
-                    yield parse_requirement_wheel_line_data(**m.groupdict())
-
-
-def parse_requirement_wheel_line_data(pkg, verspec, wheel_spec):
-    if not verspec.startswith(('>=', '~=', '==')):
-        raise Exception('No version (>=, ~=, ==) for: {}'.format(pkg))
-    ver = verspec[2:]
-    (provider, src) = wheel_spec.strip().split(':', 1)
-    if provider == 'github':
-        url = 'git+ssh://git@github.com/{}@v{}'.format(src, ver)
-    else:
-        raise Exception('Currently only github repos are supported')
-    return (pkg, ver, url)
-
-
-def build_wheel(pkg, ver, url):
-    d = locals()
-    if get_wheels(pkg, ver):
-        print('*** Already built: {}'.format(get_wheels(pkg, ver)[0]))
+def build_wheel(prereq, pkg, ver, url):
+    already_built = get_wheels(prereq, pkg, ver)
+    if already_built:
+        print('*** Already built: {}'.format(already_built[0]))
         return
     print('*** Building wheel for {} {} from {}'.format(pkg, ver, url))
-    call('pip wheel -v -w {w} --no-deps {u}', w=WHEEL_DIR, u=url)
-    built_wheel = get_wheels(pkg, ver)[0]
+    call('pip wheel -v -w {w} --no-deps {u}', w=prereq.wheel_dir, u=url)
+    built_wheel = get_wheels(prereq, pkg, ver)[0]
     print('*** Built: {}'.format(built_wheel))
-    for wheel in get_wheels(pkg):  # All versions
+    for wheel in get_wheels(prereq, pkg):  # All versions
         if wheel != built_wheel:
             print('*** Removing: {}'.format(wheel))
             os.remove(wheel)
 
 
-def get_wheels(pkg, ver='*'):
+def get_wheels(prereq, pkg, ver='*'):
     return glob(os.path.join(
-        WHEEL_DIR, '{}-{}-*.whl'.format(pkg.replace('-', '_'), ver)))
+        prereq.wheel_dir, '{}-{}-*.whl'.format(pkg.replace('-', '_'), ver)))
+
+
+def call(cmd, stdout=None, **kwargs):
+    formatted_cmd = [x.format(**kwargs) for x in cmd.split()]
+    return subprocess.check_call(formatted_cmd, stdout=stdout)

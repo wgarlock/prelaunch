@@ -4,6 +4,7 @@ Unreleased
 - (nvie/pip-tools#453) Write relative find-links opts to output file
 - Add "--silent" option for the compile command
 - Rename "prequ compile" to "prequ compile-in"
+- Use ``requirements.pre`` as input for ``prequ update``
 
 0.180.8
 -------

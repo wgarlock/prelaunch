@@ -1,12 +1,14 @@
 from .. import click
-from .build_wheels import build_wheels
-from .compile_all import compile_all_requirements
+from . import build_wheels
+from . import compile_all
 
 
 @click.command()
-def main():
+@click.option('-v', '--verbose', is_flag=True, help="Show more output")
+@click.pass_context
+def main(ctx, verbose):
     """
     Build wheels and compile all requirements.
     """
-    build_wheels()
-    compile_all_requirements()
+    ctx.invoke(build_wheels.main)
+    ctx.invoke(compile_all.main, verbose=verbose)
