@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- (jazzband/pip-tools#464) sync: Use options from the txt file
+
 0.200.0
 -------
 
