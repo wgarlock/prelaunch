@@ -2,7 +2,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import optparse
 import os
 import sys
 import tempfile
@@ -13,11 +12,12 @@ from pip.req import InstallRequirement, parse_requirements
 from .. import click
 from ..exceptions import PrequError
 from ..logging import log
-from ..repositories import LocalRequirementsRepository, PyPIRepository
+from ..repositories import LocalRequirementsRepository
 from ..resolver import Resolver
 from ..utils import (assert_compatible_pip_version, is_pinned_requirement,
                      key_from_req)
 from ..writer import OutputWriter
+from ._repo import get_pip_options_and_pypi_repository
 
 # Make sure we're using a compatible version of pip
 assert_compatible_pip_version()
@@ -96,38 +96,10 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     # Setup
     ###
 
-    # Use pip's parser for pip.conf management and defaults.
-    # General options (find_links, index_url, extra_index_url, trusted_host,
-    # and pre) are defered to pip.
-    pip_command = PipCommand()
-    index_opts = pip.cmdoptions.make_option_group(
-        pip.cmdoptions.index_group,
-        pip_command.parser,
-    )
-    pip_command.parser.insert_option_group(0, index_opts)
-    pip_command.parser.add_option(optparse.Option('--pre', action='store_true', default=False))
-
-    pip_args = []
-    if find_links:
-        for link in find_links:
-            pip_args.extend(['-f', link])
-    if index_url:
-        pip_args.extend(['-i', index_url])
-    if extra_index_url:
-        for extra_index in extra_index_url:
-            pip_args.extend(['--extra-index-url', extra_index])
-    if client_cert:
-        pip_args.extend(['--client-cert', client_cert])
-    if pre:
-        pip_args.extend(['--pre'])
-    if trusted_host:
-        for host in trusted_host:
-            pip_args.extend(['--trusted-host', host])
-
-    pip_options, _ = pip_command.parse_args(pip_args)
-
-    session = pip_command._build_session(pip_options)
-    repository = PyPIRepository(pip_options, session)
+    (pip_options, repository) = get_pip_options_and_pypi_repository(
+        index_url=index_url, extra_index_url=extra_index_url,
+        find_links=find_links, client_cert=client_cert,
+        pre=pre, trusted_host=trusted_host)
 
     # Pre-parse the inline package upgrade specs: they should take precedence
     # over the stuff in the requirements files
