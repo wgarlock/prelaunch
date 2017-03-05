@@ -1,5 +1,5 @@
-Unreleased
-----------
+0.300.0
+-------
 
 - Use ``[prequ]`` section in ``setup.cfg`` as default pre-requirements
 
