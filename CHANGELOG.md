@@ -1,4 +1,4 @@
-# 1.8.1
+# 1.8.1 (unreleased)
 
 - Recalculate secondary dependencies between rounds (#378)
 - Add "--emit-trusted-host/--no-trusted-host" option
@@ -8,8 +8,11 @@
 - Ignore pkg-resources
 - Support pinned VCS dependencies
 - Exclude irrelevant pip constraints (#417)
-- Fix resolver when toplevel requirements are also in pinned
-  subdependency (#450)
+- Calculated dependencies could be left with wrong candidates when 
+  toplevel requirements happen to be also pinned in sub-dependencies (#450)
+- Fix duplicate entries that could happen in generated requirements.txt (#427)
+- Gracefully report invalid pip version (#457)
+- Fix capitalization in the generated requirements.txt, packages will always be lowercased (#452)
 
 
 # 1.8.0

@@ -35,10 +35,13 @@ def key_from_req(req):
     """Get an all-lowercase version of the requirement's name."""
     if hasattr(req, 'key'):
         # pip 8.1.1 or below, using pkg_resources
-        return req.key
+        key = req.key
     else:
         # pip 8.1.2 or above, using packaging
-        return req.name.lower()
+        key = req.name
+
+    key = key.replace('_', '-').lower()
+    return key
 
 
 def name_from_req(req):
@@ -73,9 +76,9 @@ def format_requirement(ireq, include_specifier=True):
     if ireq.editable or is_vcs_link(ireq):
         line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
     elif include_specifier:
-        line = str(ireq.req)
+        line = str(ireq.req).lower()
     else:
-        line = name_from_req(ireq.req)
+        line = name_from_req(ireq.req).lower()
     return line
 
 

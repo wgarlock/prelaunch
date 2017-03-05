@@ -5,8 +5,8 @@ from setuptools import find_packages, setup
 
 setup(
     name='pip-tools',
-    version='1.8.1dev0',
-    url='https://github.com/nvie/pip-tools/',
+    version='1.8.1rc3',
+    url='https://github.com/jazzband/pip-tools/',
     license='BSD',
     author='Vincent Driessen',
     author_email='me@nvie.com',
