@@ -3,13 +3,22 @@ Prequ pre-requirements file definition and parsing.
 """
 from __future__ import unicode_literals
 
+import io
+import os
 import re
 import sys
 from collections import defaultdict
+from contextlib import contextmanager
+from glob import glob
 
-from prequ.repositories.pypi import PyPIRepository
+from .ini_parser import parse_ini
+from .repositories.pypi import PyPIRepository
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
 
 DEFAULT_INDEX_URL = PyPIRepository.DEFAULT_INDEX_URL
 
@@ -30,13 +39,75 @@ class PreRequirements(object):
     ]
 
     @classmethod
-    def from_file(cls, fileobj):
-        if hasattr(fileobj, 'read'):
-            conf_data = yaml.load(fileobj, UnicodeYamlSafeLoader)
-        else:
-            with open(fileobj, 'rb') as fp:
-                conf_data = yaml.load(fp, UnicodeYamlSafeLoader)
+    def from_directory(cls, directory):
+        def path(filename):
+            return os.path.join(directory, filename)
+
+        setup_cfg = path('setup.cfg')
+        if os.path.exists(setup_cfg):
+            from_ini = cls.from_ini(setup_cfg)
+            if from_ini is not None:
+                return from_ini
+        pre_file = path('requirements.pre')
+        if os.path.exists(pre_file):
+            return cls.from_yaml(pre_file)
+        in_files = (
+            glob(path('requirements.in')) +
+            glob(path('requirements-*.in')))
+        if in_files:
+            return cls.from_in_files(*in_files)
+        raise NoPreRequirementsFound(
+            'Cannot find pre-requirements. '
+            'Add [prequ] section to your setup.cfg.')
+
+    @classmethod
+    def from_ini(cls, fileobj, section_name='prequ'):
+        field_specs = {
+            key.split('options.', 1)[1]: value
+            for (key, value) in cls.fields
+            if key.startswith('options.')
+        }
+        with _get_fileobj(fileobj, 'rt', 'utf-8') as fp:
+            data = parse_ini(fp, field_specs, section_name=section_name)
+        if not data:
+            return None
+        opts = {}
+        reqs = {}
+        for (key, value) in data.items():
+            if key == 'requirements':
+                reqs['base'] = value
+            elif key.startswith('requirements-'):
+                reqs[key.split('requirements-', 1)[1]] = value
+            else:
+                opts[key] = value
+        return cls.from_dict({'options': opts, 'requirements': reqs})
+
+    @classmethod
+    def from_yaml(cls, fileobj):
+        if not yaml:
+            msg = (
+                'Cannot load pre-requirements from "{}": No yaml module.  '
+                'Migrate to setup.cfg or install pyyaml.').format(fileobj)
+            raise Error(msg)
+        with _get_fileobj(fileobj) as fp:
+            conf_data = yaml.load(fp, UnicodeYamlSafeLoader)
         return cls.from_dict(conf_data)
+
+    @classmethod
+    def from_in_files(cls, *filenames):
+        reqs = {}
+        for filepath in filenames:
+            fn = os.path.basename(filepath)
+            if fn == 'requirements.in':
+                mode = 'base'
+            elif fn.startswith('requirements-') and fn.endswith('.in'):
+                mode = fn.split('requirements-', 1)[1].rsplit('.in', 1)[0]
+            else:
+                raise InvalidPreRequirements(
+                    'Invalid in-file name: {}'.format(fn))
+            with io.open(filepath, 'rt', encoding='utf-8') as fp:
+                reqs[mode] = fp.read()
+        return cls.from_dict({'requirements': reqs})
 
     @classmethod
     def from_dict(cls, conf_data):
@@ -115,6 +186,15 @@ class PreRequirements(object):
         if self.wheel_dir:
             options.append('--find-links {}\n'.format(self.wheel_dir))
         return options
+
+
+@contextmanager
+def _get_fileobj(file_or_filename, mode='rb', encoding=None):
+    if isinstance(file_or_filename, (bytes, type(u''))):
+        with io.open(file_or_filename, mode, encoding=encoding) as fp:
+            yield fp
+    else:
+        yield file_or_filename
 
 
 def get_data_errors(data, field_types):
@@ -245,6 +325,10 @@ class Error(Exception):
     pass
 
 
+class NoPreRequirementsFound(Error):
+    pass
+
+
 class InvalidPreRequirements(Error):
     pass
 
@@ -255,16 +339,15 @@ class UnknownWheelSource(Error):
         super(UnknownWheelSource, self).__init__(msg)
 
 
-class UnicodeYamlSafeLoader(yaml.SafeLoader):
-    pass
+if yaml:
+    class UnicodeYamlSafeLoader(yaml.SafeLoader):
+        pass
 
+    def construct_yaml_str(self, node):
+        return self.construct_scalar(node)
 
-def construct_yaml_str(self, node):
-    return self.construct_scalar(node)
-
-
-if sys.version_info < (3, 0):
-    # Override YAML str constructor in Python 2 so that it will
-    # construct unicode rather than bytes
-    UnicodeYamlSafeLoader.add_constructor(
-        'tag:yaml.org,2002:str', construct_yaml_str)
+    if sys.version_info < (3, 0):
+        # Override YAML str constructor in Python 2 so that it will
+        # construct unicode rather than bytes
+        UnicodeYamlSafeLoader.add_constructor(
+            'tag:yaml.org,2002:str', construct_yaml_str)

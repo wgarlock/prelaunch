@@ -3,7 +3,7 @@ from itertools import chain
 
 from ._compat import ExitStack
 from .click import unstyle
-from .io import AtomicSaver
+from .fileutils import AtomicSaver
 from .logging import log
 from .utils import comment, format_requirement, dedup
 

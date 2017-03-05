@@ -6,7 +6,8 @@ import io
 
 import pytest
 
-from prequ.prereqfile import get_data_errors, PreRequirements, text
+from prequ.prereqfile import (
+    get_data_errors, InvalidPreRequirements, PreRequirements, text)
 
 
 field_types = [
@@ -110,7 +111,79 @@ def test_get_data_errors_invalid_type_specifier():
         get_data_errors({'x': 1}, [('x', set('abc'))])
 
 
-prereq_file_content = """
+prereq_ini_content = """
+[prequ]
+annotate = True
+extra_index_urls =
+    https://one.example.com/
+    https://two.example.com/
+wheel_dir = wh€€ls
+wheel_sources =
+    test_gh = git+ssh://git@github.com/test/{pkg}@{ver}
+
+requirements =
+    foobar
+    somewheel~=1.0.0 (wheel from test_gh)
+    barfoo
+
+requirements-dev =
+    devpkg>=2
+"""
+
+
+def test_prerequirements_parsing_ini():
+    stream = io.StringIO(prereq_ini_content)
+    prereq = PreRequirements.from_ini(stream)
+    assert prereq.annotate is True
+    assert prereq.extra_index_urls == [
+        'https://one.example.com/', 'https://two.example.com/']
+    assert prereq.wheel_dir == 'wh€€ls'
+    assert prereq.wheel_sources == {
+        'test_gh': 'git+ssh://git@github.com/test/{pkg}@{ver}'}
+    assert sorted(prereq.requirements.keys()) == ['base', 'dev']
+    assert prereq.requirements['base'] == (
+        '\n'
+        'foobar\n'
+        'somewheel~=1.0.0\n'
+        'barfoo')
+    assert prereq.requirements['dev'] == '\ndevpkg>=2'
+    assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
+    assert list(prereq.get_wheels_to_build()) == [
+        ('somewheel', '1.0.0',
+         'git+ssh://git@github.com/test/somewheel@1.0.0')]
+    pass
+
+
+def test_prerequirements_parsing_ini_no_section():
+    other_ini_content = (
+        '[other_section]\n'
+        'something = else\n')
+    stream = io.StringIO(other_ini_content)
+    prereq = PreRequirements.from_ini(stream)
+    assert prereq is None
+
+
+def test_prerequirements_parsing_ini_simple():
+    other_ini_content = (
+        '[prequ]\n'
+        'requirements = flask\n')
+    stream = io.StringIO(other_ini_content)
+    prereq = PreRequirements.from_ini(stream)
+    assert isinstance(prereq, PreRequirements)
+    assert prereq.requirements['base'] == 'flask'
+
+
+def test_prerequirements_parsing_ini_without_base():
+    other_ini_content = (
+        '[prequ]\n'
+        'requirements-test = pytest\n')
+    stream = io.StringIO(other_ini_content)
+    with pytest.raises(InvalidPreRequirements) as excinfo:
+        PreRequirements.from_ini(stream)
+    assert '{}'.format(excinfo.value) == 'Base requirements are required'
+
+
+prereq_yaml_content = """
 options:
   annotate: yes
   extra_index_urls:
@@ -131,9 +204,9 @@ requirements:
 """
 
 
-def test_prerequirements_parsing():
-    stream = io.BytesIO(prereq_file_content.encode('utf-8'))
-    prereq = PreRequirements.from_file(stream)
+def test_prerequirements_parsing_yaml():
+    stream = io.BytesIO(prereq_yaml_content.encode('utf-8'))
+    prereq = PreRequirements.from_yaml(stream)
     assert prereq.annotate is True
     assert prereq.extra_index_urls == [
         'https://one.example.com/', 'https://two.example.com/']

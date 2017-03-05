@@ -54,14 +54,13 @@ Example usage for ``prequ update``
 ----------------------------------
 
 Suppose you have a Flask project, and want to pin it for production.
-Write the following content to so-called *pre-requirements* file, named
-``requirements.pre``:
+You need to specify so-called *pre-requirements* for Prequ.  This can be
+done by writing following section to ``setup.cfg``:
 
-.. code:: yaml
+.. code:: ini
 
-   requirements:
-     base: |
-       Flask
+   [prequ]
+   requirements = Flask
 
 Now, run ``prequ update``::
 
@@ -82,7 +81,7 @@ under version control as well.  Generated file will look like this::
    markupsafe==0.23
    werkzeug==0.10.4
 
-To add/remove packages, add/remove them to/from ``requirements.pre`` and
+To add/remove packages, add/remove them to/from ``setup.cfg`` and
 re-run ``prequ update``.  To upgrade all packages, remove the generated
 ``requirements.txt`` and run ``prequ update`` again.
 
@@ -117,35 +116,31 @@ Passing in empty arguments would cause it to default to
 ``requirements.txt``.
 
 
-More detailed example of ``requirements.pre``
----------------------------------------------
+More detailed example of pre-requirements specification
+-------------------------------------------------------
 
 Prequ supports defining couple options for the requirement compiling and
 automatically building wheels from pip URLs.  Here is a more detailed
 example of a pre-requirement file that demonstrates those features:
 
-.. code:: yaml
+.. code:: ini
 
-   # Prequ pre-requirements file
+   [prequ]
+   annotate = yes
+   generate_hashes = no
+   header = yes
+   extra_index_urls =
+       https://shuup.github.io/pypi/simple/
+   wheel_dir = wheels
+   wheel_sources =
+       github_shuup = git+ssh://git@github.com/shuup/{pkg}@v{ver}
 
-   options:
-     annotate: yes
-     generate_hashes: no
-     header: yes
-     extra_index_urls:
-       - https://shuup.github.io/pypi/simple/
-     wheel_dir: wheels
-     wheel_sources:
-       github_shuup: git+ssh://git@github.com/shuup/{pkg}@v{ver}
-
-   requirements:
-
-     base: |
+   requirements =
        django~=1.9.5
        shuup~=0.5.0
        shuup-stripe~=0.4.2 (wheel from github_shuup)
 
-     dev: |
+   requirements-dev =
        flake8
        pep8-naming
 

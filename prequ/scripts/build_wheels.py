@@ -15,7 +15,7 @@ def main():
 
 
 def build_wheels():
-    prereq = PreRequirements.from_file('requirements.pre')
+    prereq = PreRequirements.from_directory('.')
     to_build = list(prereq.get_wheels_to_build())
     for (pkg, ver, url) in to_build:
         build_wheel(prereq, pkg, ver, url)
