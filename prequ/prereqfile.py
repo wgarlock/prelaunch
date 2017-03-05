@@ -115,8 +115,6 @@ class PreRequirements(object):
         if errors:
             raise InvalidPreRequirements(
                 'Errors in pre-requirement data: {}'.format(', '.join(errors)))
-        if 'base' not in conf_data.get('requirements', {}):
-            raise InvalidPreRequirements('Base requirements are required')
 
         (requirements, extra_opts) = parse_reqs(conf_data['requirements'])
         options = conf_data.get('options', {})
@@ -125,7 +123,6 @@ class PreRequirements(object):
 
     def __init__(self, requirements, **kwargs):
         assert isinstance(requirements, dict)
-        assert 'base' in requirements
         assert all(isinstance(x, text) for x in requirements.values())
 
         self.requirements = requirements
@@ -144,7 +141,8 @@ class PreRequirements(object):
         self.wheels_to_build = kwargs.pop('wheels_to_build', [])
 
     def get_requirements(self):
-        base_reqs = [('base', self.requirements['base'])]
+        base_req = self.requirements.get('base')
+        base_reqs = [('base', base_req)] if base_req is not None else []
         non_base_reqs = [
             (mode, self.requirements[mode])
             for mode in self.requirements

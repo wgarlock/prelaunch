@@ -6,8 +6,7 @@ import io
 
 import pytest
 
-from prequ.prereqfile import (
-    get_data_errors, InvalidPreRequirements, PreRequirements, text)
+from prequ.prereqfile import get_data_errors, PreRequirements, text
 
 
 field_types = [
@@ -178,9 +177,9 @@ def test_prerequirements_parsing_ini_without_base():
         '[prequ]\n'
         'requirements-test = pytest\n')
     stream = io.StringIO(other_ini_content)
-    with pytest.raises(InvalidPreRequirements) as excinfo:
-        PreRequirements.from_ini(stream)
-    assert '{}'.format(excinfo.value) == 'Base requirements are required'
+    prereq = PreRequirements.from_ini(stream)
+    assert prereq.requirements['test'] == 'pytest'
+    assert 'base' not in prereq.requirements
 
 
 prereq_yaml_content = """

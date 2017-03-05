@@ -24,7 +24,7 @@ def main(ctx, verbose):
 
         with NamedTemporaryFile(dir='.', prefix=out_file, suffix='.in',
                                 delete=False) as tmp:
-            if mode != 'base':
+            if mode != 'base' and 'base' in prereq.requirements:
                 tmp.write(b'-c requirements.txt\n')
             tmp.write(requirements.encode('utf-8'))
 

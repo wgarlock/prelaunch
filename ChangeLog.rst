@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- Allow pre-requirements without base requirements
+
 0.300.0
 -------
 
