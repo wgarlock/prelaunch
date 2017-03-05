@@ -13,7 +13,7 @@ def main(ctx, verbose):
     """
     Compile requirements from pre-requirements.
     """
-    prereq = PreRequirements.from_file('requirements.pre')
+    prereq = PreRequirements.from_directory('.')
     for (mode, requirements) in prereq.get_requirements():
         if mode == 'base':
             out_file = 'requirements.txt'
