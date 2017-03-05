@@ -2,11 +2,16 @@ Unreleased
 ----------
 
 - Rename "prequ compile-all" to "prequ compile"
+- (jazzband/pip-tools#427) Fix duplicate entries that could happen in
+  generated requirements.txt
+- (jazzband/pip-tools#457) Gracefully report invalid pip version
+- (jazzband/pip-tools#452) Fix capitalization in the generated
+  requirements.txt, packages will always be lowercased
 
 0.180.9
 -------
 
-- (nvie/pip-tools#453) Write relative find-links opts to output file
+- (jazzband/pip-tools#453) Write relative find-links opts to output file
 - Add "--silent" option for the compile command
 - Rename "prequ compile" to "prequ compile-in"
 - Use ``requirements.pre`` as input for ``prequ update``
@@ -19,15 +24,16 @@ Unreleased
 0.180.7
 -------
 
-- (nvie/pip-tools#450) Fix resolver when toplevel requirements are also
-  in pinned subdependency
+- (jazzband/pip-tools#450) Calculated dependencies could be left with wrong
+  candidates when toplevel requirements happen to be also pinned in
+  sub-dependencies
 - Convert README and ChangeLog to restructured text (ReST)
 - Include README as package long description in setup.py
 
 0.180.6
 -------
 
-- (nvie/pip-tools#417) Exclude irrelevant pip constraints
+- (jazzband/pip-tools#417) Exclude irrelevant pip constraints
 
 0.180.5
 -------
@@ -48,12 +54,12 @@ Unreleased
 0.180.2
 -------
 
-- (nvie/pip-tools#378) Recalculate secondary dependencies between rounds
-- (nvie/pip-tools#448) Add "--no-trusted-host" option to fix #382
-- (nvie/pip-tools#448) Deduplicate the option lines of output
-- (nvie/pip-tools#441) Exclude packages required only by unsafe packages
-- (nvie/pip-tools#389) Ignore pkg-resources
-- (nvie/pip-tools#355) Support non-editable pinned VCS dependencies
+- (jazzband/pip-tools#378) Recalculate secondary dependencies between rounds
+- (jazzband/pip-tools#448) Add "--no-trusted-host" option to fix #382
+- (jazzband/pip-tools#448) Deduplicate the option lines of output
+- (jazzband/pip-tools#441) Exclude packages required only by unsafe packages
+- (jazzband/pip-tools#389) Ignore pkg-resources
+- (jazzband/pip-tools#355) Support non-editable pinned VCS dependencies
 
 0.180.1
 -------
