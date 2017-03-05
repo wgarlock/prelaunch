@@ -27,10 +27,11 @@ matrix:
 install:
   - travis_retry pip install tox
   - travis_retry pip install coveralls
+  - pip install -U pip setuptools
+  - python setup.py bdist_wheel
 
 cache: pip
 
-script:
-  - tox
+script: tox -v --installpkg dist/*.whl
 
 after_success: test $TOXENV = py35-pip9 && coveralls
