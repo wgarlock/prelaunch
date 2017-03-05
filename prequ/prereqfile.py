@@ -11,10 +11,13 @@ from collections import defaultdict
 from contextlib import contextmanager
 from glob import glob
 
-import yaml
-
 from .ini_parser import parse_ini
 from .repositories.pypi import PyPIRepository
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 
 DEFAULT_INDEX_URL = PyPIRepository.DEFAULT_INDEX_URL
@@ -81,6 +84,11 @@ class PreRequirements(object):
 
     @classmethod
     def from_yaml(cls, fileobj):
+        if not yaml:
+            msg = (
+                'Cannot load pre-requirements from "{}": No yaml module.  '
+                'Migrate to setup.cfg or install pyyaml.').format(fileobj)
+            raise Error(msg)
         with _get_fileobj(fileobj) as fp:
             conf_data = yaml.load(fp, UnicodeYamlSafeLoader)
         return cls.from_dict(conf_data)
@@ -331,16 +339,15 @@ class UnknownWheelSource(Error):
         super(UnknownWheelSource, self).__init__(msg)
 
 
-class UnicodeYamlSafeLoader(yaml.SafeLoader):
-    pass
+if yaml:
+    class UnicodeYamlSafeLoader(yaml.SafeLoader):
+        pass
 
+    def construct_yaml_str(self, node):
+        return self.construct_scalar(node)
 
-def construct_yaml_str(self, node):
-    return self.construct_scalar(node)
-
-
-if sys.version_info < (3, 0):
-    # Override YAML str constructor in Python 2 so that it will
-    # construct unicode rather than bytes
-    UnicodeYamlSafeLoader.add_constructor(
-        'tag:yaml.org,2002:str', construct_yaml_str)
+    if sys.version_info < (3, 0):
+        # Override YAML str constructor in Python 2 so that it will
+        # construct unicode rather than bytes
+        UnicodeYamlSafeLoader.add_constructor(
+            'tag:yaml.org,2002:str', construct_yaml_str)
