@@ -66,6 +66,11 @@
   "gnureadline": {
     "6.3.3": {"": []}
   },
+  "html5lib": {
+    "0.999999999": {"": [
+      "setuptools>=18.5"
+    ]}
+  },
   "ipython": {
     "2.1.0": {
       "": ["gnureadline"],
