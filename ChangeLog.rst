@@ -2,6 +2,8 @@ Unreleased
 ----------
 
 - Allow pre-requirements without base requirements
+- (jazzband/pip-tools#441) Fixed implementation of excluding packages
+  required only by unsafe packages
 
 0.300.0
 -------
