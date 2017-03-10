@@ -155,7 +155,7 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
 
     try:
         resolver = Resolver(constraints, repository, prereleases=pre,
-                            clear_caches=rebuild)
+                            clear_caches=rebuild, allow_unsafe=allow_unsafe)
         results = resolver.resolve()
         if generate_hashes:
             hashes = resolver.resolve_hashes(results)
@@ -202,9 +202,8 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
                           default_index_url=repository.DEFAULT_INDEX_URL,
                           index_urls=repository.finder.index_urls,
                           trusted_hosts=pip_options.trusted_hosts,
-                          format_control=repository.finder.format_control,
                           find_links=repository.finder.find_links,
-                          allow_unsafe=allow_unsafe,
+                          format_control=repository.finder.format_control,
                           silent=silent)
     writer.write(results=results,
                  reverse_dependencies=reverse_dependencies,

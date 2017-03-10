@@ -22,6 +22,8 @@ def safeint(s):
 
 pip_version_info = tuple(safeint(digit) for digit in pip.__version__.split('.'))
 
+UNSAFE_PACKAGES = {'setuptools', 'distribute', 'pip'}
+
 
 def assert_compatible_pip_version():
     # Make sure we're using a reasonably modern version of pip
@@ -44,16 +46,6 @@ def key_from_req(req):
     return key
 
 
-def name_from_req(req):
-    """Get the name of the requirement"""
-    if hasattr(req, 'project_name'):
-        # pip 8.1.1 or below, using pkg_resources
-        return req.project_name
-    else:
-        # pip 8.1.2 or above, using packaging
-        return req.name
-
-
 def comment(text):
     return style(text, fg='green')
 
@@ -68,17 +60,15 @@ def make_install_requirement(name, version, extras, constraint=False):
     return InstallRequirement.from_line('{}{}=={}'.format(name, extras_string, str(version)), constraint=constraint)
 
 
-def format_requirement(ireq, include_specifier=True):
+def format_requirement(ireq):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
     """
     if ireq.editable or is_vcs_link(ireq):
         line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
-    elif include_specifier:
-        line = str(ireq.req).lower()
     else:
-        line = name_from_req(ireq.req).lower()
+        line = str(ireq.req).lower()
     return line
 
 
