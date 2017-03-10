@@ -100,23 +100,11 @@ class OutputWriter(object):
             yield line
 
         UNSAFE_PACKAGES = {'setuptools', 'distribute', 'pip'}
-
-        packages = set()
-        unsafe_packages = set()
-        ignored_packages = set()
-        for r in results:
-            if r.name in UNSAFE_PACKAGES:
-                unsafe_packages.add(r)
-            else:
-                reverse = reverse_dependencies.get(r.name.lower())
-                if reverse and all(name in UNSAFE_PACKAGES for name in reverse):
-                    ignored_packages.add(r)
-                else:
-                    packages.add(r)
+        unsafe_packages = {r for r in results if r.name in UNSAFE_PACKAGES}
+        packages = {r for r in results if r.name not in UNSAFE_PACKAGES}
 
         packages = sorted(packages, key=self._sort_key)
         unsafe_packages = sorted(unsafe_packages, key=self._sort_key)
-        ignored_packages = sorted(ignored_packages, key=self._sort_key)
 
         for ireq in packages:
             line = self._format_requirement(ireq, reverse_dependencies, primary_packages, hashes=hashes)
@@ -127,22 +115,6 @@ class OutputWriter(object):
             yield comment('# The following packages are considered to be unsafe in a requirements file:')
 
             for ireq in unsafe_packages:
-                line = self._format_requirement(
-                    ireq, reverse_dependencies, primary_packages,
-                    hashes=hashes if self.allow_unsafe else None,
-                    include_specifier=self.allow_unsafe)
-                if self.allow_unsafe:
-                    yield line
-                else:
-                    yield comment('# ' + line)
-
-        if ignored_packages:
-            yield ''
-            yield comment(
-                '# The following packages are required only by packages'
-                ' considered to be unsafe in a requirements file:')
-
-            for ireq in ignored_packages:
                 line = self._format_requirement(
                     ireq, reverse_dependencies, primary_packages,
                     hashes=hashes if self.allow_unsafe else None,
