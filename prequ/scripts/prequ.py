@@ -1,9 +1,12 @@
-from .. import click
+import click
+
 from . import build_wheels
 from . import compile_in
 from . import compile
 from . import sync
 from . import update
+
+click.disable_unicode_literals_warning = True
 
 
 @click.group()

@@ -1,4 +1,5 @@
-from .. import click
+import click
+
 from . import build_wheels
 from . import compile
 

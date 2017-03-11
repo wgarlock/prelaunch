@@ -6,11 +6,11 @@ import sys
 from itertools import chain, groupby
 
 import pip
+from click import style
 from pip.req import InstallRequirement
 
 from first import first
 
-from .click import style
 from .exceptions import ImpossibleConstraint
 
 
