@@ -9,9 +9,13 @@ import pip
 from click import style
 from pip.req import InstallRequirement
 
-from first import first
-
 from .exceptions import ImpossibleConstraint
+
+
+def first(iterable):
+    for x in iterable:
+        return x
+    return None
 
 
 def safeint(s):
