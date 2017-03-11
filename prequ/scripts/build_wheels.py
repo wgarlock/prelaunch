@@ -2,7 +2,8 @@ import os
 import subprocess
 from glob import glob
 
-from .. import click
+import click
+
 from ..prereqfile import PreRequirements
 
 

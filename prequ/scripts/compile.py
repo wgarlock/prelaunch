@@ -1,7 +1,8 @@
 import os
 from tempfile import NamedTemporaryFile
 
-from .. import click
+import click
+
 from ..prereqfile import PreRequirements
 from . import compile_in
 
