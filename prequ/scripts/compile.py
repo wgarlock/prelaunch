@@ -15,17 +15,17 @@ def main(ctx, verbose):
     Compile requirements from pre-requirements.
     """
     prereq = PreRequirements.from_directory('.')
-    for (mode, requirements) in prereq.get_requirements():
-        if mode == 'base':
+    for (label, requirements) in prereq.get_requirements():
+        if label == 'base':
             out_file = 'requirements.txt'
         else:
-            out_file = 'requirements-{}.txt'.format(mode)
+            out_file = 'requirements-{}.txt'.format(label)
 
         print('*** Compiling {}'.format(out_file))
 
         with NamedTemporaryFile(dir='.', prefix=out_file, suffix='.in',
                                 delete=False) as tmp:
-            if mode != 'base' and 'base' in prereq.requirements:
+            if label != 'base' and 'base' in prereq.requirements:
                 tmp.write(b'-c requirements.txt\n')
             tmp.write(requirements.encode('utf-8'))
 

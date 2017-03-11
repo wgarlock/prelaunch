@@ -99,14 +99,14 @@ class PreRequirements(object):
         for filepath in filenames:
             fn = os.path.basename(filepath)
             if fn == 'requirements.in':
-                mode = 'base'
+                label = 'base'
             elif fn.startswith('requirements-') and fn.endswith('.in'):
-                mode = fn.split('requirements-', 1)[1].rsplit('.in', 1)[0]
+                label = fn.split('requirements-', 1)[1].rsplit('.in', 1)[0]
             else:
                 raise InvalidPreRequirements(
                     'Invalid in-file name: {}'.format(fn))
             with io.open(filepath, 'rt', encoding='utf-8') as fp:
-                reqs[mode] = fp.read()
+                reqs[label] = fp.read()
         return cls.from_dict({'requirements': reqs})
 
     @classmethod
@@ -144,9 +144,9 @@ class PreRequirements(object):
         base_req = self.requirements.get('base')
         base_reqs = [('base', base_req)] if base_req is not None else []
         non_base_reqs = [
-            (mode, self.requirements[mode])
-            for mode in self.requirements
-            if mode != 'base']
+            (label, self.requirements[label])
+            for label in self.requirements
+            if label != 'base']
         return base_reqs + non_base_reqs
 
     def get_wheels_to_build(self):
@@ -271,10 +271,10 @@ def _get_type_error(value, typespec, fieldspec):
 def parse_reqs(requirements_map):
     extra_opts = {}
     reqs = {}
-    for (mode, req_data) in requirements_map.items():
+    for (label, req_data) in requirements_map.items():
         (req, opts) = _parse_req_data(req_data)
         _merge_update_dict(extra_opts, opts)
-        reqs[mode] = req
+        reqs[label] = req
     return (reqs, extra_opts)
 
 
