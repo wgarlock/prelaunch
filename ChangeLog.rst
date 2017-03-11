@@ -5,6 +5,7 @@ Unreleased
 - (jazzband/pip-tools#441) Fixed implementation of excluding packages
   required only by unsafe packages
 - Fix constraint handling: Do not add new dependencies from constraints
+- compile-in: Rename "--no-trusted-host" to "--no-emit-trusted-host"
 
 0.300.0
 -------
