@@ -61,7 +61,7 @@ class Resolver(object):
         self.their_constraints = set()
         self.repository = repository
         if cache is None:
-            cache = DependencyCache()  # pragma: no cover
+            cache = DependencyCache()
         self.dependency_cache = cache
         self.prereleases = prereleases
         self.clear_caches = clear_caches
