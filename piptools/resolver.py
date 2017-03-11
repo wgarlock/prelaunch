@@ -15,6 +15,7 @@ from .cache import DependencyCache
 from .exceptions import UnsupportedConstraint
 from .logging import log
 from .utils import (format_requirement, format_specifier, full_groupby,
+                    get_pinned_version,
                     is_pinned_requirement, key_from_req, is_vcs_link,
                     UNSAFE_PACKAGES)
 
@@ -164,6 +165,10 @@ class Resolver(object):
                 combined_ireq.constraint &= ireq.constraint
                 # Return a sorted, de-duped tuple of extras
                 combined_ireq.extras = tuple(sorted(set(tuple(combined_ireq.extras) + tuple(ireq.extras))))
+            pinned_version = get_pinned_version(combined_ireq)
+            if pinned_version:  # Simplify combined_ireq to single version
+                specset = type(combined_ireq.specifier)('==' + pinned_version)
+                combined_ireq.req.specifier = specset
             yield combined_ireq
 
     def _resolve_one_round(self):

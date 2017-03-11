@@ -11,6 +11,7 @@ from pip.req import InstallRequirement
 from first import first
 
 from .click import style
+from .exceptions import ImpossibleConstraint
 
 
 def safeint(s):
@@ -90,24 +91,46 @@ def is_pinned_requirement(ireq):
     An InstallRequirement is considered pinned if:
 
     - Is not editable
-    - It has exactly one specifier
-    - That specifier is "=="
-    - The version does not contain a wildcard
+    - It has at least one "==" specifier with a version that is not a
+      wildcard
 
     Examples:
-        django==1.8   # pinned
-        django>1.8    # NOT pinned
-        django~=1.8   # NOT pinned
-        django==1.*   # NOT pinned
+
+    >>> assert is_pinned_requirement('django==1.8')
+    >>> assert not is_pinned_requirement('django>1.8')
+    >>> assert not is_pinned_requirement('django~=1.8')
+    >>> assert not is_pinned_requirement('django==1.8.*')
+    >>> assert is_pinned_requirement('django>=1.4,==1.8')
+    >>> assert not is_pinned_requirement('django>=1.4,<=1.4')
     """
+    return get_pinned_version(ireq) is not None
+
+
+def get_pinned_version(ireq):
+    """
+    Get pinned version of a requirement, if it is pinned.
+    """
+    if not isinstance(ireq, InstallRequirement):
+        ireq = InstallRequirement(ireq, None)
+    assert isinstance(ireq, InstallRequirement)
+
     if ireq.editable:
-        return False
+        return None
 
-    if len(ireq.specifier._specs) != 1:
-        return False
+    if not ireq.specifier._specs:
+        return None
 
-    op, version = first(ireq.specifier._specs)._spec
-    return (op == '==' or op == '===') and not version.endswith('.*')
+    specs = (x._spec for x in ireq.specifier._specs)
+    versions = set(
+        version for (op, version) in specs
+        if (op == '==' or op == '===') and not version.endswith('.*'))
+    if len(versions) > 1:
+        raise ImpossibleConstraint(
+            'Package {} pinned to conflicting versions: {}'.format(
+                ireq.name, ireq.specifier))
+    elif versions:
+        return first(versions)
+    return None
 
 
 def is_vcs_link(ireq):
