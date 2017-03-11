@@ -8,13 +8,12 @@ from functools import partial
 from itertools import chain, count
 
 import click
-from first import first
 from pip.req import InstallRequirement
 
 from .cache import DependencyCache
 from .exceptions import UnsupportedConstraint
 from .logging import log
-from .utils import (format_requirement, format_specifier, full_groupby,
+from .utils import (first, format_requirement, format_specifier, full_groupby,
                     get_pinned_version,
                     is_pinned_requirement, key_from_req, is_vcs_link,
                     UNSAFE_PACKAGES)
@@ -156,7 +155,8 @@ class Resolver(object):
         """
         for _, ireqs in full_groupby(constraints, key=_dep_key):
             ireqs = list(ireqs)
-            exception_ireq = first(ireqs, key=lambda ireq: ireq.editable or is_vcs_link(ireq))
+            exception_ireq = first(
+                x for x in ireqs if x.editable or is_vcs_link(x))
             if exception_ireq:
                 yield exception_ireq  # ignore all the other specs: the editable/vcs one is the one that counts
                 continue
