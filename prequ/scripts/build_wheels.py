@@ -4,36 +4,41 @@ from glob import glob
 
 import click
 
+from ..logging import log
 from ..prereqfile import PreRequirements
 
 
 @click.command()
-def main():
+@click.option('-s', '--silent', is_flag=True, help="Show no output")
+def main(silent):
     """
     Build wheels of required packages.
     """
-    build_wheels()
+    build_wheels(silent=silent)
 
 
-def build_wheels():
+def build_wheels(silent=False):
     prereq = PreRequirements.from_directory('.')
     to_build = list(prereq.get_wheels_to_build())
     for (pkg, ver, url) in to_build:
-        build_wheel(prereq, pkg, ver, url)
+        build_wheel(prereq, pkg, ver, url, silent)
 
 
-def build_wheel(prereq, pkg, ver, url):
+def build_wheel(prereq, pkg, ver, url, silent=False):
+    info = log.info if not silent else (lambda x: None)
     already_built = get_wheels(prereq, pkg, ver)
     if already_built:
-        print('*** Already built: {}'.format(already_built[0]))
+        info('*** Already built: {}'.format(already_built[0]))
         return
-    print('*** Building wheel for {} {} from {}'.format(pkg, ver, url))
-    call('pip wheel -v -w {w} --no-deps {u}', w=prereq.wheel_dir, u=url)
+    info('*** Building wheel for {} {} from {}'.format(pkg, ver, url))
+    call('pip wheel {verbosity} -w {w} --no-deps {u}',
+         verbosity=('-q' if silent else '-v'),
+         w=prereq.wheel_dir, u=url)
     built_wheel = get_wheels(prereq, pkg, ver)[0]
-    print('*** Built: {}'.format(built_wheel))
+    info('*** Built: {}'.format(built_wheel))
     for wheel in get_wheels(prereq, pkg):  # All versions
         if wheel != built_wheel:
-            print('*** Removing: {}'.format(wheel))
+            info('*** Removing: {}'.format(wheel))
             os.remove(wheel)
 
 
