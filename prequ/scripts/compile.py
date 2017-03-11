@@ -15,19 +15,13 @@ def main(ctx, verbose):
     Compile requirements from pre-requirements.
     """
     prereq = PreRequirements.from_directory('.')
-    for (label, requirement_set) in prereq.get_requirement_sets():
-        if label == 'base':
-            out_file = 'requirements.txt'
-        else:
-            out_file = 'requirements-{}.txt'.format(label)
-
+    for label in prereq.labels:
+        out_file = prereq.get_output_file_for(label)
         print('*** Compiling {}'.format(out_file))
 
         with NamedTemporaryFile(dir='.', prefix=out_file, suffix='.in',
                                 delete=False) as tmp:
-            if label != 'base' and 'base' in prereq.requirement_sets:
-                tmp.write(b'-c requirements.txt\n')
-            tmp.write(requirement_set.encode('utf-8'))
+            tmp.write(prereq.get_requirements_in_for(label).encode('utf-8'))
 
         try:
             compile_options = dict(prereq.get_prequ_compile_options())

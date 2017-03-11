@@ -110,6 +110,30 @@ def test_get_data_errors_invalid_type_specifier():
         get_data_errors({'x': 1}, [('x', set('abc'))])
 
 
+def test_label_sorting():
+    data = {'requirements': {'a': '', 'base': '', 'b': '', 'c': ''}}
+    prereq = PreRequirements.from_dict(data)
+    assert prereq.labels == ['base', 'a', 'b', 'c']
+
+
+def test_requirements_in_generation():
+    data = {
+        'requirements': {
+            'base': 'framework',
+            'dev': 'ipython',
+            'test': 'pytest',
+        }
+    }
+    prereq = PreRequirements.from_dict(data)
+    assert prereq.get_requirements_in_for('base') == 'framework'
+    assert prereq.get_requirements_in_for('dev') == (
+        '-c requirements.txt\n'
+        'ipython')
+    assert prereq.get_requirements_in_for('test') == (
+        '-c requirements.txt\n'
+        'pytest')
+
+
 prereq_ini_content = """
 [prequ]
 annotate = True

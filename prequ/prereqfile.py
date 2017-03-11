@@ -167,14 +167,35 @@ class PreRequirements(object):
         #: List of wheels to build, format [(wheel_src_name, pkg, ver)]
         self.wheels_to_build = kwargs.pop('wheels_to_build', [])
 
-    def get_requirement_sets(self):
-        base_req = self.requirement_sets.get('base')
-        base_reqs = [('base', base_req)] if base_req is not None else []
-        non_base_reqs = [
-            (label, self.requirement_sets[label])
-            for label in self.requirement_sets
-            if label != 'base']
-        return base_reqs + non_base_reqs
+    @property
+    def labels(self):
+        def sort_key(label):
+            return (0, label) if label == 'base' else (1, label)
+        return sorted(self.requirement_sets.keys(), key=sort_key)
+
+    def get_output_file_for(self, label):
+        """
+        Get output file name for a requirement set.
+
+        :type label: text
+        :rtype: text
+        """
+        return (
+            'requirements.txt' if label == 'base' else
+            'requirements-{}.txt'.format(label))
+
+    def get_requirements_in_for(self, label):
+        """
+        Get requirements.in file content for a requirement set.
+
+        :type label: text
+        :rtype: text
+        """
+        constraint_line = (
+            '-c {}\n'.format(self.get_output_file_for('base'))
+            if label != 'base' and 'base' in self.requirement_sets
+            else '')
+        return constraint_line + self.requirement_sets[label]
 
     def get_wheels_to_build(self):
         for (wheel_src_name, pkg, ver) in self.wheels_to_build:
