@@ -8,6 +8,7 @@ Unreleased
 - compile-in: Rename "--no-trusted-host" to "--no-emit-trusted-host"
 - Remove dependency on the "first" Python package
 - Demand using equality operator (==) in lines with a wheel instruction
+- Add new command "prequ check" for checking generated requirements
 
 0.300.0
 -------
