@@ -26,6 +26,19 @@ text = type('')
 
 
 class PreRequirements(object):
+    """
+    Pre-requirements specification.
+
+    Pre-requirements define how requirements files should be generated:
+    various options, package names and versions.
+
+    It is possible to have several requirement sets defined.  A single
+    requirements file will be generated from each set.  These sets are
+    addressed by a label which determines the output file name.  Label
+    "base" is the default and its output is "requirements.txt".  Other
+    output files are named "requirements-{label}.txt" by their labels.
+    """
+
     fields = [
         ('options.annotate', bool),
         ('options.generate_hashes', bool),
@@ -40,6 +53,19 @@ class PreRequirements(object):
 
     @classmethod
     def from_directory(cls, directory):
+        """
+        Get pre-requirements of a directory.
+
+        Reads the first existing pre-requirements configuration file(s)
+        and parses it/them to a PreRequirements object.  Supported
+        configuration files in preference order are:
+
+          * setup.cfg, [prequ] section
+          * requirements.pre
+          * requirements.in and requirements-*.in
+
+        :rtype: PreRequirements
+        """
         def path(filename):
             return os.path.join(directory, filename)
 
