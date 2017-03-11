@@ -1,7 +1,7 @@
 # 1.8.1 (unreleased)
 
 - Recalculate secondary dependencies between rounds (#378)
-- Add "--emit-trusted-host/--no-trusted-host" option
+- Add "--emit-trusted-host/--no-emit-trusted-host" option
 - Deduplicate the option lines of output
 - Ignore pkg-resources
 - Support pinned VCS dependencies
