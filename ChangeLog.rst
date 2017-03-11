@@ -4,6 +4,7 @@ Unreleased
 - Allow pre-requirements without base requirements
 - (jazzband/pip-tools#441) Fixed implementation of excluding packages
   required only by unsafe packages
+- Fix constraint handling: Do not add new dependencies from constraints
 
 0.300.0
 -------
