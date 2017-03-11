@@ -57,7 +57,8 @@ class Resolver(object):
         InstallRequirement objects) by consulting the given Repository and the
         DependencyCache.
         """
-        self.our_constraints = set(constraints)
+        self.our_constraints = set(x for x in constraints if not x.constraint)
+        self.limiters = set(x for x in constraints if x.constraint)
         self.their_constraints = set()
         self.repository = repository
         if cache is None:
@@ -69,8 +70,9 @@ class Resolver(object):
 
     @property
     def constraints(self):
-        return set(self._group_constraints(chain(self.our_constraints,
-                                                 self.their_constraints)))
+        grouped = self._group_constraints(chain(
+            self.our_constraints, self.their_constraints, self.limiters))
+        return set(ireq for ireq in grouped if not ireq.constraint)
 
     def resolve_hashes(self, ireqs):
         """
@@ -94,6 +96,10 @@ class Resolver(object):
 
         self.check_constraints(chain(self.our_constraints,
                                      self.their_constraints))
+
+        log.debug('Limiting constraints:')
+        for constraint in sorted(self.limiters, key=_dep_key):
+            log.debug('  {}'.format(constraint))
 
         # Ignore existing packages
         os.environ[str('PIP_EXISTS_ACTION')] = str('i')  # NOTE: str() wrapping necessary for Python 2/3 compat
@@ -196,13 +202,15 @@ class Resolver(object):
         log.debug('')
         log.debug('Finding secondary dependencies:')
 
-        ungrouped = []
+        ungrouped = list(self.limiters)
         for best_match in best_matches:
             for dep in self._iter_dependencies(best_match):
                 if self.allow_unsafe or dep.name not in UNSAFE_PACKAGES:
                     ungrouped.append(dep)
         # Grouping constraints to make clean diff between rounds
-        theirs = set(self._group_constraints(ungrouped))
+        theirs = set(
+            ireq for ireq in self._group_constraints(ungrouped)
+            if not ireq.constraint)
 
         # NOTE: We need to compare RequirementSummary objects, since
         # InstallRequirement does not define equality
