@@ -332,7 +332,8 @@ def _parse_req_data(req_data):
     for line in req_data.splitlines():
         match = WHEEL_LINE_RX.match(line)
         if match:
-            (wheel_data, req_line) = _parse_wheel_match(**match.groupdict())
+            (wheel_data, req_line) = _parse_wheel_match(
+                line, **match.groupdict())
             wheels_to_build.append(wheel_data)
             result_lines.append(req_line)
         else:
@@ -345,10 +346,10 @@ WHEEL_LINE_RX = re.compile(
     '\(\s*wheel from \s*(?P<wheel_src_name>\S+)\)$')
 
 
-def _parse_wheel_match(pkg, verspec, wheel_src_name):
-    if not verspec.startswith(('>=', '~=', '==')):
+def _parse_wheel_match(line, pkg, verspec, wheel_src_name):
+    if not verspec.startswith('=='):
         raise InvalidPreRequirements(
-            'Wheel needs version specifier (==, ~=, or >=): {}'.format(pkg))
+            'Wheel lines must use "==" version specifier: {}'.format(line))
     ver = verspec[2:]
     wheel_data = (wheel_src_name, pkg, ver)
     req_line = pkg + verspec

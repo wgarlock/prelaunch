@@ -146,7 +146,7 @@ wheel_sources =
 
 requirements =
     foobar
-    somewheel~=1.0.0 (wheel from test_gh)
+    somewheel==1.0.0 (wheel from test_gh)
     barfoo
 
 requirements-dev =
@@ -167,7 +167,7 @@ def test_prerequirements_parsing_ini():
     assert prereq.requirement_sets['base'] == (
         '\n'
         'foobar\n'
-        'somewheel~=1.0.0\n'
+        'somewheel==1.0.0\n'
         'barfoo')
     assert prereq.requirement_sets['dev'] == '\ndevpkg>=2'
     assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
@@ -219,7 +219,7 @@ options:
 requirements:
   base: |
     foobar
-    somewheel~=1.0.0 (wheel from test_gh)
+    somewheel==1.0.0 (wheel from test_gh)
     barfoo
 
   dev: |
@@ -239,7 +239,7 @@ def test_prerequirements_parsing_yaml():
     assert sorted(prereq.requirement_sets.keys()) == ['base', 'dev']
     assert prereq.requirement_sets['base'] == (
         'foobar\n'
-        'somewheel~=1.0.0\n'
+        'somewheel==1.0.0\n'
         'barfoo')
     assert prereq.requirement_sets['dev'] == 'devpkg>=2'
     assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
