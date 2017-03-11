@@ -139,13 +139,13 @@ def test_prerequirements_parsing_ini():
     assert prereq.wheel_dir == 'wh€€ls'
     assert prereq.wheel_sources == {
         'test_gh': 'git+ssh://git@github.com/test/{pkg}@{ver}'}
-    assert sorted(prereq.requirements.keys()) == ['base', 'dev']
-    assert prereq.requirements['base'] == (
+    assert sorted(prereq.requirement_sets.keys()) == ['base', 'dev']
+    assert prereq.requirement_sets['base'] == (
         '\n'
         'foobar\n'
         'somewheel~=1.0.0\n'
         'barfoo')
-    assert prereq.requirements['dev'] == '\ndevpkg>=2'
+    assert prereq.requirement_sets['dev'] == '\ndevpkg>=2'
     assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
     assert list(prereq.get_wheels_to_build()) == [
         ('somewheel', '1.0.0',
@@ -169,7 +169,7 @@ def test_prerequirements_parsing_ini_simple():
     stream = io.StringIO(other_ini_content)
     prereq = PreRequirements.from_ini(stream)
     assert isinstance(prereq, PreRequirements)
-    assert prereq.requirements['base'] == 'flask'
+    assert prereq.requirement_sets['base'] == 'flask'
 
 
 def test_prerequirements_parsing_ini_without_base():
@@ -178,8 +178,8 @@ def test_prerequirements_parsing_ini_without_base():
         'requirements-test = pytest\n')
     stream = io.StringIO(other_ini_content)
     prereq = PreRequirements.from_ini(stream)
-    assert prereq.requirements['test'] == 'pytest'
-    assert 'base' not in prereq.requirements
+    assert prereq.requirement_sets['test'] == 'pytest'
+    assert 'base' not in prereq.requirement_sets
 
 
 prereq_yaml_content = """
@@ -212,12 +212,12 @@ def test_prerequirements_parsing_yaml():
     assert prereq.wheel_dir == 'wh€€ls'
     assert prereq.wheel_sources == {
         'test_gh': 'git+ssh://git@github.com/test/{pkg}@{ver}'}
-    assert sorted(prereq.requirements.keys()) == ['base', 'dev']
-    assert prereq.requirements['base'] == (
+    assert sorted(prereq.requirement_sets.keys()) == ['base', 'dev']
+    assert prereq.requirement_sets['base'] == (
         'foobar\n'
         'somewheel~=1.0.0\n'
         'barfoo')
-    assert prereq.requirements['dev'] == 'devpkg>=2'
+    assert prereq.requirement_sets['dev'] == 'devpkg>=2'
     assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
     assert list(prereq.get_wheels_to_build()) == [
         ('somewheel', '1.0.0',

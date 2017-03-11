@@ -15,7 +15,7 @@ def main(ctx, verbose):
     Compile requirements from pre-requirements.
     """
     prereq = PreRequirements.from_directory('.')
-    for (label, requirements) in prereq.get_requirements():
+    for (label, requirement_set) in prereq.get_requirement_sets():
         if label == 'base':
             out_file = 'requirements.txt'
         else:
@@ -25,9 +25,9 @@ def main(ctx, verbose):
 
         with NamedTemporaryFile(dir='.', prefix=out_file, suffix='.in',
                                 delete=False) as tmp:
-            if label != 'base' and 'base' in prereq.requirements:
+            if label != 'base' and 'base' in prereq.requirement_sets:
                 tmp.write(b'-c requirements.txt\n')
-            tmp.write(requirements.encode('utf-8'))
+            tmp.write(requirement_set.encode('utf-8'))
 
         try:
             compile_options = dict(prereq.get_prequ_compile_options())

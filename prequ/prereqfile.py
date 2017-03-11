@@ -116,16 +116,17 @@ class PreRequirements(object):
             raise InvalidPreRequirements(
                 'Errors in pre-requirement data: {}'.format(', '.join(errors)))
 
-        (requirements, extra_opts) = parse_reqs(conf_data['requirements'])
+        input_reqs = conf_data['requirements']
+        (requirement_sets, extra_opts) = parse_input_requirements(input_reqs)
         options = conf_data.get('options', {})
         options.update(extra_opts)
-        return cls(requirements, **options)
+        return cls(requirement_sets, **options)
 
-    def __init__(self, requirements, **kwargs):
-        assert isinstance(requirements, dict)
-        assert all(isinstance(x, text) for x in requirements.values())
+    def __init__(self, requirement_sets, **kwargs):
+        assert isinstance(requirement_sets, dict)
+        assert all(isinstance(x, text) for x in requirement_sets.values())
 
-        self.requirements = requirements
+        self.requirement_sets = requirement_sets
         self.annotate = kwargs.pop('annotate', False)
         self.generate_hashes = kwargs.pop('generate_hashes', False)
         self.header = kwargs.pop('header', True)
@@ -140,12 +141,12 @@ class PreRequirements(object):
         #: List of wheels to build, format [(wheel_src_name, pkg, ver)]
         self.wheels_to_build = kwargs.pop('wheels_to_build', [])
 
-    def get_requirements(self):
-        base_req = self.requirements.get('base')
+    def get_requirement_sets(self):
+        base_req = self.requirement_sets.get('base')
         base_reqs = [('base', base_req)] if base_req is not None else []
         non_base_reqs = [
-            (label, self.requirements[label])
-            for label in self.requirements
+            (label, self.requirement_sets[label])
+            for label in self.requirement_sets
             if label != 'base']
         return base_reqs + non_base_reqs
 
@@ -268,14 +269,14 @@ def _get_type_error(value, typespec, fieldspec):
             return 'Field "{}" should be {}'.format(fieldspec, typename)
 
 
-def parse_reqs(requirements_map):
+def parse_input_requirements(input_requirements):
     extra_opts = {}
-    reqs = {}
-    for (label, req_data) in requirements_map.items():
-        (req, opts) = _parse_req_data(req_data)
+    requirement_sets = {}
+    for (label, req_data) in input_requirements.items():
+        (requirement_set, opts) = _parse_req_data(req_data)
         _merge_update_dict(extra_opts, opts)
-        reqs[label] = req
-    return (reqs, extra_opts)
+        requirement_sets[label] = requirement_set
+    return (requirement_sets, extra_opts)
 
 
 def _parse_req_data(req_data):
