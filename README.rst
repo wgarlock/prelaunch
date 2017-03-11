@@ -9,9 +9,9 @@ requirements files complete and up-to-date.
    :target: https://travis-ci.org/suutari-ai/prequ
 
 .. image::
-   https://coveralls.io/repos/github/suutari-ai/prequ/badge.svg?branch=master
+   https://codecov.io/gh/suutari-ai/prequ/branch/master/graph/badge.svg
    :alt: Coverage
-   :target: https://coveralls.io/github/suutari-ai/prequ?branch=master
+   :target: https://codecov.io/gh/suutari-ai/prequ
 
 Background
 ----------
