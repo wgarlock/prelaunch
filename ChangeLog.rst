@@ -6,6 +6,7 @@ Unreleased
   required only by unsafe packages
 - Fix constraint handling: Do not add new dependencies from constraints
 - compile-in: Rename "--no-trusted-host" to "--no-emit-trusted-host"
+- Remove dependency on the "first" Python package
 
 0.300.0
 -------
