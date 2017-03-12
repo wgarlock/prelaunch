@@ -1,3 +1,0 @@
-rm -fr dist/for-tox
-python setup.py bdist_wheel --dist-dir dist/for-tox >/dev/null
-tox --installpkg dist/for-tox/*.whl "$@"
