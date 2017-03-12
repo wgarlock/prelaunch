@@ -6,7 +6,8 @@ from click import unstyle
 from ._compat import ExitStack
 from .fileutils import AtomicSaver
 from .logging import log
-from .utils import UNSAFE_PACKAGES, comment, dedup, format_requirement
+from .utils import (
+    UNSAFE_PACKAGES, comment, dedup, format_requirement, key_from_req)
 
 
 class OutputWriter(object):
@@ -30,7 +31,7 @@ class OutputWriter(object):
         self.silent = silent
 
     def _sort_key(self, ireq):
-        return (not ireq.editable, str(ireq.req).lower())
+        return key_from_req(ireq.req) if ireq.req else u'{}'.format(ireq)
 
     def write_header(self):
         if self.emit_header:

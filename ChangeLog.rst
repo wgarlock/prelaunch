@@ -9,6 +9,7 @@ Unreleased
 - Remove dependency on the "first" Python package
 - Demand using equality operator (==) in lines with a wheel instruction
 - Add new command "prequ check" for checking generated requirements
+- Sort generated requirements by lower case distribution name
 
 0.300.0
 -------
