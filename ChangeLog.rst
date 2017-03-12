@@ -7,6 +7,8 @@ Unreleased
 - Fix constraint handling: Do not add new dependencies from constraints
 - compile-in: Rename "--no-trusted-host" to "--no-emit-trusted-host"
 - Remove dependency on the "first" Python package
+- Use backports.tempfile and contextlib2 on Python 2 for
+  TemporaryDirectory and ExitStack rather than vendoring them
 - Demand using equality operator (==) in lines with a wheel instruction
 - Add new command "prequ check" for checking generated requirements
 - Sort generated requirements by lower case distribution name
