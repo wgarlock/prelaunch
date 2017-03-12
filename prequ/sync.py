@@ -6,7 +6,7 @@ from subprocess import check_call
 import click
 
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
-from .utils import flat_map, key_from_req, is_pinned_requirement, is_vcs_link
+from .utils import flat_map, is_pinned_requirement, is_vcs_link, key_from_req
 
 PACKAGES_TO_IGNORE = [
     'pip',

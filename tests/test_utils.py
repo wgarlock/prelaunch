@@ -1,7 +1,7 @@
 from pytest import raises
 
 from prequ.utils import (
-    as_tuple, format_requirement, format_specifier, flat_map, dedup)
+    as_tuple, dedup, flat_map, format_requirement, format_specifier)
 
 
 def test_format_requirement(from_line):

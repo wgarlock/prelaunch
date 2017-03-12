@@ -1,6 +1,7 @@
 from collections import Counter
 
 import pytest
+
 from prequ.exceptions import IncompatibleRequirements
 from prequ.sync import dependency_tree, diff, merge
 

@@ -6,9 +6,9 @@ import contextlib
 import io
 import os
 
+import pytest
 from click.testing import CliRunner
 
-import pytest
 from prequ.scripts.update import main
 
 

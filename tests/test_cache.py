@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 
 from pytest import raises
 
-from prequ.cache import read_cache_file, CorruptCacheError, DependencyCache
+from prequ.cache import CorruptCacheError, DependencyCache, read_cache_file
 
 
 @contextmanager

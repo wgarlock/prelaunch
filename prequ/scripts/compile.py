@@ -3,10 +3,10 @@ from tempfile import NamedTemporaryFile
 
 import click
 
+from . import compile_in
 from ..exceptions import FileOutdated, PrequError
 from ..logging import log
 from ..prereqfile import PreRequirements
-from . import compile_in
 
 click.disable_unicode_literals_warning = True
 

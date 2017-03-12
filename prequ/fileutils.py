@@ -11,14 +11,13 @@ most commonly-found gaps in the standard library.
 
 from __future__ import print_function
 
-import os
-import re
-import sys
-import stat
 import errno
 import fnmatch
-from shutil import copy2, copystat, Error
-
+import os
+import re
+import stat
+import sys
+from shutil import Error, copy2, copystat
 
 __all__ = ['mkdir_p', 'atomic_save', 'AtomicSaver', 'FilePerms',
            'iter_find_files', 'copytree']

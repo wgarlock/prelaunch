@@ -4,7 +4,7 @@ from glob import glob
 
 import click
 
-from ..exceptions import WheelMissing, PrequError
+from ..exceptions import PrequError, WheelMissing
 from ..logging import log
 from ..prereqfile import PreRequirements
 

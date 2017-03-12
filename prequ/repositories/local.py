@@ -1,8 +1,9 @@
 # coding: utf-8
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 from prequ.utils import as_tuple, key_from_req, make_install_requirement
+
 from .base import BaseRepository
 
 

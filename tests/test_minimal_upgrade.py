@@ -1,4 +1,5 @@
 import pytest
+
 from prequ.repositories import LocalRequirementsRepository
 
 

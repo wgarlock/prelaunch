@@ -1,11 +1,6 @@
 import click
 
-from . import build_wheels
-from . import check
-from . import compile_in
-from . import compile
-from . import sync
-from . import update
+from . import build_wheels, check, compile, compile_in, sync, update
 
 click.disable_unicode_literals_warning = True
 

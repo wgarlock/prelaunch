@@ -1,10 +1,10 @@
 import os
-from textwrap import dedent
 import subprocess
-
-from click.testing import CliRunner
+from textwrap import dedent
 
 import pytest
+from click.testing import CliRunner
+
 from prequ.scripts.compile_in import cli
 
 

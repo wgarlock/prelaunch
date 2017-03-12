@@ -1,6 +1,6 @@
 # coding: utf-8
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 import hashlib
 import os
@@ -9,17 +9,19 @@ from shutil import rmtree
 from pip.download import unpack_url
 from pip.index import PackageFinder
 from pip.req.req_set import RequirementSet
+
+from ..cache import CACHE_DIR
+from ..exceptions import NoCandidateFound
+from ..utils import (
+    is_pinned_requirement, is_vcs_link, lookup_table, make_install_requirement,
+    pip_version_info)
+from .base import BaseRepository
+
 try:
     from pip.utils.hashes import FAVORITE_HASH
 except ImportError:
     FAVORITE_HASH = 'sha256'
 
-from ..cache import CACHE_DIR
-from ..exceptions import NoCandidateFound
-from ..utils import (is_pinned_requirement, lookup_table,
-                     make_install_requirement, pip_version_info,
-                     is_vcs_link)
-from .base import BaseRepository
 
 try:
     from tempfile import TemporaryDirectory  # added in 3.2

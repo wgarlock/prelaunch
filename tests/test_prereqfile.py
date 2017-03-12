@@ -6,8 +6,7 @@ import io
 
 import pytest
 
-from prequ.prereqfile import get_data_errors, PreRequirements, text
-
+from prequ.prereqfile import PreRequirements, get_data_errors, text
 
 field_types = [
     ('text_item', text),

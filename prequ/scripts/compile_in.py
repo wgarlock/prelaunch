@@ -1,6 +1,6 @@
 # coding: utf-8
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 import os
 import sys
@@ -14,8 +14,8 @@ from ..exceptions import PrequError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository
 from ..resolver import Resolver
-from ..utils import (assert_compatible_pip_version, is_pinned_requirement,
-                     key_from_req)
+from ..utils import (
+    assert_compatible_pip_version, is_pinned_requirement, key_from_req)
 from ..writer import OutputWriter
 from ._repo import get_pip_options_and_pypi_repository
 

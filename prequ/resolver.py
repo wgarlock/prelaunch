@@ -1,9 +1,9 @@
 # coding: utf-8
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
-import os
 import copy
+import os
 from functools import partial
 from itertools import chain, count
 
@@ -13,10 +13,9 @@ from pip.req import InstallRequirement
 from .cache import DependencyCache
 from .exceptions import UnsupportedConstraint
 from .logging import log
-from .utils import (first, format_requirement, format_specifier, full_groupby,
-                    get_pinned_version,
-                    is_pinned_requirement, key_from_req, is_vcs_link,
-                    UNSAFE_PACKAGES)
+from .utils import (
+    UNSAFE_PACKAGES, first, format_requirement, format_specifier, full_groupby,
+    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_req)
 
 green = partial(click.style, fg='green')
 magenta = partial(click.style, fg='magenta')

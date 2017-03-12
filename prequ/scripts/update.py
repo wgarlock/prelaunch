@@ -1,7 +1,6 @@
 import click
 
-from . import build_wheels
-from . import compile
+from . import build_wheels, compile
 
 click.disable_unicode_literals_warning = True
 

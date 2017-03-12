@@ -6,7 +6,7 @@ from click import unstyle
 from ._compat import ExitStack
 from .fileutils import AtomicSaver
 from .logging import log
-from .utils import comment, format_requirement, dedup, UNSAFE_PACKAGES
+from .utils import UNSAFE_PACKAGES, comment, dedup, format_requirement
 
 
 class OutputWriter(object):
