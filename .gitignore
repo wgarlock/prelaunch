@@ -25,4 +25,4 @@ venv/
 
 # Test files
 requirements.in
-requirements.txt
+requirements*.txt
