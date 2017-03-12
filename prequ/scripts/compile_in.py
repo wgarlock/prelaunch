@@ -19,6 +19,8 @@ from ..utils import (assert_compatible_pip_version, is_pinned_requirement,
 from ..writer import OutputWriter
 from ._repo import get_pip_options_and_pypi_repository
 
+click.disable_unicode_literals_warning = True
+
 # Make sure we're using a compatible version of pip
 assert_compatible_pip_version()
 

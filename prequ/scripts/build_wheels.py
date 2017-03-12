@@ -6,6 +6,8 @@ import click
 
 from ..prereqfile import PreRequirements
 
+click.disable_unicode_literals_warning = True
+
 
 @click.command()
 def main():

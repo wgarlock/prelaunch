@@ -6,6 +6,8 @@ import click
 from ..prereqfile import PreRequirements
 from . import compile_in
 
+click.disable_unicode_literals_warning = True
+
 
 @click.command()
 @click.option('-v', '--verbose', is_flag=True, help="Show more output")
