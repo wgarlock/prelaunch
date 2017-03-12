@@ -38,3 +38,11 @@ class IncompatibleRequirements(PrequError):
     def __str__(self):
         message = "Incompatible requirements found: {} and {}"
         return message.format(self.ireq_a, self.ireq_b)
+
+
+class FileOutdated(PrequError):
+    pass
+
+
+class WheelMissing(PrequError):
+    pass

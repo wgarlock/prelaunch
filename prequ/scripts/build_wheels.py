@@ -4,38 +4,55 @@ from glob import glob
 
 import click
 
+from ..exceptions import WheelMissing, PrequError
+from ..logging import log
 from ..prereqfile import PreRequirements
 
 click.disable_unicode_literals_warning = True
 
 
 @click.command()
-def main():
+@click.option('-s', '--silent', is_flag=True, help="Show no output")
+@click.option('-c', '--check', is_flag=True,
+              help="Check if the wheels exists")
+def main(silent, check):
     """
     Build wheels of required packages.
     """
-    build_wheels()
+    try:
+        build_wheels(silent=silent, check_only=check)
+    except PrequError as error:
+        log.error('{}'.format(error))
+        raise SystemExit(1)
 
 
-def build_wheels():
+def build_wheels(silent=False, check_only=False):
     prereq = PreRequirements.from_directory('.')
     to_build = list(prereq.get_wheels_to_build())
     for (pkg, ver, url) in to_build:
-        build_wheel(prereq, pkg, ver, url)
+        build_wheel(prereq, pkg, ver, url, silent, check_only)
 
 
-def build_wheel(prereq, pkg, ver, url):
+def build_wheel(prereq, pkg, ver, url, silent=False, check_only=False):
+    info = log.info if not silent else (lambda x: None)
     already_built = get_wheels(prereq, pkg, ver)
+    if check_only:
+        if already_built:
+            info('{} exists'.format(already_built[0]))
+            return
+        raise WheelMissing('Wheel for {} {} is missing'.format(pkg, ver))
     if already_built:
-        print('*** Already built: {}'.format(already_built[0]))
+        info('*** Already built: {}'.format(already_built[0]))
         return
-    print('*** Building wheel for {} {} from {}'.format(pkg, ver, url))
-    call('pip wheel -v -w {w} --no-deps {u}', w=prereq.wheel_dir, u=url)
+    info('*** Building wheel for {} {} from {}'.format(pkg, ver, url))
+    call('pip wheel {verbosity} -w {w} --no-deps {u}',
+         verbosity=('-q' if silent else '-v'),
+         w=prereq.wheel_dir, u=url)
     built_wheel = get_wheels(prereq, pkg, ver)[0]
-    print('*** Built: {}'.format(built_wheel))
+    info('*** Built: {}'.format(built_wheel))
     for wheel in get_wheels(prereq, pkg):  # All versions
         if wheel != built_wheel:
-            print('*** Removing: {}'.format(wheel))
+            info('*** Removing: {}'.format(wheel))
             os.remove(wheel)
 
 

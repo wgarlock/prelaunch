@@ -26,6 +26,19 @@ text = type('')
 
 
 class PreRequirements(object):
+    """
+    Pre-requirements specification.
+
+    Pre-requirements define how requirements files should be generated:
+    various options, package names and versions.
+
+    It is possible to have several requirement sets defined.  A single
+    requirements file will be generated from each set.  These sets are
+    addressed by a label which determines the output file name.  Label
+    "base" is the default and its output is "requirements.txt".  Other
+    output files are named "requirements-{label}.txt" by their labels.
+    """
+
     fields = [
         ('options.annotate', bool),
         ('options.generate_hashes', bool),
@@ -40,6 +53,19 @@ class PreRequirements(object):
 
     @classmethod
     def from_directory(cls, directory):
+        """
+        Get pre-requirements of a directory.
+
+        Reads the first existing pre-requirements configuration file(s)
+        and parses it/them to a PreRequirements object.  Supported
+        configuration files in preference order are:
+
+          * setup.cfg, [prequ] section
+          * requirements.pre
+          * requirements.in and requirements-*.in
+
+        :rtype: PreRequirements
+        """
         def path(filename):
             return os.path.join(directory, filename)
 
@@ -99,14 +125,14 @@ class PreRequirements(object):
         for filepath in filenames:
             fn = os.path.basename(filepath)
             if fn == 'requirements.in':
-                mode = 'base'
+                label = 'base'
             elif fn.startswith('requirements-') and fn.endswith('.in'):
-                mode = fn.split('requirements-', 1)[1].rsplit('.in', 1)[0]
+                label = fn.split('requirements-', 1)[1].rsplit('.in', 1)[0]
             else:
                 raise InvalidPreRequirements(
                     'Invalid in-file name: {}'.format(fn))
             with io.open(filepath, 'rt', encoding='utf-8') as fp:
-                reqs[mode] = fp.read()
+                reqs[label] = fp.read()
         return cls.from_dict({'requirements': reqs})
 
     @classmethod
@@ -116,16 +142,17 @@ class PreRequirements(object):
             raise InvalidPreRequirements(
                 'Errors in pre-requirement data: {}'.format(', '.join(errors)))
 
-        (requirements, extra_opts) = parse_reqs(conf_data['requirements'])
+        input_reqs = conf_data['requirements']
+        (requirement_sets, extra_opts) = parse_input_requirements(input_reqs)
         options = conf_data.get('options', {})
         options.update(extra_opts)
-        return cls(requirements, **options)
+        return cls(requirement_sets, **options)
 
-    def __init__(self, requirements, **kwargs):
-        assert isinstance(requirements, dict)
-        assert all(isinstance(x, text) for x in requirements.values())
+    def __init__(self, requirement_sets, **kwargs):
+        assert isinstance(requirement_sets, dict)
+        assert all(isinstance(x, text) for x in requirement_sets.values())
 
-        self.requirements = requirements
+        self.requirement_sets = requirement_sets
         self.annotate = kwargs.pop('annotate', False)
         self.generate_hashes = kwargs.pop('generate_hashes', False)
         self.header = kwargs.pop('header', True)
@@ -140,14 +167,35 @@ class PreRequirements(object):
         #: List of wheels to build, format [(wheel_src_name, pkg, ver)]
         self.wheels_to_build = kwargs.pop('wheels_to_build', [])
 
-    def get_requirements(self):
-        base_req = self.requirements.get('base')
-        base_reqs = [('base', base_req)] if base_req is not None else []
-        non_base_reqs = [
-            (mode, self.requirements[mode])
-            for mode in self.requirements
-            if mode != 'base']
-        return base_reqs + non_base_reqs
+    @property
+    def labels(self):
+        def sort_key(label):
+            return (0, label) if label == 'base' else (1, label)
+        return sorted(self.requirement_sets.keys(), key=sort_key)
+
+    def get_output_file_for(self, label):
+        """
+        Get output file name for a requirement set.
+
+        :type label: text
+        :rtype: text
+        """
+        return (
+            'requirements.txt' if label == 'base' else
+            'requirements-{}.txt'.format(label))
+
+    def get_requirements_in_for(self, label):
+        """
+        Get requirements.in file content for a requirement set.
+
+        :type label: text
+        :rtype: text
+        """
+        constraint_line = (
+            '-c {}\n'.format(self.get_output_file_for('base'))
+            if label != 'base' and 'base' in self.requirement_sets
+            else '')
+        return constraint_line + self.requirement_sets[label]
 
     def get_wheels_to_build(self):
         for (wheel_src_name, pkg, ver) in self.wheels_to_build:
@@ -268,14 +316,14 @@ def _get_type_error(value, typespec, fieldspec):
             return 'Field "{}" should be {}'.format(fieldspec, typename)
 
 
-def parse_reqs(requirements_map):
+def parse_input_requirements(input_requirements):
     extra_opts = {}
-    reqs = {}
-    for (mode, req_data) in requirements_map.items():
-        (req, opts) = _parse_req_data(req_data)
+    requirement_sets = {}
+    for (label, req_data) in input_requirements.items():
+        (requirement_set, opts) = _parse_req_data(req_data)
         _merge_update_dict(extra_opts, opts)
-        reqs[mode] = req
-    return (reqs, extra_opts)
+        requirement_sets[label] = requirement_set
+    return (requirement_sets, extra_opts)
 
 
 def _parse_req_data(req_data):
@@ -284,7 +332,8 @@ def _parse_req_data(req_data):
     for line in req_data.splitlines():
         match = WHEEL_LINE_RX.match(line)
         if match:
-            (wheel_data, req_line) = _parse_wheel_match(**match.groupdict())
+            (wheel_data, req_line) = _parse_wheel_match(
+                line, **match.groupdict())
             wheels_to_build.append(wheel_data)
             result_lines.append(req_line)
         else:
@@ -297,10 +346,10 @@ WHEEL_LINE_RX = re.compile(
     '\(\s*wheel from \s*(?P<wheel_src_name>\S+)\)$')
 
 
-def _parse_wheel_match(pkg, verspec, wheel_src_name):
-    if not verspec.startswith(('>=', '~=', '==')):
+def _parse_wheel_match(line, pkg, verspec, wheel_src_name):
+    if not verspec.startswith('=='):
         raise InvalidPreRequirements(
-            'Wheel needs version specifier (==, ~=, or >=): {}'.format(pkg))
+            'Wheel lines must use "==" version specifier: {}'.format(line))
     ver = verspec[2:]
     wheel_data = (wheel_src_name, pkg, ver)
     req_line = pkg + verspec
