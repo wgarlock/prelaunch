@@ -2,7 +2,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import sys
 from itertools import chain, groupby
 
 import pip
@@ -33,9 +32,9 @@ UNSAFE_PACKAGES = {'setuptools', 'distribute', 'pip'}
 def assert_compatible_pip_version():
     # Make sure we're using a reasonably modern version of pip
     if not pip_version_info >= (8, 0):
-        print('Prequ requires at least version 8.0 of pip ({} found), '
-              'perhaps run `pip install --upgrade pip`?'.format(pip.__version__))
-        sys.exit(4)
+        raise SystemExit((
+            'Prequ requires at least version 8.0 of pip ({} found), '
+            'perhaps run `pip install --upgrade pip`?').format(pip.__version__))
 
 
 def key_from_req(req):

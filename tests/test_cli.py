@@ -115,7 +115,6 @@ def test_trusted_host(pip_conf):
         out = runner.invoke(cli, ['-v',
                                   '--trusted-host', 'example.com',
                                   '--trusted-host', 'example2.com'])
-        print(out.output)
         assert ('--trusted-host example.com\n'
                 '--trusted-host example2.com\n' in out.output)
 
@@ -129,7 +128,6 @@ def test_trusted_host_no_emit(pip_conf):
         out = runner.invoke(cli, ['-v',
                                   '--trusted-host', 'example.com',
                                   '--no-emit-trusted-host'])
-        print(out.output)
         assert '--trusted-host example.com' not in out.output
 
 
@@ -150,5 +148,4 @@ def test_realistic_complex_sub_dependencies(tmpdir):
                                   '-n', '--rebuild',
                                   '-f', str(tmpdir)])
 
-        print(out.output)
         assert out.exit_code == 0
