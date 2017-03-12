@@ -38,7 +38,7 @@ class LocalRequirementsRepository(BaseRepository):
         return self.repository.session
 
     @property
-    def DEFAULT_INDEX_URL(self):
+    def DEFAULT_INDEX_URL(self):  # noqa (N802)
         return self.repository.DEFAULT_INDEX_URL
 
     def clear_caches(self):
