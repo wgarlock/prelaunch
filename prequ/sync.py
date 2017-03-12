@@ -47,7 +47,8 @@ def dependency_tree(installed_keys, root_key):
             if dep_name in installed_keys:
                 dep = installed_keys[dep_name]
 
-                if dep_specifier.specifier.contains(dep.version):
+                specifier = dep_specifier.specifier
+                if specifier.contains(dep.version, prereleases=True):
                     queue.append(dep)
 
     return dependencies
