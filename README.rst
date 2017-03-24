@@ -138,7 +138,7 @@ example of a pre-requirement file that demonstrates those features:
    requirements =
        django~=1.9.5
        shuup~=0.5.0
-       shuup-stripe~=0.4.2 (wheel from github_shuup)
+       shuup-stripe==0.4.2 (wheel from github_shuup)
 
    requirements-dev =
        flake8
