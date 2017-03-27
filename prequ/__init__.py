@@ -1,1 +1,6 @@
-__version__ = '0.400.0.post0.dev0'
+import pkg_resources
+
+try:
+    __version__ = pkg_resources.get_distribution(__name__).version
+except pkg_resources.DistributionNotFound:
+    __version__ = None
