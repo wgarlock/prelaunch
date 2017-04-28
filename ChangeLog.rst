@@ -1,3 +1,23 @@
+Unreleased
+----------
+
+Features
+~~~~~~~~
+
+- (jazzband/pip-tools#472) compile-in: Add "--max-rounds" argument to
+  allow solving large requirement sets
+
+- (jazzband/pip-tools#461) Allow running as a Python module
+
+- (jazzband/pip-tools#460) Preserve environment markers in generated
+  requirements.txt
+
+Bug Fixes
+~~~~~~~~~
+
+- (jazzband/pip-tools#476) Fix editable requirements loosing their
+  dependencies after first round
+
 0.400.0
 -------
 
