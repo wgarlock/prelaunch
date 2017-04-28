@@ -96,15 +96,15 @@ import pytest
             'pytz==2016.4']
          ),
 
+        # Exclude package dependcy of setuptools as it is unsafe.
+        (['html5lib'], ['html5lib==0.999999999']),
+
         # We shouldn't include irrelevant pip constraints
-        # See: GH-417
+        # See: GH-471
         (['Flask', ('click', True), ('itsdangerous', True)],
          ['flask==0.10.1', 'itsdangerous==0.24', 'markupsafe==0.23',
           'jinja2==2.7.3', 'werkzeug==0.10.4']
          ),
-
-        # Exclude package dependcy of setuptools as it is unsafe.
-        (['html5lib'], ['html5lib==0.999999999']),
     ])
 )
 def test_resolver(resolver, from_line, input, expected, prereleases):

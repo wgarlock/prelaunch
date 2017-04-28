@@ -12,17 +12,7 @@ class PipCommand(pip.basecommand.Command):
 def get_pip_options_and_pypi_repository(
         index_url=None, extra_index_url=None, no_index=None,
         find_links=None, client_cert=None, pre=None, trusted_host=None):
-    # Use pip's parser for pip.conf management and defaults.
-    # General options (find_links, index_url, extra_index_url, trusted_host,
-    # and pre) are defered to pip.
-    pip_command = PipCommand()
-    index_opts = pip.cmdoptions.make_option_group(
-        pip.cmdoptions.index_group,
-        pip_command.parser,
-    )
-    pip_command.parser.insert_option_group(0, index_opts)
-    pip_command.parser.add_option(
-        optparse.Option('--pre', action='store_true', default=False))
+    pip_command = get_pip_command()
 
     pip_args = []
     if find_links:
@@ -48,3 +38,19 @@ def get_pip_options_and_pypi_repository(
     session = pip_command._build_session(pip_options)
     repository = PyPIRepository(pip_options, session)
     return (pip_options, repository)
+
+
+def get_pip_command():
+    # Use pip's parser for pip.conf management and defaults.
+    # General options (find_links, index_url, extra_index_url, trusted_host,
+    # and pre) are defered to pip.
+    pip_command = PipCommand()
+    index_opts = pip.cmdoptions.make_option_group(
+        pip.cmdoptions.index_group,
+        pip_command.parser,
+    )
+    pip_command.parser.insert_option_group(0, index_opts)
+    pip_command.parser.add_option(
+        optparse.Option('--pre', action='store_true', default=False))
+
+    return pip_command

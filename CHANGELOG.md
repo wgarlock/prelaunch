@@ -1,4 +1,28 @@
-# 1.8.1 (unreleased)
+# 1.9.0
+
+Features:
+- Added ability to read requirements from `setup.py` instead of just `requirements.in` ([#418](https://github.com/jazzband/pip-tools/pull/418)). Thanks to @tysonclugg and @majuscule.
+- Added a `--max-rounds` argument to the pip-compile command to allow for solving large requirement sets ([#472](https://github.com/jazzband/pip-tools/pull/472)). Thanks @derek-miller.
+- Exclude unsafe packages' dependencies when `--allow-unsafe` is not in use ([#441](https://github.com/jazzband/pip-tools/pull/441)). Thanks @jdufresne.
+- Exclude irrelevant pip constraints ([#471](https://github.com/jazzband/pip-tools/pull/471)). Thanks @derek-miller.
+- Allow control over emitting trusted-host to the compiled requirements. ([#448](https://github.com/jazzband/pip-tools/pull/448)). Thanks @tonyseek.
+- Allow running as a Python module (#[461](https://github.com/jazzband/pip-tools/pull/461)). Thanks @AndreLouisCaron.
+- Preserve environment markers in generated requirements.txt. ([#460](https://github.com/jazzband/pip-tools/pull/460)). Thanks @barrywhart.
+
+Bug Fixes:
+- Fixed the --upgrade-package option to respect the given package list to update ([#491](https://github.com/jazzband/pip-tools/pull/491)).
+- Fixed the default output file name when the source file has no extension ([#488](https://github.com/jazzband/pip-tools/pull/488)). Thanks @vphilippon
+- Fixed crash on editable requirements introduced in 1.8.2.
+- Fixed duplicated --trusted-host, --extra-index-url and --index-url in the generated requirements.
+
+# 1.8.2
+
+- Regression fix: editable reqs were loosing their dependencies after first round ([#476](https://github.com/jazzband/pip-tools/pull/476))
+  Thanks @mattlong
+- Remove duplicate index urls in generated requirements.txt ([#468](https://github.com/jazzband/pip-tools/pull/468))
+  Thanks @majuscule
+
+# 1.8.1
 
 - Recalculate secondary dependencies between rounds (#378)
 - Add "--emit-trusted-host/--no-emit-trusted-host" option
@@ -89,8 +113,8 @@ Minor changes:
 
 # 1.5
 
-- Add support for pip>=8
-- Drop support for pip<7
+- Add support for pip >= 8
+- Drop support for pip < 7
 - Fix bug where `pip-sync` fails to uninstall packages if you're using the
   `--no-index` (or other) flags
 

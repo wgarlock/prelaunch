@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import sys
 from itertools import chain, groupby
+from collections import OrderedDict
 
 import pip
 from pip.req import InstallRequirement
@@ -61,7 +62,7 @@ def make_install_requirement(name, version, extras, constraint=False):
     return InstallRequirement.from_line('{}{}=={}'.format(name, extras_string, str(version)), constraint=constraint)
 
 
-def format_requirement(ireq):
+def format_requirement(ireq, marker=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
@@ -70,6 +71,10 @@ def format_requirement(ireq):
         line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
     else:
         line = str(ireq.req).lower()
+
+    if marker:
+        line = '{} ; {}'.format(line, marker)
+
     return line
 
 
@@ -231,8 +236,4 @@ def dedup(iterable):
     """Deduplicate an iterable object like iter(set(iterable)) but
     order-reserved.
     """
-    emitted = set()
-    for x in iterable:
-        if x not in emitted:
-            yield x
-            emitted.add(x)
+    return iter(OrderedDict.fromkeys(iterable))
