@@ -15,7 +15,7 @@ from ..logging import log
 from ..repositories import LocalRequirementsRepository
 from ..resolver import Resolver
 from ..utils import (
-    assert_compatible_pip_version, is_pinned_requirement, key_from_req)
+    assert_compatible_pip_version, dedup, is_pinned_requirement, key_from_req)
 from ..writer import OutputWriter
 from ._repo import get_pip_options_and_pypi_repository
 
@@ -64,19 +64,26 @@ class PipCommand(pip.basecommand.Command):
               help="Pin packages considered unsafe: pip, setuptools & distribute")
 @click.option('--generate-hashes', is_flag=True, default=False,
               help="Generate pip 8 style hashes in the resulting requirements file.")
+@click.option('--max-rounds', default=10,
+              help="Maximum number of rounds before resolving the requirements aborts.")
 @click.argument('src_files', nargs=-1, type=click.Path(exists=True, allow_dash=True))
 def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
         extra_index_url, client_cert, trusted_host, header, index,
         emit_trusted_host, annotate, upgrade, upgrade_packages, output_file,
-        allow_unsafe, generate_hashes, src_files):
+        allow_unsafe, generate_hashes, src_files, max_rounds):
     """Compiles requirements.txt from requirements.in specs."""
     log.verbose = verbose
 
     if len(src_files) == 0:
-        if not os.path.exists(DEFAULT_REQUIREMENTS_FILE):
+        if os.path.exists(DEFAULT_REQUIREMENTS_FILE):
+            src_files = (DEFAULT_REQUIREMENTS_FILE,)
+        elif os.path.exists('setup.py'):
+            src_files = ('setup.py',)
+            if not output_file:
+                output_file = 'requirements.txt'
+        else:
             raise click.BadParameter(("If you do not specify an input file, "
-                                      "the default is {}").format(DEFAULT_REQUIREMENTS_FILE))
-        src_files = (DEFAULT_REQUIREMENTS_FILE,)
+                                      "the default is {} or setup.py").format(DEFAULT_REQUIREMENTS_FILE))
 
     if len(src_files) == 1 and src_files[0] == '-':
         if not output_file:
@@ -88,7 +95,7 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     if output_file:
         dst_file = output_file
     else:
-        base_name, _, _ = src_files[0].rpartition('.')
+        base_name = src_files[0].rsplit('.', 1)[0]
         dst_file = base_name + '.txt'
 
     if upgrade and upgrade_packages:
@@ -103,24 +110,20 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
         find_links=find_links, client_cert=client_cert,
         pre=pre, trusted_host=trusted_host)
 
-    # Pre-parse the inline package upgrade specs: they should take precedence
-    # over the stuff in the requirements files
-    upgrade_packages = [InstallRequirement.from_line(pkg)
-                        for pkg in upgrade_packages]
-
     # Proxy with a LocalRequirementsRepository if --upgrade is not specified
     # (= default invocation)
-    if not (upgrade or upgrade_packages) and os.path.exists(dst_file):
-        existing_pins = {}
+    if not upgrade and os.path.exists(dst_file):
         ireqs = parse_requirements(dst_file, finder=repository.finder, session=repository.session, options=pip_options)
-        for ireq in ireqs:
-            key = key_from_req(ireq.req)
-
-            if is_pinned_requirement(ireq):
-                existing_pins[key] = ireq
+        # Exclude packages from --upgrade-package/-P from the existing pins: We want to upgrade.
+        upgrade_pkgs_key = {key_from_req(InstallRequirement.from_line(pkg).req) for pkg in upgrade_packages}
+        existing_pins = {key_from_req(ireq.req): ireq
+                         for ireq in ireqs
+                         if is_pinned_requirement(ireq) and key_from_req(ireq.req) not in upgrade_pkgs_key}
         repository = LocalRequirementsRepository(existing_pins, repository)
 
     log.debug('Using indexes:')
+    # remove duplicate index urls before processing
+    repository.finder.index_urls = list(dedup(repository.finder.index_urls))
     for index_url in repository.finder.index_urls:
         log.debug('  {}'.format(index_url))
 
@@ -136,15 +139,22 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
 
     constraints = []
     for src_file in src_files:
-        if src_file == '-':
+        is_setup_file = os.path.basename(src_file) == 'setup.py'
+        if is_setup_file or src_file == '-':
             # pip requires filenames and not files. Since we want to support
             # piping from stdin, we need to briefly save the input from stdin
-            # to a temporary file and have pip read that.
-            with tempfile.NamedTemporaryFile(mode='wt') as tmpfile:
+            # to a temporary file and have pip read that.  also used for
+            # reading requirements from install_requires in setup.py.
+            tmpfile = tempfile.NamedTemporaryFile(mode='wt', delete=False)
+            if is_setup_file:
+                from distutils.core import run_setup
+                dist = run_setup(src_file)
+                tmpfile.write('\n'.join(dist.install_requires))
+            else:
                 tmpfile.write(sys.stdin.read())
-                tmpfile.flush()
-                constraints.extend(parse_requirements(
-                    tmpfile.name, finder=repository.finder, session=repository.session, options=pip_options))
+            tmpfile.flush()
+            constraints.extend(parse_requirements(
+                tmpfile.name, finder=repository.finder, session=repository.session, options=pip_options))
         else:
             constraints.extend(parse_requirements(
                 src_file, finder=repository.finder, session=repository.session, options=pip_options))
@@ -152,13 +162,10 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     # Check the given base set of constraints first
     Resolver.check_constraints(constraints)
 
-    # The requirement objects are modified in-place so we need to save off the list of primary packages first
-    primary_packages = {key_from_req(ireq.req) for ireq in constraints if not ireq.constraint}
-
     try:
         resolver = Resolver(constraints, repository, prereleases=pre,
                             clear_caches=rebuild, allow_unsafe=allow_unsafe)
-        results = resolver.resolve()
+        results = resolver.resolve(max_rounds=max_rounds)
         if generate_hashes:
             hashes = resolver.resolve_hashes(results)
         else:
@@ -211,7 +218,9 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
                           silent=silent)
     writer.write(results=results,
                  reverse_dependencies=reverse_dependencies,
-                 primary_packages=primary_packages,
+                 primary_packages={key_from_req(ireq.req) for ireq in constraints if not ireq.constraint},
+                 markers={key_from_req(ireq.req): ireq.markers
+                          for ireq in constraints if ireq.markers},
                  hashes=hashes)
 
     if dry_run:

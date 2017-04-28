@@ -41,7 +41,7 @@
     "1.7.7": {"": []},
     "1.8": {"": []}
   },
-  "fake-piptools-test-with-pinned-deps": {
+  "fake-prequ-test-with-pinned-deps": {
     "0.1": {"": [
         "celery==3.1.18"
     ]}
@@ -121,6 +121,12 @@
   },
   "pytz": {
     "2016.4": {"": []}
+  },
+  "setuptools": {
+    "34.0.0": {"": [
+      "packaging>=16.8",
+      "appdirs>=1.4.0"
+    ]}
   },
   "six": {
     "1.6.1": {"": []},

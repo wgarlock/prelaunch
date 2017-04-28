@@ -85,26 +85,26 @@ import pytest
         # Support specifying loose top-level requirements that could also appear as
         # pinned subdependencies.
         (['billiard', 'celery',
-          'fake-piptools-test-with-pinned-deps'],
+          'fake-prequ-test-with-pinned-deps'],
          [
             'amqp==1.4.9',
             'anyjson==0.3.3',
             'billiard==3.3.0.23',
             'celery==3.1.18',  # this is pinned from test subdependency
-            'fake-piptools-test-with-pinned-deps==0.1',
+            'fake-prequ-test-with-pinned-deps==0.1',
             'kombu==3.0.35',
             'pytz==2016.4']
          ),
 
+        # Exclude package dependcy of setuptools as it is unsafe.
+        (['html5lib'], ['html5lib==0.999999999']),
+
         # We shouldn't include irrelevant pip constraints
-        # See: GH-417
+        # See: GH-471
         (['Flask', ('click', True), ('itsdangerous', True)],
          ['flask==0.10.1', 'itsdangerous==0.24', 'markupsafe==0.23',
           'jinja2==2.7.3', 'werkzeug==0.10.4']
          ),
-
-        # Exclude package dependcy of setuptools as it is unsafe.
-        (['html5lib'], ['html5lib==0.999999999']),
     ])
 )
 def test_resolver(resolver, from_line, input, expected, prereleases):
