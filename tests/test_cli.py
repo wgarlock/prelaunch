@@ -183,11 +183,11 @@ def _invoke(command):
     return status, output
 
 
-def test_run_as_module_compile(tmpdir):
-    """Prequ can be run as ``python -m prequ ...``."""
+def test_run_as_module_compile_in(tmpdir):
+    """Prequ can be run as ``python -m prequ compile-in ...``."""
 
     status, output = _invoke([
-        sys.executable, '-m', 'prequ', 'compile', '--help',
+        sys.executable, '-m', 'prequ', 'compile-in', '--help',
     ])
 
     # Should have run prequ compile successfully.
@@ -198,7 +198,7 @@ def test_run_as_module_compile(tmpdir):
 
 
 def test_run_as_module_sync():
-    """Prequ can be run as ``python -m prequ ...``."""
+    """Prequ can be run as ``python -m prequ sync ...``."""
 
     status, output = _invoke([
         sys.executable, '-m', 'prequ', 'sync', '--help',
