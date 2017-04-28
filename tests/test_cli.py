@@ -22,15 +22,20 @@ def pip_conf(tmpdir):
     with open(path, 'w') as f:
         f.write(test_conf)
 
-    old_value = os.environ.get('PIP_CONFIG_FILE')
+    pip_env_vars = [key for key in os.environ.keys() if key.startswith('PIP_')]
+    env_var_names = set(['PIP_CONFIG_FILE'] + pip_env_vars)
+    old_values = {k: os.environ.get(k) for k in env_var_names}
     try:
+        for key in pip_env_vars:
+            del os.environ[key]
         os.environ['PIP_CONFIG_FILE'] = path
         yield path
     finally:
-        if old_value is not None:
-            os.environ['PIP_CONFIG_FILE'] = old_value
-        else:
-            del os.environ['PIP_CONFIG_FILE']
+        for (key, old_value) in old_values.items():
+            if old_value is not None:
+                os.environ[key] = old_value
+            else:
+                del os.environ[key]
         os.remove(path)
 
 
