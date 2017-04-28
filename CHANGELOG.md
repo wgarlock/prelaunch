@@ -1,5 +1,8 @@
 - Ignore pkg-resources (#437)
 - Support pinned VCS dependencies (#355)
+- Write relative find-links opts to output file (#453)
+- sync: Use options from the txt file (#464)
+- Fix doctests and run them with tox (#469)
 
 # 1.9.0
 
