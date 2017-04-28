@@ -238,12 +238,12 @@ def test_input_file_without_extension(tmpdir):
         with open('requirements', 'w') as req_in:
             req_in.write('six==1.10.0')
 
-        out = runner.invoke(cli, ['-n', 'requirements'])
+        out = runner.invoke(cli, ['requirements'])
 
         print(out.output)
         assert out.exit_code == 0
-        assert '--output-file requirements.txt' in out.output
-        assert 'six==1.10.0' in out.output
+        assert os.path.exists('requirements.txt')
+        assert 'six==1.10.0' in open('requirements.txt').read()
 
 
 def test_upgrade_packages_option(tmpdir):
