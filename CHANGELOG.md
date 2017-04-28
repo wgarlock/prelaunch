@@ -1,3 +1,6 @@
+- Ignore pkg-resources
+- Support pinned VCS dependencies
+
 # 1.9.0
 
 Features:
@@ -25,18 +28,11 @@ Bug Fixes:
 # 1.8.1
 
 - Recalculate secondary dependencies between rounds (#378)
-- Add "--emit-trusted-host/--no-emit-trusted-host" option
-- Deduplicate the option lines of output
-- Ignore pkg-resources
-- Support pinned VCS dependencies
-- Exclude irrelevant pip constraints (#417)
 - Calculated dependencies could be left with wrong candidates when 
   toplevel requirements happen to be also pinned in sub-dependencies (#450)
 - Fix duplicate entries that could happen in generated requirements.txt (#427)
 - Gracefully report invalid pip version (#457)
 - Fix capitalization in the generated requirements.txt, packages will always be lowercased (#452)
-- Exclude unsafe packages' dependencies when `--allow-unsafe` is not in use (#445)
-
 
 # 1.8.0
 
