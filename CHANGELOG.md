@@ -1,5 +1,5 @@
-- Ignore pkg-resources
-- Support pinned VCS dependencies
+- Ignore pkg-resources (#437)
+- Support pinned VCS dependencies (#355)
 
 # 1.9.0
 
