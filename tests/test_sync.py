@@ -1,6 +1,6 @@
-from collections import Counter
 import os
 import platform
+from collections import Counter
 
 import mock
 import pytest

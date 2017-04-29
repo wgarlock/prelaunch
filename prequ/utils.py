@@ -2,8 +2,8 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
-from itertools import chain, groupby
 from collections import OrderedDict
+from itertools import chain, groupby
 
 import pip
 from click import style
