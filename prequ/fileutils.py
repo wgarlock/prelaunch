@@ -238,7 +238,7 @@ def path_to_unicode(path):
     return path.decode(encoding)
 
 
-if os.name == 'nt':
+if os.name == 'nt':  # noqa: C901
     import ctypes
     from ctypes import c_wchar_p
     from ctypes.wintypes import DWORD, LPVOID
@@ -496,7 +496,7 @@ def iter_find_files(directory, patterns, ignored=None):
     return
 
 
-def copy_tree(src, dst, symlinks=False, ignore=None):
+def copy_tree(src, dst, symlinks=False, ignore=None):  # noqa: C901
     """The ``copy_tree`` function is an exact copy of the built-in
     :func:`shutil.copytree`, with one key difference: it will not
     raise an exception if part of the tree already exists. It achieves

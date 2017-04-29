@@ -31,7 +31,7 @@ class PipCommand(pip.basecommand.Command):
     name = 'PipCommand'
 
 
-@click.command()
+@click.command()  # noqa: C901
 @click.version_option()
 @click.option('-v', '--verbose', is_flag=True, help="Show more output")
 @click.option('-s', '--silent', is_flag=True, help="Show no output")

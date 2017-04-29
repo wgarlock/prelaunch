@@ -122,7 +122,9 @@ def diff(compiled_requirements, installed_dists):
     return (to_install, to_uninstall)
 
 
-def sync(to_install, to_uninstall, verbose=False, dry_run=False, pip_flags=None, install_flags=None):
+def sync(to_install, to_uninstall,  # noqa: C901
+         verbose=False, dry_run=False,
+         pip_flags=None, install_flags=None):
     """
     Install and uninstalls the given sets of modules.
     """

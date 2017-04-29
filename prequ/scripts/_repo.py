@@ -9,7 +9,7 @@ class PipCommand(pip.basecommand.Command):
     name = 'PipCommand'
 
 
-def get_pip_options_and_pypi_repository(
+def get_pip_options_and_pypi_repository(  # noqa: C901
         index_url=None, extra_index_url=None, no_index=None,
         find_links=None, client_cert=None, pre=None, trusted_host=None):
     pip_command = get_pip_command()

@@ -22,7 +22,7 @@ assert_compatible_pip_version()
 DEFAULT_REQUIREMENTS_FILE = 'requirements.txt'
 
 
-@click.command()
+@click.command()  # noqa: C901
 @click.version_option()
 @click.option('-n', '--dry-run', is_flag=True, help="Only show what would happen, don't change anything")
 @click.option('--force', is_flag=True, help="Proceed even if conflicts are found")
