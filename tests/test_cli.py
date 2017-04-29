@@ -222,7 +222,6 @@ def test_editable_package(tmpdir):
 
         out = runner.invoke(cli, ['-n'])
 
-        print(out.output)
         assert out.exit_code == 0
         assert fake_package_dir in out.output
         assert 'six==1.10.0' in out.output
@@ -240,7 +239,6 @@ def test_input_file_without_extension(tmpdir):
 
         out = runner.invoke(cli, ['requirements'])
 
-        print(out.output)
         assert out.exit_code == 0
         assert os.path.exists('requirements.txt')
         assert 'six==1.10.0' in open('requirements.txt').read()
@@ -263,7 +261,6 @@ def test_upgrade_packages_option(tmpdir):
             '-f', fake_package_dir,
         ])
 
-        print(out.output)
         assert out.exit_code == 0
         assert 'small-fake-a==0.1' in out.output
         assert 'small-fake-b==0.2' in out.output
