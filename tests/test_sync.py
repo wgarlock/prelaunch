@@ -189,3 +189,11 @@ def test_sync_with_editable(from_editable):
 
         sync(to_install, set())
         check_call.assert_called_once_with(['pip', 'install', '-q', '-e', _get_file_url(path_to_package)])
+
+
+def test_sync_sorting_ireqs(from_line):
+    with mock.patch('prequ.sync.check_call') as check_call:
+        to_install = {from_line('django==1.8'), from_line('first==2.0.1')}
+        sync(to_install, {})
+        check_call.assert_called_once_with(
+            ['pip', 'install', '-q', 'django==1.8', 'first==2.0.1'])

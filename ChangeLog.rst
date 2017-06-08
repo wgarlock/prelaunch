@@ -14,7 +14,7 @@ Bug Fixes
 
 - (jazzband/pip-tools#517) Fix a bug where unsafe packages would get
   pinned in generated requirements files
-
+- sync: Fix sync to work on Python 3 (TypeError: unorderable types...)
 
 0.500.0
 -------
