@@ -3,6 +3,11 @@ Unreleased
 
 This version of Prequ is synced with pip-tools 1.10.0rc1.
 
+General Changes
+~~~~~~~~~~~~~~~
+
+- compile-in: Mark as internal command
+
 Features
 ~~~~~~~~
 

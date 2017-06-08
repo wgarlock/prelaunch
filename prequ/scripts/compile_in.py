@@ -72,7 +72,12 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
         extra_index_url, client_cert, trusted_host, header, index,
         emit_trusted_host, annotate, upgrade, upgrade_packages, output_file,
         allow_unsafe, generate_hashes, src_files, max_rounds):
-    """Compiles requirements.txt from requirements.in specs."""
+    """
+    INTERNAL: Compile a single in-file.
+
+    Note: This command is considered implementation detail of Prequ and
+    it may change or be removed from without a major version update.
+    """
     log.verbose = verbose
 
     if len(src_files) == 0:

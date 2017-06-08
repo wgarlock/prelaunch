@@ -194,7 +194,8 @@ def test_run_as_module_compile_in(tmpdir):
     # Should have run prequ compile successfully.
     output = output.decode('utf-8')
     assert output.startswith('Usage:')
-    assert 'Compiles requirements.txt from requirements.in' in output
+    assert 'INTERNAL: Compile a single in-file.' in output
+    assert 'command is considered implementation detail' in output
     assert status == 0
 
 
