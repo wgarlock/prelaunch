@@ -1,3 +1,21 @@
+Unreleased
+----------
+
+This version of Prequ is synced with pip-tools 1.10.0rc1.
+
+Features
+~~~~~~~~
+
+- (jazzband/pip-tools#520) Using ``generate_hashes = yes`` now generates
+  hashes for all wheels, not only for the currently running platform
+
+Bug Fixes
+~~~~~~~~~
+
+- (jazzband/pip-tools#517) Fix a bug where unsafe packages would get
+  pinned in generated requirements files
+
+
 0.500.0
 -------
 
