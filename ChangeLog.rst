@@ -15,6 +15,7 @@ Features
 
 - (jazzband/pip-tools#520) Using ``generate_hashes = yes`` now generates
   hashes for all wheels, not only for the currently running platform
+- Make command line help available also with ``-h``
 
 Bug Fixes
 ~~~~~~~~~

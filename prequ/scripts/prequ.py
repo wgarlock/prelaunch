@@ -5,7 +5,7 @@ from . import build_wheels, check, compile, compile_in, sync, update
 click.disable_unicode_literals_warning = True
 
 
-@click.group()
+@click.group(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option()
 def main():
     pass
