@@ -6,6 +6,16 @@
 - Optimize resolver by improving handling of pinned requirements (f456185)
 - Bugfix: Do not generate dependencies from constraints (1367f55)
 
+# 1.10.0 (UNRELEASED)
+
+Features:
+- `--generate-hashes` now generates hashes for all wheels,
+not only wheels for the currently running platform ([#520](https://github.com/jazzband/pip-tools/pull/520)). Thanks @jdufresne
+
+Bug Fixes:
+- Fixed bug where unsafe packages would get pinned in generated requirements files
+when `--allow-unsafe` was not set. ([#517](https://github.com/jazzband/pip-tools/pull/517)). Thanks @dschaller
+
 # 1.9.0
 
 Features:
@@ -33,7 +43,7 @@ Bug Fixes:
 # 1.8.1
 
 - Recalculate secondary dependencies between rounds (#378)
-- Calculated dependencies could be left with wrong candidates when 
+- Calculated dependencies could be left with wrong candidates when
   toplevel requirements happen to be also pinned in sub-dependencies (#450)
 - Fix duplicate entries that could happen in generated requirements.txt (#427)
 - Gracefully report invalid pip version (#457)
