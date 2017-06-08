@@ -44,18 +44,22 @@ def run_check(pip_conf, options=None, requirements=None):
 
 
 def create_configuration(options=None, requirements=None):
-    with io.open('requirements.pre', 'wt', encoding='utf-8') as fp:
+    with io.open('setup.cfg', 'wt', encoding='utf-8') as fp:
+        fp.write('[prequ]\n')
         if options:
-            fp.write('options:\n')
             for (key, value) in options.items():
-                fp.write('  {}: {}\n'.format(key, value))
-        fp.write('requirements:\n')
-        if not requirements:
-            fp.write('  base: ""\n')
-        else:
-            fp.write('  base: |')
+                if isinstance(value, dict):
+                    value = [
+                        '{} = {}'.format(k, v)
+                        for (k, v) in value.items()
+                    ]
+                if isinstance(value, list):
+                    value = '\n    ' + '\n    '.join(value)
+                fp.write('{} = {}\n'.format(key, value))
+        fp.write('requirements =\n')
+        if requirements:
             for req in requirements:
-                fp.write(req + '\n')
+                fp.write('    {}\n'.format(req))
 
 
 def test_default_pip_conf_read(pip_conf):
@@ -66,8 +70,10 @@ def test_default_pip_conf_read(pip_conf):
 
 def test_extra_index_option(pip_conf):
     options = {
-        'extra_index_urls': (
-            '["http://extraindex1.com", "http://extraindex2.com"]')
+        'extra_index_urls': [
+            'http://extraindex1.com',
+            'http://extraindex2.com',
+        ],
     }
     with run_check(pip_conf, options) as out:
         assert ('--index-url http://localhost\n'
@@ -81,7 +87,7 @@ def test_wheel_dir_option(pip_conf):
 
 
 def test_trusted_host_option(pip_conf):
-    options = {'trusted_hosts': '["example.com", "other.example.com"]'}
+    options = {'trusted_hosts': ['example.com', 'other.example.com']}
     with run_check(pip_conf, options) as out:
         assert ('--trusted-host example.com\n'
                 '--trusted-host other.example.com\n') in out.output
@@ -98,6 +104,6 @@ def test_invalid_option(pip_conf):
 
 
 def test_umlaut_in_prequ_conf_file(pip_conf):
-    options = {'wheel_sources': '{"mämmi": "http://localhost/mämmi"}'}
+    options = {'wheel_sources': {'mämmi': 'http://localhost/mämmi'}}
     with run_check(pip_conf, options) as out:
         assert out.exit_code == 0

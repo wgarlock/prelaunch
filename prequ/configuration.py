@@ -6,18 +6,12 @@ from __future__ import unicode_literals
 import io
 import os
 import re
-import sys
 from collections import defaultdict
 from contextlib import contextmanager
 from glob import glob
 
 from .ini_parser import parse_ini
 from .repositories.pypi import PyPIRepository
-
-try:
-    import yaml
-except ImportError:
-    yaml = None
 
 
 DEFAULT_INDEX_URL = PyPIRepository.DEFAULT_INDEX_URL
@@ -63,7 +57,6 @@ class PrequConfiguration(object):
         files in preference order are:
 
           * setup.cfg, [prequ] section
-          * requirements.pre
           * requirements.in and requirements-*.in
 
         :rtype: PrequConfiguration
@@ -76,9 +69,6 @@ class PrequConfiguration(object):
             from_ini = cls.from_ini(setup_cfg)
             if from_ini is not None:
                 return from_ini
-        pre_file = path('requirements.pre')
-        if os.path.exists(pre_file):
-            return cls.from_yaml(pre_file)
         in_files = (
             glob(path('requirements.in')) +
             glob(path('requirements-*.in')))
@@ -97,7 +87,7 @@ class PrequConfiguration(object):
         }
         with _get_fileobj(fileobj, 'rt', 'utf-8') as fp:
             data = parse_ini(fp, field_specs, section_name=section_name)
-        if not data:
+        if data is None:
             return None
         opts = {}
         reqs = {}
@@ -109,17 +99,6 @@ class PrequConfiguration(object):
             else:
                 opts[key] = value
         return cls.from_dict({'options': opts, 'requirements': reqs})
-
-    @classmethod
-    def from_yaml(cls, fileobj):
-        if not yaml:
-            msg = (
-                'Cannot load Prequ configuration from "{}": No yaml module.  '
-                'Migrate to setup.cfg or install pyyaml.').format(fileobj)
-            raise Error(msg)
-        with _get_fileobj(fileobj) as fp:
-            conf_data = yaml.load(fp, UnicodeYamlSafeLoader)
-        return cls.from_dict(conf_data)
 
     @classmethod
     def from_in_files(cls, *filenames):
@@ -386,17 +365,3 @@ class UnknownWheelSource(Error):
     def __init__(self, name):
         msg = 'No URL template defined for "{}"'.format(name)
         super(UnknownWheelSource, self).__init__(msg)
-
-
-if yaml:
-    class UnicodeYamlSafeLoader(yaml.SafeLoader):
-        pass
-
-    def construct_yaml_str(self, node):
-        return self.construct_scalar(node)
-
-    if sys.version_info < (3, 0):
-        # Override YAML str constructor in Python 2 so that it will
-        # construct unicode rather than bytes
-        UnicodeYamlSafeLoader.add_constructor(
-            'tag:yaml.org,2002:str', construct_yaml_str)
