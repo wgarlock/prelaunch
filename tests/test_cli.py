@@ -155,7 +155,7 @@ def test_realistic_complex_sub_dependencies(tmpdir):
     subprocess.check_output(['pip', 'wheel',
                              '--no-deps',
                              '-w', str(tmpdir),
-                             os.path.join('.', 'tests', 'fixtures', 'fake_package', '.')])
+                             os.path.join('.', 'tests', 'fake_pypi', 'fake_package', '.')])
 
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -214,7 +214,7 @@ def test_run_as_module_sync():
 
 def test_editable_package(tmpdir):
     """Prequ can compile an editable """
-    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fixtures', 'small_fake_package')
+    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'small_fake_package')
     fake_package_dir = 'file:' + pathname2url(fake_package_dir)
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -249,7 +249,7 @@ def test_upgrade_packages_option(tmpdir):
     """
     Prequ respects --upgrade-package/-P inline list.
     """
-    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fixtures', 'minimal_wheels')
+    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'minimal_wheels')
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open('requirements.in', 'w') as req_in:

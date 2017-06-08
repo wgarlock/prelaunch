@@ -15,10 +15,10 @@ from prequ.utils import as_tuple, key_from_req, make_install_requirement
 
 class FakeRepository(BaseRepository):
     def __init__(self):
-        with open('tests/fixtures/fake-index.json', 'r') as f:
+        with open('tests/fake_pypi/fake-index.json', 'r') as f:
             self.index = json.load(f)
 
-        with open('tests/fixtures/fake-editables.json', 'r') as f:
+        with open('tests/fake_pypi/fake-editables.json', 'r') as f:
             self.editables = json.load(f)
 
     def get_hashes(self, ireq):

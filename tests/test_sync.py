@@ -166,7 +166,7 @@ def test_diff_with_editable(fake_dist, from_editable):
         fake_dist('small-fake-with-deps==0.0.1'),
         fake_dist('six==1.10.0'),
     ]
-    path_to_package = os.path.join(os.path.dirname(__file__), 'fixtures', 'small_fake_package')
+    path_to_package = os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')
     reqs = [
         from_editable(path_to_package),
     ]
@@ -184,7 +184,7 @@ def test_diff_with_editable(fake_dist, from_editable):
 
 def test_sync_with_editable(from_editable):
     with mock.patch('prequ.sync.check_call') as check_call:
-        path_to_package = os.path.join(os.path.dirname(__file__), 'fixtures', 'small_fake_package')
+        path_to_package = os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')
         to_install = {from_editable(path_to_package)}
 
         sync(to_install, set())
