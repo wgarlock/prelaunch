@@ -13,7 +13,6 @@ from glob import glob
 from .ini_parser import parse_ini
 from .repositories.pypi import PyPIRepository
 
-
 DEFAULT_INDEX_URL = PyPIRepository.DEFAULT_INDEX_URL
 
 text = type('')
