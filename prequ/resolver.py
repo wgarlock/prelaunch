@@ -177,7 +177,7 @@ class Resolver(object):
                 combined_ireq.req.specifier = specset
             yield combined_ireq
 
-    def _resolve_one_round(self):
+    def _resolve_one_round(self):  # noqa: C901 (too complex)
         """
         Resolves one level of the current constraints, by finding the best
         match for each package in the repository and adding all requirements
