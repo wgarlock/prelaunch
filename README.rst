@@ -54,8 +54,10 @@ Example usage for ``prequ update``
 ----------------------------------
 
 Suppose you have a Flask project, and want to pin it for production.
-You need to specify so-called *pre-requirements* for Prequ.  This can be
-done by writing following section to ``setup.cfg``:
+You need to specify a configuration file for Prequ.  The configuration
+file minimally defines so-called *source requirements*, i.e. list of
+Python packages (with optional version specifiers).  This can be done by
+writing following section to ``setup.cfg``:
 
 .. code:: ini
 
@@ -116,12 +118,12 @@ Passing in empty arguments would cause it to default to
 ``requirements.txt``.
 
 
-More detailed example of pre-requirements specification
--------------------------------------------------------
+More detailed example of Prequ configuration
+--------------------------------------------
 
 Prequ supports defining couple options for the requirement compiling and
 automatically building wheels from pip URLs.  Here is a more detailed
-example of a pre-requirement file that demonstrates those features:
+example of a Prequ configuration to demonstrate those features:
 
 .. code:: ini
 

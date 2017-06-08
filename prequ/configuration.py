@@ -1,5 +1,5 @@
 """
-Prequ pre-requirements file definition and parsing.
+Prequ configuration file definition and parsing.
 """
 from __future__ import unicode_literals
 
@@ -25,18 +25,20 @@ DEFAULT_INDEX_URL = PyPIRepository.DEFAULT_INDEX_URL
 text = type('')
 
 
-class PreRequirements(object):
+class PrequConfiguration(object):
     """
-    Pre-requirements specification.
+    Prequ configuration specification.
 
-    Pre-requirements define how requirements files should be generated:
-    various options, package names and versions.
+    Prequ configuration defines the source requirement set(s) and some
+    options to control aspects of the requirements files generation.
 
-    It is possible to have several requirement sets defined.  A single
-    requirements file will be generated from each set.  These sets are
-    addressed by a label which determines the output file name.  Label
-    "base" is the default and its output is "requirements.txt".  Other
-    output files are named "requirements-{label}.txt" by their labels.
+    Each source requirement set is a list of package names with an
+    optional version specifier.  It is possible to have several source
+    requirement sets defined.  A single requirements file will be
+    generated from each set.  These sets are addressed by a label which
+    determines the output file name.  Label "base" is the default and
+    its output is "requirements.txt".  Other output files are named
+    "requirements-{label}.txt" by their labels.
     """
 
     fields = [
@@ -54,17 +56,17 @@ class PreRequirements(object):
     @classmethod
     def from_directory(cls, directory):
         """
-        Get pre-requirements of a directory.
+        Get Prequ configuration from a directory.
 
-        Reads the first existing pre-requirements configuration file(s)
-        and parses it/them to a PreRequirements object.  Supported
-        configuration files in preference order are:
+        Reads the first existing Prequ configuration file(s) and parses
+        it/them to a PrequConfiguration object.  Supported configuration
+        files in preference order are:
 
           * setup.cfg, [prequ] section
           * requirements.pre
           * requirements.in and requirements-*.in
 
-        :rtype: PreRequirements
+        :rtype: PrequConfiguration
         """
         def path(filename):
             return os.path.join(directory, filename)
@@ -82,8 +84,8 @@ class PreRequirements(object):
             glob(path('requirements-*.in')))
         if in_files:
             return cls.from_in_files(*in_files)
-        raise NoPreRequirementsFound(
-            'Cannot find pre-requirements. '
+        raise NoPrequConfigurationFound(
+            'Cannot find Prequ configuration. '
             'Add [prequ] section to your setup.cfg.')
 
     @classmethod
@@ -112,7 +114,7 @@ class PreRequirements(object):
     def from_yaml(cls, fileobj):
         if not yaml:
             msg = (
-                'Cannot load pre-requirements from "{}": No yaml module.  '
+                'Cannot load Prequ configuration from "{}": No yaml module.  '
                 'Migrate to setup.cfg or install pyyaml.').format(fileobj)
             raise Error(msg)
         with _get_fileobj(fileobj) as fp:
@@ -129,7 +131,7 @@ class PreRequirements(object):
             elif fn.startswith('requirements-') and fn.endswith('.in'):
                 label = fn.split('requirements-', 1)[1].rsplit('.in', 1)[0]
             else:
-                raise InvalidPreRequirements(
+                raise InvalidPrequConfiguration(
                     'Invalid in-file name: {}'.format(fn))
             with io.open(filepath, 'rt', encoding='utf-8') as fp:
                 reqs[label] = fp.read()
@@ -139,8 +141,8 @@ class PreRequirements(object):
     def from_dict(cls, conf_data):
         errors = get_data_errors(conf_data, cls.fields)
         if errors:
-            raise InvalidPreRequirements(
-                'Errors in pre-requirement data: {}'.format(', '.join(errors)))
+            raise InvalidPrequConfiguration(
+                'Errors in Prequ configuration: {}'.format(', '.join(errors)))
 
         input_reqs = conf_data['requirements']
         (requirement_sets, extra_opts) = parse_input_requirements(input_reqs)
@@ -348,7 +350,7 @@ WHEEL_LINE_RX = re.compile(
 
 def _parse_wheel_match(line, pkg, verspec, wheel_src_name):
     if not verspec.startswith('=='):
-        raise InvalidPreRequirements(
+        raise InvalidPrequConfiguration(
             'Wheel lines must use "==" version specifier: {}'.format(line))
     ver = verspec[2:]
     wheel_data = (wheel_src_name, pkg, ver)
@@ -372,11 +374,11 @@ class Error(Exception):
     pass
 
 
-class NoPreRequirementsFound(Error):
+class NoPrequConfigurationFound(Error):
     pass
 
 
-class InvalidPreRequirements(Error):
+class InvalidPrequConfiguration(Error):
     pass
 
 

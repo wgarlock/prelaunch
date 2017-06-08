@@ -38,12 +38,12 @@ def run_check(pip_conf, options=None, requirements=None):
     assert os.path.exists(pip_conf)
     runner = CliRunner()
     with runner.isolated_filesystem():
-        create_prerequirements(options, requirements)
+        create_configuration(options, requirements)
         out = runner.invoke(main, ['-v'])
         yield out
 
 
-def create_prerequirements(options=None, requirements=None):
+def create_configuration(options=None, requirements=None):
     with io.open('requirements.pre', 'wt', encoding='utf-8') as fp:
         if options:
             fp.write('options:\n')
@@ -91,13 +91,13 @@ def test_invalid_option(pip_conf):
     options = {'invalid': 'foobar'}
     with run_check(pip_conf, options) as out:
         assert out.exit_code != 0
-        assert type(out.exc_info[1]).__name__ == 'InvalidPreRequirements'
+        assert type(out.exc_info[1]).__name__ == 'InvalidPrequConfiguration'
         assert '{}'.format(out.exc_info[1]) == (
-            'Errors in pre-requirement data:'
+            'Errors in Prequ configuration:'
             ' Unknown key name: "options.invalid"')
 
 
-def test_umlaut_in_pre_requirements_file(pip_conf):
+def test_umlaut_in_prequ_conf_file(pip_conf):
     options = {'wheel_sources': '{"mämmi": "http://localhost/mämmi"}'}
     with run_check(pip_conf, options) as out:
         assert out.exit_code == 0

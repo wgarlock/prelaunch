@@ -6,7 +6,7 @@ import io
 
 import pytest
 
-from prequ.prereqfile import PreRequirements, get_data_errors, text
+from prequ.configuration import PrequConfiguration, get_data_errors, text
 
 field_types = [
     ('text_item', text),
@@ -111,8 +111,8 @@ def test_get_data_errors_invalid_type_specifier():
 
 def test_label_sorting():
     data = {'requirements': {'a': '', 'base': '', 'b': '', 'c': ''}}
-    prereq = PreRequirements.from_dict(data)
-    assert prereq.labels == ['base', 'a', 'b', 'c']
+    conf = PrequConfiguration.from_dict(data)
+    assert conf.labels == ['base', 'a', 'b', 'c']
 
 
 def test_requirements_in_generation():
@@ -123,17 +123,17 @@ def test_requirements_in_generation():
             'test': 'pytest',
         }
     }
-    prereq = PreRequirements.from_dict(data)
-    assert prereq.get_requirements_in_for('base') == 'framework'
-    assert prereq.get_requirements_in_for('dev') == (
+    conf = PrequConfiguration.from_dict(data)
+    assert conf.get_requirements_in_for('base') == 'framework'
+    assert conf.get_requirements_in_for('dev') == (
         '-c requirements.txt\n'
         'ipython')
-    assert prereq.get_requirements_in_for('test') == (
+    assert conf.get_requirements_in_for('test') == (
         '-c requirements.txt\n'
         'pytest')
 
 
-prereq_ini_content = """
+conf_ini_content = """
 [prequ]
 annotate = True
 extra_index_urls =
@@ -153,59 +153,59 @@ requirements-dev =
 """
 
 
-def test_prerequirements_parsing_ini():
-    stream = io.StringIO(prereq_ini_content)
-    prereq = PreRequirements.from_ini(stream)
-    assert prereq.annotate is True
-    assert prereq.extra_index_urls == [
+def test_configuration_parsing_ini():
+    stream = io.StringIO(conf_ini_content)
+    conf = PrequConfiguration.from_ini(stream)
+    assert conf.annotate is True
+    assert conf.extra_index_urls == [
         'https://one.example.com/', 'https://two.example.com/']
-    assert prereq.wheel_dir == 'wh€€ls'
-    assert prereq.wheel_sources == {
+    assert conf.wheel_dir == 'wh€€ls'
+    assert conf.wheel_sources == {
         'test_gh': 'git+ssh://git@github.com/test/{pkg}@{ver}'}
-    assert sorted(prereq.requirement_sets.keys()) == ['base', 'dev']
-    assert prereq.requirement_sets['base'] == (
+    assert sorted(conf.requirement_sets.keys()) == ['base', 'dev']
+    assert conf.requirement_sets['base'] == (
         '\n'
         'foobar\n'
         'somewheel==1.0.0\n'
         'barfoo')
-    assert prereq.requirement_sets['dev'] == '\ndevpkg>=2'
-    assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
-    assert list(prereq.get_wheels_to_build()) == [
+    assert conf.requirement_sets['dev'] == '\ndevpkg>=2'
+    assert conf.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
+    assert list(conf.get_wheels_to_build()) == [
         ('somewheel', '1.0.0',
          'git+ssh://git@github.com/test/somewheel@1.0.0')]
     pass
 
 
-def test_prerequirements_parsing_ini_no_section():
+def test_configuration_parsing_ini_no_section():
     other_ini_content = (
         '[other_section]\n'
         'something = else\n')
     stream = io.StringIO(other_ini_content)
-    prereq = PreRequirements.from_ini(stream)
-    assert prereq is None
+    conf = PrequConfiguration.from_ini(stream)
+    assert conf is None
 
 
-def test_prerequirements_parsing_ini_simple():
+def test_configuration_parsing_ini_simple():
     other_ini_content = (
         '[prequ]\n'
         'requirements = flask\n')
     stream = io.StringIO(other_ini_content)
-    prereq = PreRequirements.from_ini(stream)
-    assert isinstance(prereq, PreRequirements)
-    assert prereq.requirement_sets['base'] == 'flask'
+    conf = PrequConfiguration.from_ini(stream)
+    assert isinstance(conf, PrequConfiguration)
+    assert conf.requirement_sets['base'] == 'flask'
 
 
-def test_prerequirements_parsing_ini_without_base():
+def test_configuration_parsing_ini_without_base():
     other_ini_content = (
         '[prequ]\n'
         'requirements-test = pytest\n')
     stream = io.StringIO(other_ini_content)
-    prereq = PreRequirements.from_ini(stream)
-    assert prereq.requirement_sets['test'] == 'pytest'
-    assert 'base' not in prereq.requirement_sets
+    conf = PrequConfiguration.from_ini(stream)
+    assert conf.requirement_sets['test'] == 'pytest'
+    assert 'base' not in conf.requirement_sets
 
 
-prereq_yaml_content = """
+conf_yaml_content = """
 options:
   annotate: yes
   extra_index_urls:
@@ -226,22 +226,22 @@ requirements:
 """
 
 
-def test_prerequirements_parsing_yaml():
-    stream = io.BytesIO(prereq_yaml_content.encode('utf-8'))
-    prereq = PreRequirements.from_yaml(stream)
-    assert prereq.annotate is True
-    assert prereq.extra_index_urls == [
+def test_configuration_parsing_yaml():
+    stream = io.BytesIO(conf_yaml_content.encode('utf-8'))
+    conf = PrequConfiguration.from_yaml(stream)
+    assert conf.annotate is True
+    assert conf.extra_index_urls == [
         'https://one.example.com/', 'https://two.example.com/']
-    assert prereq.wheel_dir == 'wh€€ls'
-    assert prereq.wheel_sources == {
+    assert conf.wheel_dir == 'wh€€ls'
+    assert conf.wheel_sources == {
         'test_gh': 'git+ssh://git@github.com/test/{pkg}@{ver}'}
-    assert sorted(prereq.requirement_sets.keys()) == ['base', 'dev']
-    assert prereq.requirement_sets['base'] == (
+    assert sorted(conf.requirement_sets.keys()) == ['base', 'dev']
+    assert conf.requirement_sets['base'] == (
         'foobar\n'
         'somewheel==1.0.0\n'
         'barfoo')
-    assert prereq.requirement_sets['dev'] == 'devpkg>=2'
-    assert prereq.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
-    assert list(prereq.get_wheels_to_build()) == [
+    assert conf.requirement_sets['dev'] == 'devpkg>=2'
+    assert conf.wheels_to_build == [('test_gh', 'somewheel', '1.0.0')]
+    assert list(conf.get_wheels_to_build()) == [
         ('somewheel', '1.0.0',
          'git+ssh://git@github.com/test/somewheel@1.0.0')]

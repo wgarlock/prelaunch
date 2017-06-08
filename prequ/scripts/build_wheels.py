@@ -4,9 +4,9 @@ from glob import glob
 
 import click
 
+from ..configuration import PrequConfiguration
 from ..exceptions import PrequError, WheelMissing
 from ..logging import log
-from ..prereqfile import PreRequirements
 
 click.disable_unicode_literals_warning = True
 
@@ -27,15 +27,15 @@ def main(silent, check):
 
 
 def build_wheels(silent=False, check_only=False):
-    prereq = PreRequirements.from_directory('.')
-    to_build = list(prereq.get_wheels_to_build())
+    conf = PrequConfiguration.from_directory('.')
+    to_build = list(conf.get_wheels_to_build())
     for (pkg, ver, url) in to_build:
-        build_wheel(prereq, pkg, ver, url, silent, check_only)
+        build_wheel(conf, pkg, ver, url, silent, check_only)
 
 
-def build_wheel(prereq, pkg, ver, url, silent=False, check_only=False):
+def build_wheel(conf, pkg, ver, url, silent=False, check_only=False):
     info = log.info if not silent else (lambda x: None)
-    already_built = get_wheels(prereq, pkg, ver)
+    already_built = get_wheels(conf, pkg, ver)
     if check_only:
         if already_built:
             info('{} exists'.format(already_built[0]))
@@ -47,18 +47,18 @@ def build_wheel(prereq, pkg, ver, url, silent=False, check_only=False):
     info('*** Building wheel for {} {} from {}'.format(pkg, ver, url))
     call('pip wheel {verbosity} -w {w} --no-deps {u}',
          verbosity=('-q' if silent else '-v'),
-         w=prereq.wheel_dir, u=url)
-    built_wheel = get_wheels(prereq, pkg, ver)[0]
+         w=conf.wheel_dir, u=url)
+    built_wheel = get_wheels(conf, pkg, ver)[0]
     info('*** Built: {}'.format(built_wheel))
-    for wheel in get_wheels(prereq, pkg):  # All versions
+    for wheel in get_wheels(conf, pkg):  # All versions
         if wheel != built_wheel:
             info('*** Removing: {}'.format(wheel))
             os.remove(wheel)
 
 
-def get_wheels(prereq, pkg, ver='*'):
+def get_wheels(conf, pkg, ver='*'):
     return glob(os.path.join(
-        prereq.wheel_dir, '{}-{}-*.whl'.format(pkg.replace('-', '_'), ver)))
+        conf.wheel_dir, '{}-{}-*.whl'.format(pkg.replace('-', '_'), ver)))
 
 
 def call(cmd, stdout=None, **kwargs):

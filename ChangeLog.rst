@@ -7,6 +7,7 @@ General Changes
 ~~~~~~~~~~~~~~~
 
 - compile-in: Mark as internal command
+- Rename pre-requirements to Prequ configuration
 
 Features
 ~~~~~~~~

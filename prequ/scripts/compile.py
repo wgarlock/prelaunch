@@ -4,9 +4,9 @@ from tempfile import NamedTemporaryFile
 import click
 
 from . import compile_in
+from ..configuration import PrequConfiguration
 from ..exceptions import FileOutdated, PrequError
 from ..logging import log
-from ..prereqfile import PreRequirements
 
 click.disable_unicode_literals_warning = True
 
@@ -19,7 +19,7 @@ click.disable_unicode_literals_warning = True
 @click.pass_context
 def main(ctx, verbose, silent, check):
     """
-    Compile requirements from pre-requirements.
+    Compile requirements from source requirements.
     """
     try:
         compile(ctx, verbose, silent, check)
@@ -30,28 +30,28 @@ def main(ctx, verbose, silent, check):
 
 def compile(ctx, verbose, silent, check):
     info = log.info if not silent else (lambda x: None)
-    prereq_cls = PreRequirements if not check else CheckerPreRequirements
-    prereq = prereq_cls.from_directory('.')
+    conf_cls = PrequConfiguration if not check else CheckerPrequConfiguration
+    conf = conf_cls.from_directory('.')
 
-    compile_opts = dict(prereq.get_prequ_compile_options())
+    compile_opts = dict(conf.get_prequ_compile_options())
     compile_opts.update(verbose=verbose, silent=(not verbose))
 
     try:
-        for label in prereq.labels:
+        for label in conf.labels:
             if not check:
                 info('*** Compiling {}'.format(
-                    prereq.get_output_file_for(label)))
-            do_one_file(ctx, prereq, label, compile_opts)
+                    conf.get_output_file_for(label)))
+            do_one_file(ctx, conf, label, compile_opts)
             if check:
-                prereq.check(label, info)
+                conf.check(label, info)
     finally:
         if check:
-            prereq.cleanup()
+            conf.cleanup()
 
 
-def do_one_file(ctx, prereq, label, compile_opts):
-    out_file = prereq.get_output_file_for(label)
-    content = prereq.get_requirements_in_for(label).encode('utf-8')
+def do_one_file(ctx, conf, label, compile_opts):
+    out_file = conf.get_output_file_for(label)
+    content = conf.get_requirements_in_for(label).encode('utf-8')
     with get_tmp_file(prefix=out_file, suffix='.in') as tmp:
         tmp.write(content)
     try:
@@ -61,9 +61,9 @@ def do_one_file(ctx, prereq, label, compile_opts):
         os.remove(tmp.name)
 
 
-class CheckerPreRequirements(PreRequirements):
+class CheckerPrequConfiguration(PrequConfiguration):
     def __init__(self, *args, **kwargs):
-        super(CheckerPreRequirements, self).__init__(*args, **kwargs)
+        super(CheckerPrequConfiguration, self).__init__(*args, **kwargs)
         self.tmp_out_files = {}
 
     def get_output_file_for(self, label):
@@ -76,7 +76,7 @@ class CheckerPreRequirements(PreRequirements):
             return filename
 
     def get_requirements_in_for(self, label):
-        parent = super(CheckerPreRequirements, self)
+        parent = super(CheckerPrequConfiguration, self)
         parent_file = parent.get_output_file_for(label)
         if not os.path.exists(parent_file):
             raise FileOutdated('{} is missing'.format(parent_file))
@@ -84,7 +84,7 @@ class CheckerPreRequirements(PreRequirements):
         return '-c {}\n'.format(parent_file) + parent_req_in
 
     def check(self, label, info):
-        cur = super(CheckerPreRequirements, self).get_output_file_for(label)
+        cur = super(CheckerPrequConfiguration, self).get_output_file_for(label)
         new = self.get_output_file_for(label)
         if files_have_same_content(cur, new):
             info('{} is OK'.format(cur))
