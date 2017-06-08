@@ -15,7 +15,8 @@ from ..logging import log
 from ..repositories import LocalRequirementsRepository
 from ..resolver import Resolver
 from ..utils import (
-    assert_compatible_pip_version, dedup, is_pinned_requirement, key_from_req)
+    UNSAFE_PACKAGES, assert_compatible_pip_version, dedup,
+    is_pinned_requirement, key_from_req)
 from ..writer import OutputWriter
 from ._repo import get_pip_options_and_pypi_repository
 
@@ -61,7 +62,7 @@ class PipCommand(pip.basecommand.Command):
               help=('Output file name. Required if more than one input file is given. '
                     'Will be derived from input file otherwise.'))
 @click.option('--allow-unsafe', is_flag=True, default=False,
-              help="Pin packages considered unsafe: pip, setuptools & distribute")
+              help="Pin packages considered unsafe: {}".format(', '.join(sorted(UNSAFE_PACKAGES))))
 @click.option('--generate-hashes', is_flag=True, default=False,
               help="Generate pip 8 style hashes in the resulting requirements file.")
 @click.option('--max-rounds', default=10,
@@ -217,11 +218,13 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
                           format_control=repository.finder.format_control,
                           silent=silent)
     writer.write(results=results,
+                 unsafe_requirements=resolver.unsafe_constraints,
                  reverse_dependencies=reverse_dependencies,
                  primary_packages={key_from_req(ireq.req) for ireq in constraints if not ireq.constraint},
                  markers={key_from_req(ireq.req): ireq.markers
                           for ireq in constraints if ireq.markers},
-                 hashes=hashes)
+                 hashes=hashes,
+                 allow_unsafe=allow_unsafe)
 
     if dry_run:
         log.warning('Dry-run, so nothing updated.')
