@@ -1,5 +1,7 @@
-Unreleased
-----------
+1.0.1
+-----
+
+Released on 2017-08-02 15:20 +03:00.
 
 This version of Prequ is synced with pip-tools 1.10.0rc2.
 
