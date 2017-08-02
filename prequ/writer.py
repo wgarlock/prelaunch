@@ -97,7 +97,7 @@ class OutputWriter(object):
         for ireq in packages:
             line = self._format_requirement(
                 ireq, reverse_dependencies, primary_packages,
-                markers.get(ireq.req.name), hashes=hashes)
+                markers.get(key_from_req(ireq.req)), hashes=hashes)
             yield line
 
         if unsafe_requirements:
@@ -109,7 +109,7 @@ class OutputWriter(object):
                 req = self._format_requirement(ireq,
                                                reverse_dependencies,
                                                primary_packages,
-                                               marker=markers.get(ireq.req.name),
+                                               marker=markers.get(key_from_req(ireq.req)),
                                                hashes=hashes)
                 if not allow_unsafe:
                     yield comment('# {}'.format(req))
