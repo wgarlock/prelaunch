@@ -23,3 +23,6 @@ dist
 # IDE
 .idea
 venv/
+
+# Requirement files for local tools
+requirements-local.*
