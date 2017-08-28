@@ -11,7 +11,6 @@ from pip.req import InstallRequirement
 from first import first
 
 from .click import style
-from .exceptions import ImpossibleConstraint
 
 
 def safeint(s):
@@ -93,6 +92,7 @@ def is_pinned_requirement(ireq):
     - Is not editable
     - It has at least one "==" specifier with a version that is not a
       wildcard
+    - It is not conflicting (i.e. filtering out all possible versions)
 
     Examples:
 
@@ -102,6 +102,8 @@ def is_pinned_requirement(ireq):
     >>> assert not is_pinned_requirement('django==1.8.*')
     >>> assert is_pinned_requirement('django>=1.4,==1.8')
     >>> assert not is_pinned_requirement('django>=1.4,<=1.4')
+    >>> assert not is_pinned_requirement('django==1.8,==1.9')
+    >>> assert not is_pinned_requirement('django==1.8,>=1.9')
     """
     return get_pinned_version(ireq) is not None
 
@@ -124,13 +126,8 @@ def get_pinned_version(ireq):
     versions = set(
         version for (op, version) in specs
         if (op == '==' or op == '===') and not version.endswith('.*'))
-    if len(versions) > 1:
-        raise ImpossibleConstraint(
-            'Package {} pinned to conflicting versions: {}'.format(
-                ireq.name, ireq.specifier))
-    elif versions:
-        return first(versions)
-    return None
+    good_versions = ireq.specifier.filter(versions, prereleases=True)
+    return first(good_versions)
 
 
 def is_vcs_link(ireq):
