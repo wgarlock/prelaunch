@@ -16,10 +16,6 @@ class NoCandidateFound(PrequError):
         return '\n'.join(lines)
 
 
-class ImpossibleConstraint(PrequError):
-    pass
-
-
 class UnsupportedConstraint(PrequError):
     def __init__(self, message, constraint):
         super(UnsupportedConstraint, self).__init__(message)
