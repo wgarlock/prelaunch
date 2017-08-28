@@ -9,8 +9,8 @@ Bug Fixes
 ~~~~~~~~~
 
 - (jazzband/pip-tools#538) Fixed bug where editable PyPI dependencies
-  would have a `download_dir` and be exposed to `git-checkout-index`,
-  (thus losing their VCS directory) and `python setup.py egg_info`
+  would have a ``download_dir`` and be exposed to ``git-checkout-index``,
+  (thus losing their VCS directory) and ``python setup.py egg_info``
   fails.
 
 1.0.0
