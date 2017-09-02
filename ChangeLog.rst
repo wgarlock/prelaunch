@@ -1,3 +1,22 @@
+Unreleased
+----------
+
+This version of Prequ is synced with pip-tools master at commit 8c09d72.
+
+Features
+~~~~~~~~
+
+- (jazzband/pip-tools#509) Add a "-q"/"--quiet" argument to the sync
+  command to reduce log output
+
+Bug Fixes
+~~~~~~~~~
+
+- (jazzband/pip-tools#542) Fix a bug where some primary dependencies
+  were annotated with the "via" info comments
+- (jazzband/pip-tools#557) Fix package hashing doing unnecessary
+  unpacking
+
 1.0.2
 -----
 
