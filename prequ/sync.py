@@ -14,9 +14,9 @@ PACKAGES_TO_IGNORE = [
     'pip',
     'prequ',
     'pip-review',
+    'pkg-resources',
     'setuptools',
     'wheel',
-    'pkg-resources',
 ]
 
 
