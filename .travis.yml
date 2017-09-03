@@ -14,7 +14,6 @@ matrix:
 install:
   - travis_retry pip install tox-travis
   - travis_retry pip install codecov
-  - travis_retry pip install coveralls
   - pip install -U pip setuptools
   - python setup.py bdist_wheel
 
@@ -24,4 +23,3 @@ script: tox -v --installpkg dist/*.whl
 
 after_success:
   - codecov -e TRAVIS_PYTHON_VERSION
-  - coveralls
