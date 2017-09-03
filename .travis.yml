@@ -12,8 +12,8 @@ matrix:
     - python: "3.6"
 
 install:
-  - travis_retry pip install tox-travis
-  - travis_retry pip install codecov
+  - pip install tox-travis
+  - pip install codecov
   - pip install -U pip setuptools
   - python setup.py bdist_wheel
 
