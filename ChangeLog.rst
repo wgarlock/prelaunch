@@ -1,5 +1,7 @@
-Unreleased
-----------
+1.1.0
+-----
+
+Released on 2017-09-03 11:10 +03:00.
 
 This version of Prequ is synced with pip-tools master at commit 8c09d72.
 
