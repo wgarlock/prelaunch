@@ -1,5 +1,8 @@
+branches: {only: [master]}
+
 sudo: false
 language: python
+cache: pip
 
 matrix:
   include:
@@ -10,16 +13,12 @@ matrix:
     - python: "3.6"
 
 install:
-  - travis_retry pip install tox-travis
-  - travis_retry pip install codecov
-  - travis_retry pip install coveralls
+  - pip install tox-travis
+  - pip install codecov
   - pip install -U pip setuptools
   - python setup.py bdist_wheel
-
-cache: pip
 
 script: tox -v --installpkg dist/*.whl
 
 after_success:
   - codecov -e TRAVIS_PYTHON_VERSION
-  - coveralls

@@ -1,27 +1,18 @@
+branches: {only: [master]}
 environment:
-
-    matrix:
-        - TOXENV: py27-pip8
-        - TOXENV: py27-pip8.1.1
-        - TOXENV: py27-pip9
-        - TOXENV: py27-piplatest
-        - TOXENV: py34-pip8
-        - TOXENV: py34-pip8.1.1
-        - TOXENV: py34-pip9
-        - TOXENV: py34-piplatest
-        - TOXENV: py35-pip8
-        - TOXENV: py35-pip8.1.1
-        - TOXENV: py35-pip9
-        - TOXENV: py35-piplatest
-        - TOXENV: py36-pip8
-        - TOXENV: py36-pip8.1.1
-        - TOXENV: py36-pip9
-        - TOXENV: py36-piplatest
-
+  matrix:
+    - TOXENV: py27-pip8.1.1
+    - TOXENV: py27-piplatest
+    - TOXENV: py34-pip8.1.1
+    - TOXENV: py34-piplatest
+    - TOXENV: py35-piplatest
+    - TOXENV: py36-piplatest
 install:
-    - C:\Python36\python -m pip install tox
-
-build: false
-
+  - pip install -U pip setuptools wheel
+  - pip install -U tox
+build_script:
+  - python setup.py bdist_wheel
 test_script:
-    - C:\Python36\Scripts\tox
+  - 'FOR %%w IN ("dist\*.whl") DO tox -v --installpkg "%%w"'
+cache:
+  - '%LocalAppData%\pip\cache'

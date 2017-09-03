@@ -83,7 +83,8 @@ def test_extra_index_option(pip_conf):
 
 def test_wheel_dir_option(pip_conf):
     with run_check(pip_conf, options={'wheel_dir': 'foo/bar'}) as out:
-        assert '--find-links foo/bar\n' in out.output
+        find_links_line = '--find-links foo/bar\n'.replace('/', os.path.sep)
+        assert find_links_line in out.output
 
 
 def test_trusted_host_option(pip_conf):
