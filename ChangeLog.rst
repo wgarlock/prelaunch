@@ -5,6 +5,7 @@ Features
 ~~~~~~~~
 
 - Detect annotation and other options from the existing output files
+- Merge configuration from setup.cfg with requirements*.in files
 
 1.1.0
 -----

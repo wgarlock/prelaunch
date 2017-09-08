@@ -15,6 +15,8 @@ from prequ.repositories.base import BaseRepository
 from prequ.resolver import Resolver
 from prequ.utils import as_tuple, key_from_req, make_install_requirement
 
+from .dirs import FAKE_PYPI_WHEELS_DIR
+
 
 class FakeRepository(BaseRepository):
     def __init__(self):
@@ -123,15 +125,24 @@ def pip_conf_with_index(tmpdir):
         yield path
 
 
+@pytest.yield_fixture
+def pip_conf_with_wheeldir(tmpdir):
+    with get_temporary_pip_conf(tmpdir, wheeldir=True) as path:
+        yield path
+
+
 @contextlib.contextmanager
-def get_temporary_pip_conf(tmpdir, index=None):
+def get_temporary_pip_conf(tmpdir, index=None, wheeldir=False):
     pip_conf_file = 'pip.conf' if os.name != 'nt' else 'pip.ini'
     path = (tmpdir / pip_conf_file).strpath
     index_line = ('index-url = ' + index) if index else 'no-index = yes'
+    wheeldir_line = (
+        'find-links = {}\n'.format(FAKE_PYPI_WHEELS_DIR) if wheeldir else '')
     with open(path, 'w') as f:
         f.write(
             '[global]\n'
-            + index_line + '\n' +
+            + index_line + '\n'
+            + wheeldir_line +
             'trusted-host = localhost\n')
     old_value = os.environ.get('PIP_CONFIG_FILE')
     try:
