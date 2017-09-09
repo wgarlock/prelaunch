@@ -16,12 +16,25 @@ from prequ.scripts.update import main
 
 @pytest.yield_fixture
 def pip_conf(tmpdir):
+    with get_temporary_pip_conf(tmpdir) as path:
+        yield path
+
+
+@pytest.yield_fixture
+def pip_conf_with_index(tmpdir):
+    with get_temporary_pip_conf(tmpdir, index='http://localhost') as path:
+        yield path
+
+
+@contextlib.contextmanager
+def get_temporary_pip_conf(tmpdir, index=None):
     pip_conf_file = 'pip.conf' if os.name != 'nt' else 'pip.ini'
     path = (tmpdir / pip_conf_file).strpath
+    index_line = ('index-url = ' + index) if index else 'no-index = yes'
     with open(path, 'w') as f:
         f.write(
             '[global]\n'
-            'index-url = http://localhost\n'
+            + index_line + '\n' +
             'trusted-host = localhost\n')
     old_value = os.environ.get('PIP_CONFIG_FILE')
     try:
@@ -70,18 +83,21 @@ def create_configuration(options=None, requirements=None):
 
 def test_default_pip_conf_read(pip_conf):
     with run_check(pip_conf) as out:
-        assert 'Using indexes:\n  http://localhost' in out.output
-        assert '--index-url http://localhost' in out.output
+        assert 'Using indexes:\n' in out.output
+        after_index_title_line = out.output.split(
+            'Using indexes:\n', 1)[1].split('\n', 1)[0]
+        assert after_index_title_line == 'Limiting constraints:'
+        assert '--trusted-host localhost' in out.output
 
 
-def test_extra_index_option(pip_conf):
+def test_extra_index_option(pip_conf_with_index):
     options = {
         'extra_index_urls': [
             'http://extraindex1.com',
             'http://extraindex2.com',
         ],
     }
-    with run_check(pip_conf, options) as out:
+    with run_check(pip_conf_with_index, options) as out:
         assert ('--index-url http://localhost\n'
                 '--extra-index-url http://extraindex1.com\n'
                 '--extra-index-url http://extraindex2.com' in out.output)
