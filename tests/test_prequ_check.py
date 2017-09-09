@@ -27,12 +27,12 @@ TXT_CONTENTS = {
 
 
 @pytest.mark.parametrize('txt_status', ['up_to_date', 'outdated'])
-@pytest.mark.parametrize('mode', ['default', 'silent'])
+@pytest.mark.parametrize('mode', ['default', 'silent', 'verbose'])
 def test_simple_case(pip_conf, txt_status, mode):
     out = run_check(pip_conf, TXT_CONTENTS[txt_status], mode)
     if txt_status == 'up_to_date':
         assert out.exit_code == 0
-        if mode == 'default':
+        if mode in ('default', 'verbose'):
             expected_output = 'requirements.txt is OK\n'
         elif mode == 'silent':
             expected_output = ''
@@ -40,12 +40,23 @@ def test_simple_case(pip_conf, txt_status, mode):
         assert out.exit_code == 1
         if mode == 'default':
             expected_output = 'requirements.txt is outdated\n'
+        elif mode == 'verbose':
+            expected_output = (
+                '--- requirements.txt (current)\n'
+                '+++ requirements.txt (expected)\n'
+                '@@ -1,4 +1,4 @@\n'
+                ' --trusted-host localhost\n'
+                ' \n'
+                ' tiny-dependee==1.0\n'
+                '-tiny-depender\n'
+                '+tiny-depender==1.1\n'
+                'requirements.txt is outdated\n')
         elif mode == 'silent':
             expected_output = ''
     assert out.output == expected_output
 
 
-@pytest.mark.parametrize('mode', ['default', 'silent'])
+@pytest.mark.parametrize('mode', ['default', 'silent', 'verbose'])
 def test_error_in_input(pip_conf, mode):
     with pytest.raises(DistributionNotFound) as excinfo:
         run_check(pip_conf, 'tiny-dependee==0.1\n', mode)
@@ -54,7 +65,7 @@ def test_error_in_input(pip_conf, mode):
 
 
 def run_check(pip_conf, txt_content, mode='default'):
-    check_args = {'default': [], 'silent': ['-s']}[mode]
+    check_args = {'default': [], 'silent': ['-s'], 'verbose': ['-v']}[mode]
     runner = make_cli_runner(check_main, check_args)
     conf = {
         'options': {'wheel_dir': FAKE_PYPI_WHEELS_DIR},

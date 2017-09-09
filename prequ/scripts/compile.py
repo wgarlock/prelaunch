@@ -1,3 +1,4 @@
+import difflib
 import os
 from tempfile import NamedTemporaryFile
 
@@ -36,6 +37,8 @@ def compile(ctx, verbose, silent, check):
 
     compile_opts = dict(conf.get_prequ_compile_options())
     compile_opts.update(verbose=verbose, silent=(not verbose))
+    if check:
+        compile_opts.update(verbose=False, silent=True)
 
     try:
         for label in conf.labels:
@@ -44,7 +47,7 @@ def compile(ctx, verbose, silent, check):
                     conf.get_output_file_for(label)))
             do_one_file(ctx, conf, label, compile_opts)
             if isinstance(conf, CheckerPrequConfiguration):
-                conf.check(label, info)
+                conf.check(label, info, verbose)
     finally:
         if isinstance(conf, CheckerPrequConfiguration):
             conf.cleanup()
@@ -85,12 +88,20 @@ class CheckerPrequConfiguration(PrequConfiguration):
         if not os.path.exists(filename):
             raise FileOutdated('{} is missing'.format(filename))
 
-    def check(self, label, info):
+    def check(self, label, info, verbose=False):
         cur = super(CheckerPrequConfiguration, self).get_output_file_for(label)
         new = self.get_output_file_for(label)
         if files_have_same_content(cur, new):
             info('{} is OK'.format(cur))
         else:
+            if verbose:
+                cur_lines = _read_file(cur).decode('utf-8').splitlines()
+                new_lines = _read_file(new).decode('utf-8').splitlines()
+                diff = difflib.unified_diff(
+                    cur_lines, new_lines,
+                    cur + ' (current)', cur + ' (expected)')
+                for line in diff:
+                    info(line.rstrip('\n'))
             raise FileOutdated('{} is outdated'.format(cur))
 
     def cleanup(self):
