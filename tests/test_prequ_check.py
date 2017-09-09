@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import pytest
+from pip.exceptions import DistributionNotFound
 
 from prequ.scripts.check import main as check_main
 
@@ -26,17 +27,34 @@ TXT_CONTENTS = {
 
 
 @pytest.mark.parametrize('txt_status', ['up_to_date', 'outdated'])
-def test_simple_case(pip_conf, txt_status):
-    out = run_check(pip_conf, TXT_CONTENTS[txt_status])
+@pytest.mark.parametrize('mode', ['default', 'silent'])
+def test_simple_case(pip_conf, txt_status, mode):
+    out = run_check(pip_conf, TXT_CONTENTS[txt_status], mode)
     if txt_status == 'up_to_date':
         assert out.exit_code == 0
-        assert out.output == 'requirements.txt is OK\n'
+        if mode == 'default':
+            expected_output = 'requirements.txt is OK\n'
+        elif mode == 'silent':
+            expected_output = ''
     else:
         assert out.exit_code == 1
-        assert out.output == 'requirements.txt is outdated\n'
+        if mode == 'default':
+            expected_output = 'requirements.txt is outdated\n'
+        elif mode == 'silent':
+            expected_output = ''
+    assert out.output == expected_output
 
 
-def run_check(pip_conf, txt_content, check_args=[]):
+@pytest.mark.parametrize('mode', ['default', 'silent'])
+def test_error_in_input(pip_conf, mode):
+    with pytest.raises(DistributionNotFound) as excinfo:
+        run_check(pip_conf, 'tiny-dependee==0.1\n', mode)
+    assert '{}'.format(excinfo.value) == (
+        'No matching distribution found for tiny-dependee==0.1')
+
+
+def run_check(pip_conf, txt_content, mode='default'):
+    check_args = {'default': [], 'silent': ['-s']}[mode]
     runner = make_cli_runner(check_main, check_args)
     conf = {
         'options': {'wheel_dir': FAKE_PYPI_WHEELS_DIR},
