@@ -2,90 +2,18 @@
 
 from __future__ import unicode_literals
 
-import contextlib
 import io
 import os
 
 import pytest
-import six
-from click.testing import CliRunner
 
 from prequ.configuration import InvalidPrequConfiguration
-from prequ.scripts.update import main
+from prequ.scripts.update import main as update_main
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
+from .utils import make_cli_runner
 
-
-@pytest.yield_fixture
-def pip_conf(tmpdir):
-    with get_temporary_pip_conf(tmpdir) as path:
-        yield path
-
-
-@pytest.yield_fixture
-def pip_conf_with_index(tmpdir):
-    with get_temporary_pip_conf(tmpdir, index='http://localhost') as path:
-        yield path
-
-
-@contextlib.contextmanager
-def get_temporary_pip_conf(tmpdir, index=None):
-    pip_conf_file = 'pip.conf' if os.name != 'nt' else 'pip.ini'
-    path = (tmpdir / pip_conf_file).strpath
-    index_line = ('index-url = ' + index) if index else 'no-index = yes'
-    with open(path, 'w') as f:
-        f.write(
-            '[global]\n'
-            + index_line + '\n' +
-            'trusted-host = localhost\n')
-    old_value = os.environ.get('PIP_CONFIG_FILE')
-    try:
-        os.environ['PIP_CONFIG_FILE'] = path
-        yield path
-    finally:
-        if old_value is not None:
-            os.environ['PIP_CONFIG_FILE'] = old_value
-        else:
-            del os.environ['PIP_CONFIG_FILE']
-        os.remove(path)
-
-
-@contextlib.contextmanager
-def run_check(pip_conf, options=None, requirements=None,
-              existing_out_files=None):
-    assert os.path.exists(pip_conf)
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        create_configuration(options, requirements, existing_out_files)
-        out = runner.invoke(main, ['-v'])
-        if out.exit_code == -1:
-            (exc_type, exc_value, traceback) = out.exc_info
-            exc_value.run_result = out
-            six.reraise(exc_type, exc_value, traceback)
-        yield out
-
-
-def create_configuration(options=None, requirements=None,
-                         existing_out_files=None):
-    with io.open('setup.cfg', 'wt', encoding='utf-8') as fp:
-        fp.write('[prequ]\n')
-        if options:
-            for (key, value) in options.items():
-                if isinstance(value, dict):
-                    value = [
-                        '{} = {}'.format(k, v)
-                        for (k, v) in value.items()
-                    ]
-                if isinstance(value, list):
-                    value = '\n    ' + '\n    '.join(value)
-                fp.write('{} = {}\n'.format(key, value))
-        fp.write('requirements =\n')
-        if requirements:
-            for req in requirements:
-                fp.write('    {}\n'.format(req))
-        for (out_file, contents) in (existing_out_files or {}).items():
-            with io.open(out_file, 'wt', encoding='utf-8') as fp:
-                fp.write(contents)
+run_check = make_cli_runner(update_main, ['-v'])
 
 
 def test_default_pip_conf_read(pip_conf):

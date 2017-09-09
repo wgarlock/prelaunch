@@ -42,10 +42,10 @@ def compile(ctx, verbose, silent, check):
                 info('*** Compiling {}'.format(
                     conf.get_output_file_for(label)))
             do_one_file(ctx, conf, label, compile_opts)
-            if check:
+            if isinstance(conf, CheckerPrequConfiguration):
                 conf.check(label, info)
     finally:
-        if check:
+        if isinstance(conf, CheckerPrequConfiguration):
             conf.cleanup()
 
 
@@ -67,21 +67,22 @@ class CheckerPrequConfiguration(PrequConfiguration):
         self.tmp_out_files = {}
 
     def get_output_file_for(self, label):
+        real_output_file = (
+            super(CheckerPrequConfiguration, self).get_output_file_for(label))
         try:
             return self.tmp_out_files[label]
         except KeyError:
+            self._check_exists(real_output_file)
             with get_tmp_file(prefix='req-' + label, suffix='.txt') as tmp:
                 filename = tmp.name
+                tmp.write(_read_file(real_output_file))
             self.tmp_out_files[label] = filename
             return filename
 
-    def get_requirements_in_for(self, label):
-        parent = super(CheckerPrequConfiguration, self)
-        parent_file = parent.get_output_file_for(label)
-        if not os.path.exists(parent_file):
-            raise FileOutdated('{} is missing'.format(parent_file))
-        parent_req_in = parent.get_requirements_in_for(label)
-        return '-c {}\n'.format(parent_file) + parent_req_in
+    @classmethod
+    def _check_exists(cls, filename):
+        if not os.path.exists(filename):
+            raise FileOutdated('{} is missing'.format(filename))
 
     def check(self, label, info):
         cur = super(CheckerPrequConfiguration, self).get_output_file_for(label)
