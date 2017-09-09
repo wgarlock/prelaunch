@@ -7,8 +7,10 @@ import io
 import os
 
 import pytest
+import six
 from click.testing import CliRunner
 
+from prequ.configuration import InvalidPrequConfiguration
 from prequ.scripts.update import main
 
 
@@ -40,6 +42,10 @@ def run_check(pip_conf, options=None, requirements=None):
     with runner.isolated_filesystem():
         create_configuration(options, requirements)
         out = runner.invoke(main, ['-v'])
+        if out.exit_code == -1:
+            (exc_type, exc_value, traceback) = out.exc_info
+            exc_value.run_result = out
+            six.reraise(exc_type, exc_value, traceback)
         yield out
 
 
@@ -96,10 +102,10 @@ def test_trusted_host_option(pip_conf):
 
 def test_invalid_option(pip_conf):
     options = {'invalid': 'foobar'}
-    with run_check(pip_conf, options) as out:
-        assert out.exit_code != 0
-        assert type(out.exc_info[1]).__name__ == 'InvalidPrequConfiguration'
-        assert '{}'.format(out.exc_info[1]) == (
+    with pytest.raises(InvalidPrequConfiguration) as excinfo:
+        with run_check(pip_conf, options):
+            pass
+        assert '{}'.format(excinfo.value) == (
             'Errors in Prequ configuration:'
             ' Unknown key name: "options.invalid"')
 
