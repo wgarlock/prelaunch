@@ -51,34 +51,45 @@ class PrequConfiguration(object):
         """
         Get Prequ configuration from a directory.
 
-        Reads the first existing Prequ configuration file(s) and parses
-        it/them to a PrequConfiguration object.  Supported configuration
-        files in preference order are:
+        Reads the Prequ configuration file(s) in the directory and
+        parses it/them to a PrequConfiguration object.  Supported
+        configuration files are:
 
           * setup.cfg, [prequ] section
           * requirements.in and requirements-*.in
 
+        If both setup.cfg and requirements*.in files exist, then options
+        and source requirement sets specified in the setup.cfg are
+        merged with the source requirement sets defined by the in-files.
+
+        :type directory: str
         :rtype: PrequConfiguration
         """
         def path(filename):
             return os.path.join(directory, filename)
 
-        setup_cfg = path('setup.cfg')
-        if os.path.exists(setup_cfg):
-            from_ini = cls.from_ini(setup_cfg)
-            if from_ini is not None:
-                return from_ini
         in_files = (
             glob(path('requirements.in')) +
             glob(path('requirements-*.in')))
-        if in_files:
-            return cls.from_in_files(*in_files)
+        in_requirements = cls._read_in_files(in_files)
+        setup_cfg = path('setup.cfg')
+        conf_data = (cls._read_ini_file(setup_cfg)
+                     if os.path.exists(setup_cfg) else None) or {}
+        if in_requirements:
+            conf_data.setdefault('requirements', {}).update(in_requirements)
+        if conf_data:
+            return cls.from_dict(conf_data)
         raise NoPrequConfigurationFound(
             'Cannot find Prequ configuration. '
             'Add [prequ] section to your setup.cfg.')
 
     @classmethod
     def from_ini(cls, fileobj, section_name='prequ'):
+        conf_data = cls._read_ini_file(fileobj, section_name)
+        return cls.from_dict(conf_data) if conf_data else None
+
+    @classmethod
+    def _read_ini_file(cls, fileobj, section_name='prequ'):
         field_specs = {
             key.split('options.', 1)[1]: value
             for (key, value) in cls.fields
@@ -97,10 +108,14 @@ class PrequConfiguration(object):
                 reqs[key.split('requirements-', 1)[1]] = value
             else:
                 opts[key] = value
-        return cls.from_dict({'options': opts, 'requirements': reqs})
+        return {'options': opts, 'requirements': reqs}
 
     @classmethod
     def from_in_files(cls, *filenames):
+        return cls.from_dict({'requirements': cls._read_in_files(filenames)})
+
+    @classmethod
+    def _read_in_files(cls, filenames):
         reqs = {}
         for filepath in filenames:
             fn = os.path.basename(filepath)
@@ -113,7 +128,7 @@ class PrequConfiguration(object):
                     'Invalid in-file name: {}'.format(fn))
             with io.open(filepath, 'rt', encoding='utf-8') as fp:
                 reqs[label] = fp.read()
-        return cls.from_dict({'requirements': reqs})
+        return reqs
 
     @classmethod
     def from_dict(cls, conf_data):
