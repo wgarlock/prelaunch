@@ -7,6 +7,11 @@ Features
 - Detect annotation and other options from the existing output files
 - Merge configuration from setup.cfg with requirements*.in files
 
+Bug Fixes
+~~~~~~~~~
+
+- Fix "prequ check --silent" not being silent on outdated txt files
+
 1.1.0
 -----
 

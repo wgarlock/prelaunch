@@ -24,7 +24,8 @@ def main(ctx, verbose, silent, check):
     try:
         compile(ctx, verbose, silent, check)
     except PrequError as error:
-        log.error('{}'.format(error))
+        if not check or not silent:
+            log.error('{}'.format(error))
         raise SystemExit(1)
 
 
