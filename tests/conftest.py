@@ -1,6 +1,9 @@
+import contextlib
 import json
+import os
 from functools import partial
 
+import pytest
 from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
 from pip.req import InstallRequirement
@@ -106,3 +109,37 @@ def from_line():
 @fixture
 def from_editable():
     return InstallRequirement.from_editable
+
+
+@pytest.yield_fixture
+def pip_conf(tmpdir):
+    with get_temporary_pip_conf(tmpdir) as path:
+        yield path
+
+
+@pytest.yield_fixture
+def pip_conf_with_index(tmpdir):
+    with get_temporary_pip_conf(tmpdir, index='http://localhost') as path:
+        yield path
+
+
+@contextlib.contextmanager
+def get_temporary_pip_conf(tmpdir, index=None):
+    pip_conf_file = 'pip.conf' if os.name != 'nt' else 'pip.ini'
+    path = (tmpdir / pip_conf_file).strpath
+    index_line = ('index-url = ' + index) if index else 'no-index = yes'
+    with open(path, 'w') as f:
+        f.write(
+            '[global]\n'
+            + index_line + '\n' +
+            'trusted-host = localhost\n')
+    old_value = os.environ.get('PIP_CONFIG_FILE')
+    try:
+        os.environ['PIP_CONFIG_FILE'] = path
+        yield path
+    finally:
+        if old_value is not None:
+            os.environ['PIP_CONFIG_FILE'] = old_value
+        else:
+            del os.environ['PIP_CONFIG_FILE']
+        os.remove(path)

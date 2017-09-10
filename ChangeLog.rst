@@ -1,3 +1,11 @@
+Unreleased
+----------
+
+Features
+~~~~~~~~
+
+- Detect annotation and other options from the existing output files
+
 1.1.0
 -----
 
