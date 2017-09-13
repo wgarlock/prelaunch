@@ -1,9 +1,42 @@
+import mock
+import pytest
+
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
 
+PY27_LINUX64_TAGS = [
+    ('cp27', 'cp27mu', 'manylinux1_x86_64'),
+    ('cp27', 'cp27mu', 'linux_x86_64'),
+    ('cp27', 'none', 'manylinux1_x86_64'),
+    ('cp27', 'none', 'linux_x86_64'),
+    ('py2', 'none', 'manylinux1_x86_64'),
+    ('py2', 'none', 'linux_x86_64'),
+    ('cp27', 'none', 'any'),
+    ('cp2', 'none', 'any'),
+    ('py27', 'none', 'any'),
+    ('py2', 'none', 'any'),
+    ('py26', 'none', 'any'),
+    ('py25', 'none', 'any'),
+    ('py24', 'none', 'any'),
+    ('py23', 'none', 'any'),
+    ('py22', 'none', 'any'),
+    ('py21', 'none', 'any'),
+    ('py20', 'none', 'any'),
+]
 
-def test_generate_hashes_all_platforms(from_line):
-    expected = {
+
+@mock.patch('pip.pep425tags.supported_tags', new=PY27_LINUX64_TAGS)
+def test_resolving_respects_platform(from_line):
+    repository = get_repository()
+    repository.finder.valid_tags = PY27_LINUX64_TAGS
+    ireq = from_line('cryptography==2.0.3')
+    deps = repository.get_dependencies(ireq)
+    assert set(x.name for x in deps) == {
+        'asn1crypto', 'cffi', 'enum34', 'idna', 'ipaddress', 'six'}
+
+
+def test_generate_hashes_only_current_platform(from_line):
+    all_cffi_191_hashes = {
         'sha256:04b133ef629ae2bc05f83d0b079a964494a9cd17914943e690c57209b44aae20',
         'sha256:0f1b3193c17b93c75e73eeac92f22eec4c98a021d9969b1c347d1944fae0d26b',
         'sha256:1fb1cf40c315656f98f4d3acfb1bd031a14a9a69d155e9a180d5f9b52eaf745a',
@@ -47,18 +80,33 @@ def test_generate_hashes_all_platforms(from_line):
         'sha256:fde17c52d7ce7d55a9fb263b57ccb5da6439915b5c7105617eb21f636bb1bd9c',
     }
 
-    pip_command = get_pip_command()
-    pip_options, _ = pip_command.parse_args([])
-    session = pip_command._build_session(pip_options)
-    repository = PyPIRepository(pip_options, session)
+    repository = get_repository()
     ireq = from_line('cffi==1.9.1')
-    assert repository.get_hashes(ireq) == expected
+    hashes = repository.get_hashes(ireq)
+    assert hashes != all_cffi_191_hashes, "No platform could support them all"
+    assert hashes.issubset(all_cffi_191_hashes)
 
 
 def test_generate_hashes_without_interfering_with_each_other(from_line):
+    repository = get_repository()
+    repository.get_hashes(from_line('cffi==1.9.1'))
+    repository.get_hashes(from_line('matplotlib==2.0.2'))
+
+
+def test_get_hashes_non_pinned(from_line):
+    repository = get_repository()
+    with pytest.raises(TypeError):
+        repository.get_hashes(from_line('prequ'))
+
+
+def test_get_dependencies_non_pinned_non_editable(from_line):
+    repository = get_repository()
+    with pytest.raises(TypeError):
+        repository.get_dependencies(from_line('prequ'))
+
+
+def get_repository():
     pip_command = get_pip_command()
     pip_options, _ = pip_command.parse_args([])
     session = pip_command._build_session(pip_options)
-    repository = PyPIRepository(pip_options, session)
-    repository.get_hashes(from_line('cffi==1.9.1'))
-    repository.get_hashes(from_line('matplotlib==2.0.2'))
+    return PyPIRepository(pip_options, session)

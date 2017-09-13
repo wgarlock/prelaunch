@@ -1,3 +1,11 @@
+Unreleased
+----------
+
+Bug Fixes
+~~~~~~~~~
+
+- Correctly follow only the dependencies of the current platform
+
 1.2.0
 -----
 
@@ -47,7 +55,6 @@ Bug Fixes
 - Prevent conflicting package versions as expeceted.  The resolver used
   to allow selecting a pinned version V for a package P1 even though
   another package P2 required a version of P1 that is not V.
-
 
 1.0.1
 -----
