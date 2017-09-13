@@ -1,6 +1,6 @@
 import click
 
-from . import build_wheels, check, compile, compile_in, sync, update
+from . import build_wheels, check, compile, compile_in, sync, update, upgrade
 
 click.disable_unicode_literals_warning = True
 
@@ -17,6 +17,7 @@ main.add_command(compile_in.cli, 'compile-in')
 main.add_command(compile.main, 'compile')
 main.add_command(sync.cli, 'sync')
 main.add_command(update.main, 'update')
+main.add_command(upgrade.main, 'upgrade')
 
 
 if __name__ == '__main__':

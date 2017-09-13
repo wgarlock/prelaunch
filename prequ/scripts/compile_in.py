@@ -61,6 +61,13 @@ class PipCommand(pip.basecommand.Command):
 @click.option('-o', '--output-file', nargs=1, type=str, default=None,
               help=('Output file name. Required if more than one input file is given. '
                     'Will be derived from input file otherwise.'))
+@click.option('-O', '--real-output-file', nargs=1, type=str, default=None,
+              help=(
+                  "Real output file name.  By default this is the same "
+                  "as the \"output file\", but if a different file name "
+                  "is given here, then the output is really written to "
+                  "this file and the \"output file\" is used just for "
+                  "reading the existing package pins."))
 @click.option('--allow-unsafe', is_flag=True, default=False,
               help="Pin packages considered unsafe: {}".format(', '.join(sorted(UNSAFE_PACKAGES))))
 @click.option('--generate-hashes', is_flag=True, default=False,
@@ -71,6 +78,7 @@ class PipCommand(pip.basecommand.Command):
 def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
         extra_index_url, client_cert, trusted_host, header, index,
         emit_trusted_host, annotate, upgrade, upgrade_packages, output_file,
+        real_output_file,
         allow_unsafe, generate_hashes, src_files, max_rounds):
     """
     INTERNAL: Compile a single in-file.
@@ -211,7 +219,9 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     if annotate:
         reverse_dependencies = resolver.reverse_dependencies(results)
 
-    writer = OutputWriter(src_files, dst_file, dry_run=dry_run,
+    write_to_file = real_output_file or dst_file
+
+    writer = OutputWriter(src_files, write_to_file, dry_run=dry_run,
                           emit_header=header, emit_index=index,
                           emit_trusted_host=emit_trusted_host,
                           annotate=annotate,
