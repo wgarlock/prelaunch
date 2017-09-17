@@ -144,7 +144,7 @@ def get_cached_changelog(pkg):
             changelog = {}
         changelog_cache[pkg] = changelog
         with io.open(cache_file, 'wt', encoding='utf-8') as fp:
-            json.dump(changelog_cache, fp)
+            fp.write(json.dumps(changelog_cache).decode('utf-8'))
     return changelog
 
 
