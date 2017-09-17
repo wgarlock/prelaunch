@@ -194,7 +194,7 @@ def parse_requirements(content):
     versions = {}
     for line in content.replace('\\\n', '').splitlines():
         line = line.strip()
-        if not line or line.startswith('#'):
+        if not line or line.startswith('#') or line.startswith('-'):
             continue
         if ' --hash' in line:
             line = line.split(' --hash', 1)[0].strip()
