@@ -4,7 +4,7 @@ from itertools import chain
 from click import unstyle
 
 from ._compat import ExitStack
-from .fileutils import AtomicSaver
+from .file_replacer import FileReplacer
 from .logging import log
 from .utils import (
     UNSAFE_PACKAGES, comment, dedup, format_requirement, key_from_req)
@@ -121,7 +121,7 @@ class OutputWriter(object):
         with ExitStack() as stack:
             f = None
             if not self.dry_run:
-                f = stack.enter_context(AtomicSaver(self.dst_file))
+                f = stack.enter_context(FileReplacer(self.dst_file))
 
             for line in self._iter_lines(results, unsafe_requirements, reverse_dependencies,
                                          primary_packages, markers, hashes, allow_unsafe=allow_unsafe):
