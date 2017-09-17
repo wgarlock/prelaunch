@@ -11,8 +11,6 @@ from ..logging import log
 
 try:
     import changelogs
-    import requests_cache
-    requests_cache.install_cache()
 except ImportError:
     changelogs = None
 
