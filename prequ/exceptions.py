@@ -4,6 +4,12 @@ class PrequError(Exception):
 
 class NoCandidateFound(PrequError):
     def __init__(self, ireq, candidates_tried):
+        """
+        Initialize "no candidate found" error.
+
+        :type ireq: pip.req.InstallRequirement
+        :type candidates_tried: list[pip.index.InstallationCandidate]
+        """
         self.ireq = ireq
         self.candidates_tried = candidates_tried
 
@@ -11,13 +17,22 @@ class NoCandidateFound(PrequError):
         sorted_versions = sorted(c.version for c in self.candidates_tried)
         lines = [
             'Could not find a version that matches {}'.format(self.ireq),
-            'Tried: {}'.format(', '.join(str(version) for version in sorted_versions) or '(no version found at all)')
+            'Tried: {}'.format(
+                ', '.join(
+                    str(version) for version in sorted_versions) or
+                '(no version found at all)')
         ]
         return '\n'.join(lines)
 
 
 class UnsupportedConstraint(PrequError):
     def __init__(self, message, constraint):
+        """
+        Initialize "unsupported constraint" error.
+
+        :type message: str
+        :type constraint: pip.req.InstallRequirement
+        """
         super(UnsupportedConstraint, self).__init__(message)
         self.constraint = constraint
 
@@ -28,6 +43,12 @@ class UnsupportedConstraint(PrequError):
 
 class IncompatibleRequirements(PrequError):
     def __init__(self, ireq_a, ireq_b):
+        """
+        Initialize "incompatible requirements" error.
+
+        :type ireq_a: pip.req.InstallRequirement
+        :type ireq_b: pip.req.InstallRequirement
+        """
         self.ireq_a = ireq_a
         self.ireq_b = ireq_b
 
