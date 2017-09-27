@@ -2,8 +2,8 @@ from mock import MagicMock, patch
 from pip.index import PackageFinder
 from pip.req import InstallRequirement
 
-from piptools.repositories.pypi import PyPIRepository
-from piptools.scripts.compile import get_pip_command
+from prequ.repositories.pypi import PyPIRepository
+from prequ.scripts._repo import get_pip_command
 
 
 def test_pypirepo_build_dir_is_str():
@@ -22,7 +22,7 @@ def test_pypirepo_calls_reqset_with_str_paths():
     unpack, if the package contains non-ASCII file names, because
     non-ASCII str and unicode paths cannot be combined.
     """
-    with patch('piptools.repositories.pypi.RequirementSet') as mocked_init:
+    with patch('prequ.repositories.pypi.RequirementSet') as mocked_init:
         repo = get_pypi_repository()
         ireq = InstallRequirement.from_line('ansible==2.4.0.0')
 
