@@ -1,3 +1,14 @@
+Unreleased
+----------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix a bug where the resolver would sometime not stabilize on
+  requirements specifying extras (jazzband/pip-tools#566)
+- Fix an unicode encoding error when distribution package contains
+  non-ASCII file names (jazzband/pip-tools#567)
+
 1.2.1
 -----
 
