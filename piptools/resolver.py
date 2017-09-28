@@ -92,7 +92,7 @@ class Resolver(object):
                                      self.their_constraints))
 
         log.debug('Limiting constraints:')
-        for constraint in sorted(self.limiters, key=_dep_key):
+        for constraint in sorted(self.limiters, key=key_from_ireq):
             log.debug('  {}'.format(constraint))
 
         # Ignore existing packages
