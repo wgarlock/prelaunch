@@ -10,6 +10,7 @@ Bug Fixes
   requirements specifying extras (jazzband/pip-tools#566)
 - Fix an unicode encoding error when distribution package contains
   non-ASCII file names (jazzband/pip-tools#567)
+- sync: Fix syncing when there were editables present
 
 1.2.1
 -----

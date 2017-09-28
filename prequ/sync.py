@@ -160,8 +160,9 @@ def sync(to_install, to_uninstall,  # noqa: C901
             for ireq in to_install:
                 click.echo("  {}".format(format_requirement(ireq)))
         else:
-            arg_lists = (_ireq_to_install_args(x) for x in to_install)
-            package_args = sorted(sum(arg_lists, []))
+            package_args = sum((
+                _ireq_to_install_args(ireq)
+                for ireq in sorted(to_install, key=key_from_ireq)), [])
             check_call([pip, 'install'] + pip_flags + install_flags + package_args)
     return 0
 

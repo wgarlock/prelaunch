@@ -222,3 +222,19 @@ def test_sync_sorting_ireqs(from_line):
         sync(to_install, {})
         check_call.assert_called_once_with(
             ['pip', 'install', '-q', 'django==1.8', 'first==2.0.1'])
+
+
+def test_sync_sorting_ireqs_with_editable(from_line, from_editable):
+    with mock.patch('prequ.sync.check_call') as check_call:
+        path_to_package = os.path.join(os.path.dirname(__file__),
+                                       'fake_pypi', 'small_fake_package')
+        editable_ireq = from_editable(path_to_package)
+        to_install = {
+            from_line('django==1.8'),
+            from_line('first==2.0.1'),
+            editable_ireq,
+        }
+        sync(to_install, {})
+        check_call.assert_called_once_with(
+            ['pip', 'install', '-q',
+             'django==1.8', '-e', str(editable_ireq.link), 'first==2.0.1'])
