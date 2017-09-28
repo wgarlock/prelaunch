@@ -16,10 +16,6 @@ class NoCandidateFound(PipToolsError):
         return '\n'.join(lines)
 
 
-class ImpossibleConstraint(PipToolsError):
-    pass
-
-
 class UnsupportedConstraint(PipToolsError):
     def __init__(self, message, constraint):
         super(UnsupportedConstraint, self).__init__(message)
