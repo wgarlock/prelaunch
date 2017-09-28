@@ -3,7 +3,7 @@
 - Write relative find-links opts to output file (#453)
 - sync: Use options from the txt file (#464)
 - Fix doctests and run them with tox (#469)
-- Optimize resolver by improving handling of pinned requirements (f456185)
+- Optimize resolver by improving handling of pinned requirements (f954f53)
 - Bugfix: Do not generate dependencies from constraints (1367f55)
 
 # 1.10.0 (UNRELEASED)
