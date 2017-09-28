@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+This version of Prequ is synced with pip-tools 1.10.1.
+
 Bug Fixes
 ~~~~~~~~~
 
