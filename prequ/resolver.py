@@ -15,17 +15,11 @@ from .exceptions import UnsupportedConstraint
 from .logging import log
 from .utils import (
     UNSAFE_PACKAGES, first, format_requirement, format_specifier, full_groupby,
-    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_req)
+    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_ireq,
+    key_from_req)
 
 green = partial(click.style, fg='green')
 magenta = partial(click.style, fg='magenta')
-
-
-def _dep_key(ireq):
-    if ireq.req is None and ireq.link is not None:
-        return str(ireq.link)
-    else:
-        return key_from_req(ireq.req)
 
 
 class RequirementSummary(object):
@@ -97,7 +91,7 @@ class Resolver(object):
                                      self.their_constraints))
 
         log.debug('Limiting constraints:')
-        for constraint in sorted(self.limiters, key=_dep_key):
+        for constraint in sorted(self.limiters, key=key_from_ireq):
             log.debug('  {}'.format(constraint))
 
         # Ignore existing packages
@@ -153,7 +147,7 @@ class Resolver(object):
             flask~=0.7
 
         """
-        for _, ireqs in full_groupby(constraints, key=_dep_key):
+        for _, ireqs in full_groupby(constraints, key=key_from_ireq):
             ireqs = list(ireqs)
             exception_ireq = first(
                 x for x in ireqs if x.editable or is_vcs_link(x))
@@ -189,7 +183,7 @@ class Resolver(object):
         configuration.
         """
         # Sort this list for readability of terminal output
-        constraints = sorted(self.constraints, key=_dep_key)
+        constraints = sorted(self.constraints, key=key_from_ireq)
         unsafe_constraints = []
         original_constraints = copy.copy(constraints)
         if not self.allow_unsafe:

@@ -8,7 +8,7 @@ import click
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
 from .utils import (
     flat_map, format_requirement, is_pinned_requirement, is_vcs_link,
-    key_from_req)
+    key_from_ireq, key_from_req)
 
 PACKAGES_TO_IGNORE = [
     'pip',
