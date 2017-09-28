@@ -1,4 +1,3 @@
-- Ignore pkg-resources (#437)
 - Support pinned VCS dependencies (#355)
 - Write relative find-links opts to output file (#453)
 - sync: Use options from the txt file (#464)
