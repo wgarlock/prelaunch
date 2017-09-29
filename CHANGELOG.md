@@ -5,6 +5,9 @@
 - Optimize resolver by improving handling of pinned requirements (f954f53)
 - Bugfix: Do not generate dependencies from constraints (1367f55)
 
+Features:
+- Made local, editable, and relative requirements resolve to relative paths instead of absolute ones ([#507](https://github.com/jazzband/pip-tools/pull/507). Thanks to @orf)
+
 # 1.10.1 (2017-09-27)
 
 Bug Fixes:
