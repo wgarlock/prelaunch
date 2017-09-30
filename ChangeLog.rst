@@ -1,3 +1,11 @@
+Unreleased
+----------
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Make "via package" comments work for editable requirers too
+
 1.2.2
 -----
 

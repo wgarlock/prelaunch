@@ -86,6 +86,10 @@ class DependencyCache(object):
             extras_string = ""
         else:
             extras_string = "[{}]".format(",".join(extras))
+        if ireq.editable:
+            # Make sure that editables don't end up into the cache with
+            # a version of a real non-editable package
+            extras_string += ':EDITABLE:{}'.format(ireq.link)
         return name, "{}{}".format(version, extras_string)
 
     def read_cache(self):
@@ -99,7 +103,7 @@ class DependencyCache(object):
         """Writes the cache to disk as JSON."""
         doc = {
             '__format__': 1,
-            'dependencies': self._cache,
+            'dependencies': self._strip_editables(self._cache),
         }
         with open(self._cache_file, 'w') as f:
             json.dump(doc, f, sort_keys=True)
@@ -162,3 +166,17 @@ class DependencyCache(object):
         return lookup_table((key_from_req(Requirement.parse(dep_name)), name)
                             for name, version_and_extras in cache_keys
                             for dep_name in self.cache[name][version_and_extras])
+
+    @classmethod
+    def _strip_editables(cls, cache):
+        """
+        Strip out editable dependencies from given dependency cache map.
+        """
+        stripped = type(cache)()
+        for (name, dep_map) in cache.items():
+            stripped_dep_map = type(dep_map)()
+            for (version, deps) in dep_map.items():
+                if ':EDITABLE:' not in version:
+                    stripped_dep_map[version] = deps
+            stripped[name] = stripped_dep_map
+        return stripped

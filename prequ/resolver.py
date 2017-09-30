@@ -281,11 +281,7 @@ class Resolver(object):
         Editable requirements will never be looked up, as they may have
         changed at any time.
         """
-        if ireq.editable:
-            for dependency in self.repository.get_dependencies(ireq):
-                yield dependency
-            return
-        elif not is_pinned_requirement(ireq):
+        if not is_pinned_requirement(ireq) and not ireq.editable:
             raise TypeError('Expected pinned or editable requirement, got {}'.format(ireq))
 
         # Now, either get the dependencies from the dependency cache (for
@@ -305,5 +301,4 @@ class Resolver(object):
             yield InstallRequirement.from_line(dependency_string, constraint=ireq.constraint)
 
     def reverse_dependencies(self, ireqs):
-        non_editable = [ireq for ireq in ireqs if not ireq.editable]
-        return self.dependency_cache.reverse_dependencies(non_editable)
+        return self.dependency_cache.reverse_dependencies(ireqs)

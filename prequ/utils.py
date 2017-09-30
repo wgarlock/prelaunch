@@ -240,12 +240,13 @@ def is_vcs_link(ireq):
 def as_tuple(ireq):
     """
     Pulls out the (name: str, version:str, extras:(str)) tuple from the pinned InstallRequirement.
-    """
-    if not is_pinned_requirement(ireq):
-        raise TypeError('Expected a pinned InstallRequirement, got {}'.format(ireq))
 
-    name = key_from_ireq(ireq)
-    version = first(ireq.specifier._specs)._spec[1]
+    :type ireq: InstallRequirement
+    """
+    name = key_from_ireq(ireq)  # Runs also egg_info if needed
+    version = get_ireq_version(ireq)
+    if not version:
+        raise TypeError('Not pinned: {!r}'.format(ireq))
     extras = tuple(sorted(ireq.extras))
     return name, version, extras
 
