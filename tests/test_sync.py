@@ -4,6 +4,7 @@ from collections import Counter
 
 import mock
 import pytest
+from pip.download import url_to_path
 
 from prequ.exceptions import IncompatibleRequirements
 from prequ.sync import dependency_tree, diff, merge, sync
@@ -238,6 +239,17 @@ def test_sync_with_editable(from_editable, small_fake_package_dir):
 
         sync(to_install, set())
         check_call.assert_called_once_with(['pip', 'install', '-q', '-e', _get_file_url(small_fake_package_dir)])
+
+
+def test_sync_with_editable_uses_abspath(from_editable, small_fake_package_dir):
+    ireq = from_editable(small_fake_package_dir)
+    rel_path = os.path.relpath(url_to_path(ireq.link.url))
+    ireq.link.url = 'file:{}'.format(rel_path.replace(os.path.sep, '/'))
+    with mock.patch('prequ.sync.check_call') as check_call:
+        sync({ireq}, set())
+        check_call.assert_called_once_with(
+            ['pip', 'install', '-q',
+             '-e', _get_file_url(os.path.abspath(small_fake_package_dir))])
 
 
 def test_sync_sorting_ireqs(from_line):

@@ -4,6 +4,7 @@ import sys
 from subprocess import check_call
 
 import click
+from pip.download import url_to_path
 
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
 from .utils import (
@@ -168,7 +169,16 @@ def sync(to_install, to_uninstall,  # noqa: C901
 
 
 def _ireq_to_install_args(ireq):
+    """
+    :type ireq: pip.req.InstallRequirement
+    """
     if ireq.editable:
-        return ['-e', str(ireq.link or ireq.req)]
+        arg = str(ireq.link or ireq.req)
+        if ireq.link and ireq.link.url.startswith('file:'):
+            path = url_to_path(ireq.link.url)
+            if not os.path.isabs(path):
+                abspath = os.path.abspath(path)
+                arg = 'file://{}'.format(abspath.replace(os.path.sep, '/'))
+        return ['-e', arg]
     else:
         return [str(ireq.req)]
