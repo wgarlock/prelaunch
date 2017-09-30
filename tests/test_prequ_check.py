@@ -6,7 +6,7 @@ from pip.exceptions import DistributionNotFound
 from prequ.scripts.check import main as check_main
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
-from .utils import make_cli_runner
+from .utils import check_successful_exit, make_cli_runner
 
 run_check = make_cli_runner(check_main, [])
 
@@ -31,7 +31,7 @@ TXT_CONTENTS = {
 def test_simple_case(pip_conf, txt_status, mode):
     out = run_check(pip_conf, TXT_CONTENTS[txt_status], mode)
     if txt_status == 'up_to_date':
-        assert out.exit_code == 0
+        check_successful_exit(out)
         if mode in ('default', 'verbose'):
             expected_output = 'requirements.txt is OK\n'
         elif mode == 'silent':

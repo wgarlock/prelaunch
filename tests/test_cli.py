@@ -12,6 +12,8 @@ from six.moves.urllib.request import pathname2url
 from prequ.scripts.compile_in import cli
 from prequ.scripts.sync import cli as sync_cli
 
+from .utils import check_successful_exit
+
 
 @pytest.yield_fixture
 def pip_conf(tmpdir):
@@ -168,7 +170,7 @@ def test_realistic_complex_sub_dependencies(tmpdir):
                                   '-n', '--rebuild',
                                   '-f', str(tmpdir)])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
 
 
 def _invoke(command):
@@ -225,7 +227,7 @@ def test_sync_quiet(tmpdir):
         with mock.patch('prequ.sync.check_call') as check_call:
             out = runner.invoke(sync_cli, ['-q'])
             assert out.output == ''
-            assert out.exit_code == 0
+            check_successful_exit(out)
             # for every call to pip ensure the `-q` flag is set
             for call in check_call.call_args_list:
                 assert '-q' in call[0][0]
@@ -241,7 +243,7 @@ def test_editable_package(small_fake_package_dir):
 
         out = runner.invoke(cli, ['-n'])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert small_fake_package_dir in out.output
         assert 'six==1.10.0' in out.output
 
@@ -258,7 +260,7 @@ def test_editable_package_vcs(tmpdir):
             req_in.write('-e ' + vcs_package)
         out = runner.invoke(cli, ['-n',
                                   '--rebuild'])
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert vcs_package in out.output
         assert 'pytest' in out.output  # dependency of pytest-django
 
@@ -279,7 +281,7 @@ def test_relative_editable_package(small_fake_package_dir):
         out = runner.invoke(cli, ['-n'])
 
         print(out.output)
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert relative_package_req in out.output
 
 
@@ -295,7 +297,7 @@ def test_input_file_without_extension():
 
         out = runner.invoke(cli, ['requirements'])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert os.path.exists('requirements.txt')
         assert 'six==1.10.0' in open('requirements.txt').read()
 
@@ -316,6 +318,6 @@ def test_upgrade_packages_option(minimal_wheels_dir):
             '-f', minimal_wheels_dir,
         ])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert 'small-fake-a==0.1' in out.output
         assert 'small-fake-b==0.2' in out.output

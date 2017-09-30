@@ -12,7 +12,7 @@ from prequ.configuration import (
 from prequ.scripts.update import main as update_main
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
-from .utils import make_cli_runner
+from .utils import check_successful_exit, make_cli_runner
 
 run_check = make_cli_runner(update_main, ['-v'])
 
@@ -72,7 +72,7 @@ def test_invalid_option(pip_conf):
 def test_umlaut_in_prequ_conf_file(pip_conf):
     options = {'wheel_sources': {'mämmi': 'http://localhost/mämmi'}}
     with run_check(pip_conf, options) as out:
-        assert out.exit_code == 0
+        check_successful_exit(out)
 
 
 def test_detect_annotate(pip_conf):
@@ -138,7 +138,7 @@ def run_detection_check(pip_conf, req_txt_content, extra_options=None):
     if req_txt_content is not None:
         conf['existing_out_files'] = {'requirements.txt': req_txt_content}
     with run_check(pip_conf, **conf) as out:
-        assert out.exit_code == 0
+        check_successful_exit(out)
         return _read_text_file('requirements.txt')
 
 
@@ -154,7 +154,7 @@ def test_conf_merging(pip_conf):
     }
     txt_prelude = HEADER + '--trusted-host localhost\n\n'
     with run_check(pip_conf, **conf) as result:
-        assert result.exit_code == 0
+        check_successful_exit(result)
         assert 'small-fake-a' in result.output
         assert 'small-fake-b' in result.output
         assert 'tiny-depender' not in result.output
@@ -176,7 +176,7 @@ def test_only_in_files(pip_conf_with_wheeldir):
     }
     txt_prelude = HEADER + '--trusted-host localhost\n\n'
     with run_check(pip_conf_with_wheeldir, **conf) as result:
-        assert result.exit_code == 0
+        check_successful_exit(result)
         assert 'small-fake-a' in result.output
         assert 'small-fake-b' in result.output
         assert _read_text_file('requirements.txt') == (
