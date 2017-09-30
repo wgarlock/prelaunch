@@ -134,17 +134,17 @@ def is_subdirectory(base, directory):
     return os.path.commonprefix([base, directory]) == base
 
 
-def format_requirement(ireq, marker=None):
+def format_requirement(ireq, marker=None, root_dir='.'):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
     """
     if ireq.editable:
         path = ireq.link.path
-        if ireq.link.scheme == 'file' and is_subdirectory(os.getcwd(), path):
+        if ireq.link.scheme == 'file' and is_subdirectory(root_dir, path):
             # If the ireq.link is relative to the current directory then
             # output a relative path
-            relpath = os.path.relpath(path)
+            relpath = os.path.relpath(path, start=root_dir)
             path = '.' if relpath == '.' else os.path.join('.', relpath)
         else:
             path = ireq.link

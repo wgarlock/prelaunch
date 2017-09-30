@@ -132,7 +132,8 @@ class OutputWriter(object):
                     f.write(os.linesep.encode('utf-8'))
 
     def _format_requirement(self, ireq, reverse_dependencies, primary_packages, marker=None, hashes=None):
-        line = format_requirement(ireq, marker=marker)
+        dst_dir = os.path.dirname(self.dst_file)
+        line = format_requirement(ireq, marker=marker, root_dir=dst_dir)
 
         ireq_hashes = (hashes if hashes is not None else {}).get(ireq)
         if ireq_hashes:
