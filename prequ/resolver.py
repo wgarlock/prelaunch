@@ -15,8 +15,7 @@ from .exceptions import UnsupportedConstraint
 from .logging import log
 from .utils import (
     UNSAFE_PACKAGES, first, format_requirement, format_specifier, full_groupby,
-    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_ireq,
-    key_from_req)
+    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_ireq)
 
 green = partial(click.style, fg='green')
 magenta = partial(click.style, fg='magenta')
@@ -28,7 +27,7 @@ class RequirementSummary(object):
     """
     def __init__(self, ireq):
         self.req = ireq.req
-        self.key = key_from_req(ireq.req)
+        self.key = key_from_ireq(ireq)
         self.extras = str(sorted(ireq.extras))
         self.specifier = str(ireq.specifier)
 
@@ -227,13 +226,13 @@ class Resolver(object):
         if has_changed:
             log.debug('')
             log.debug('New dependencies found in this round:')
-            for new_dependency in sorted(diff, key=lambda req: key_from_req(req.req)):
+            for new_dependency in sorted(diff, key=lambda ireq: key_from_ireq(ireq)):
                 log.debug('  adding {}'.format(new_dependency))
             log.debug('Removed dependencies in this round:')
-            for removed_dependency in sorted(removed, key=lambda req: key_from_req(req.req)):
+            for removed_dependency in sorted(removed, key=lambda ireq: key_from_ireq(ireq)):
                 log.debug('  removing {}'.format(removed_dependency))
             log.debug('Unsafe dependencies in this round:')
-            for unsafe_dependency in sorted(unsafe, key=lambda req: key_from_req(req.req)):
+            for unsafe_dependency in sorted(unsafe, key=lambda ireq: key_from_ireq(ireq)):
                 log.debug('  remembering unsafe {}'.format(unsafe_dependency))
 
         # Store the last round's results in the their_constraints

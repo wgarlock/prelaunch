@@ -3,6 +3,7 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
 import os
+import re
 import sys
 from collections import OrderedDict
 from itertools import chain, groupby
@@ -39,24 +40,72 @@ def assert_compatible_pip_version():
 
 
 def key_from_ireq(ireq):
-    """Get a standardized key for an InstallRequirement."""
-    if ireq.req is None and ireq.link is not None:
-        return str(ireq.link)
-    else:
-        return key_from_req(ireq.req)
+    """
+    Get a normalized key for an InstallRequirement.
+
+    :type ireq: InstallRequirement|.resolver.RequirementSummary
+    :rtype: str
+    """
+    # from .resolver import RequirementSummary
+    # assert isinstance(ireq, InstallRequirement) or (
+    #     isinstance(ireq, RequirementSummary)), repr(ireq)
+    if not ireq.req:
+        ireq.source_dir = os.path.abspath(ireq.source_dir)
+        ireq.run_egg_info()
+        assert ireq.req, "run_egg_info should fill req: {!r}".format(ireq)
+    return key_from_req(ireq.req)
 
 
 def key_from_req(req):
-    """Get an all-lowercase version of the requirement's name."""
-    if hasattr(req, 'key'):
-        # pip 8.1.1 or below, using pkg_resources
-        key = req.key
-    else:
-        # pip 8.1.2 or above, using packaging
-        key = req.name
+    """
+    Get normalized key of a requirement.
 
-    key = key.replace('_', '-').lower()
-    return key
+    :type req: packaging.requirements.Requirement
+    :rtype: str
+    """
+    # import packaging.requirements
+    # import pkg_resources
+    # assert isinstance(req, packaging.requirements.Requirement) or (
+    #     isinstance(req, pip._vendor.packaging.requirements.Requirement) or
+    #     isinstance(req, pkg_resources.Requirement)), (type(req), repr(req))
+    #
+    # Note: On pip 8.1.1 req doesn't have a name but has a key
+    return normalize_req_name(req.name if hasattr(req, 'name') else req.key)
+
+
+def key_from_dist(dist):
+    """
+    Get normalized key of a distribution.
+
+    :type dist: pkg_resources.Distribution
+    :rtype: str
+    """
+    # import pkg_resources
+    # assert isinstance(dist, pkg_resources.Distribution) or (
+    #     isinstance(dist, pip._vendor.pkg_resources.Distribution)), repr(dist)
+    return normalize_req_name(dist.key)
+
+
+def normalize_req_name(name):
+    """
+    Normalize name of a requirement (in the style of PEP 503).
+
+    >>> str(normalize_req_name('hello'))
+    'hello'
+
+    >>> str(normalize_req_name('hello_world'))
+    'hello-world'
+
+    >>> str(normalize_req_name('foo.bar--ding__dong'))
+    'foo-bar-ding-dong'
+
+    :type name: str
+    :rtype: str
+    """
+    return _REQUIREMENT_NORMALIZE_RX.sub('-', name).lower()
+
+
+_REQUIREMENT_NORMALIZE_RX = re.compile(r'[-_.]+')
 
 
 def comment(text):
@@ -149,6 +198,9 @@ def is_pinned_requirement(ireq):
 def get_pinned_version(ireq):
     """
     Get pinned version of a requirement, if it is pinned.
+
+    :type ireq: InstallRequirement|str
+    :type ignore_editables: bool
     """
     if not isinstance(ireq, InstallRequirement):
         ireq = InstallRequirement(ireq, None)
@@ -157,7 +209,16 @@ def get_pinned_version(ireq):
     if ireq.editable:
         return None
 
-    if not ireq.specifier._specs:
+    return get_ireq_version(ireq)
+
+
+def get_ireq_version(ireq):
+    """
+    Get version of a requirement even if it's editable.
+
+    :type ireq: InstallRequirement|str
+    """
+    if not ireq.req or not ireq.specifier or not ireq.specifier._specs:
         return None
 
     specs = (x._spec for x in ireq.specifier._specs)
@@ -183,7 +244,7 @@ def as_tuple(ireq):
     if not is_pinned_requirement(ireq):
         raise TypeError('Expected a pinned InstallRequirement, got {}'.format(ireq))
 
-    name = key_from_req(ireq.req)
+    name = key_from_ireq(ireq)
     version = first(ireq.specifier._specs)._spec[1]
     extras = tuple(sorted(ireq.extras))
     return name, version, extras

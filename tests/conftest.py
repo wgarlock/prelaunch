@@ -3,6 +3,7 @@ import json
 import os
 from functools import partial
 
+import pkg_resources
 import pytest
 from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
@@ -13,7 +14,8 @@ from prequ.cache import DependencyCache
 from prequ.exceptions import NoCandidateFound
 from prequ.repositories.base import BaseRepository
 from prequ.resolver import Resolver
-from prequ.utils import as_tuple, key_from_req, make_install_requirement
+from prequ.utils import (
+    as_tuple, key_from_ireq, key_from_req, make_install_requirement)
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
 
@@ -37,12 +39,12 @@ class FakeRepository(BaseRepository):
         if ireq.editable:
             return ireq
 
-        versions = list(ireq.specifier.filter(self.index[key_from_req(ireq.req)],
+        versions = list(ireq.specifier.filter(self.index[key_from_ireq(ireq)],
                                               prereleases=prereleases))
         if not versions:
-            raise NoCandidateFound(ireq, self.index[key_from_req(ireq.req)])
+            raise NoCandidateFound(ireq, self.index[key_from_ireq(ireq)])
         best_version = max(versions, key=Version)
-        return make_install_requirement(key_from_req(ireq.req), best_version, ireq.extras, constraint=ireq.constraint)
+        return make_install_requirement(key_from_ireq(ireq), best_version, ireq.extras, constraint=ireq.constraint)
 
     def get_dependencies(self, ireq):
         if ireq.editable:
@@ -55,7 +57,7 @@ class FakeRepository(BaseRepository):
         return [InstallRequirement.from_line(dep, constraint=ireq.constraint) for dep in dependencies]
 
 
-class FakeInstalledDistribution(object):
+class FakeInstalledDistribution(pkg_resources.Distribution):
     def __init__(self, line, deps=None):
         if deps is None:
             deps = []
@@ -63,10 +65,10 @@ class FakeInstalledDistribution(object):
 
         self.req = Requirement.parse(line)
 
-        self.key = key_from_req(self.req)
+        self._key = key_from_req(self.req)
         self.specifier = self.req.specifier
 
-        self.version = line.split("==")[1]
+        self._version = line.split("==")[1]
 
     def requires(self):
         return self.deps

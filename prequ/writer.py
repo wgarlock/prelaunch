@@ -7,7 +7,7 @@ from ._compat import ExitStack
 from .file_replacer import FileReplacer
 from .logging import log
 from .utils import (
-    UNSAFE_PACKAGES, comment, dedup, format_requirement, key_from_req)
+    UNSAFE_PACKAGES, comment, dedup, format_requirement, key_from_ireq)
 
 
 class OutputWriter(object):
@@ -31,7 +31,7 @@ class OutputWriter(object):
         self.silent = silent
 
     def _sort_key(self, ireq):
-        return key_from_req(ireq.req) if ireq.req else u'{}'.format(ireq)
+        return key_from_ireq(ireq)
 
     def write_header(self):
         if self.emit_header:
@@ -97,7 +97,7 @@ class OutputWriter(object):
         for ireq in packages:
             line = self._format_requirement(
                 ireq, reverse_dependencies, primary_packages,
-                markers.get(key_from_req(ireq.req)), hashes=hashes)
+                markers.get(key_from_ireq(ireq)), hashes=hashes)
             yield line
 
         if unsafe_requirements:
@@ -109,7 +109,7 @@ class OutputWriter(object):
                 req = self._format_requirement(ireq,
                                                reverse_dependencies,
                                                primary_packages,
-                                               marker=markers.get(key_from_req(ireq.req)),
+                                               marker=markers.get(key_from_ireq(ireq)),
                                                hashes=hashes)
                 if not allow_unsafe:
                     yield comment('# {}'.format(req))
@@ -139,7 +139,7 @@ class OutputWriter(object):
             for hash_ in sorted(ireq_hashes):
                 line += " \\\n    --hash={}".format(hash_)
 
-        if not self.annotate or key_from_req(ireq.req) in primary_packages:
+        if not self.annotate or key_from_ireq(ireq) in primary_packages:
             return line
 
         # Annotate what packages this package is required by

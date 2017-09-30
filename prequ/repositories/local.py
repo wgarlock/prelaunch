@@ -2,7 +2,7 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
-from prequ.utils import as_tuple, key_from_req, make_install_requirement
+from prequ.utils import as_tuple, key_from_ireq, make_install_requirement
 
 from .base import BaseRepository
 
@@ -49,7 +49,7 @@ class LocalRequirementsRepository(BaseRepository):
         self.repository.freshen_build_caches()
 
     def find_best_match(self, ireq, prereleases=None):
-        key = key_from_req(ireq.req)
+        key = key_from_ireq(ireq)
         existing_pin = self.existing_pins.get(key)
         if existing_pin and ireq_satisfied_by_existing_pin(ireq, existing_pin):
             project, version, _ = as_tuple(existing_pin)

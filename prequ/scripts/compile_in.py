@@ -16,7 +16,7 @@ from ..repositories import LocalRequirementsRepository
 from ..resolver import Resolver
 from ..utils import (
     UNSAFE_PACKAGES, assert_compatible_pip_version, dedup,
-    is_pinned_requirement, key_from_req)
+    is_pinned_requirement, key_from_ireq)
 from ..writer import OutputWriter
 from ._repo import get_pip_options_and_pypi_repository
 
@@ -121,10 +121,10 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     if not upgrade and os.path.exists(dst_file):
         ireqs = parse_requirements(dst_file, finder=repository.finder, session=repository.session, options=pip_options)
         # Exclude packages from --upgrade-package/-P from the existing pins: We want to upgrade.
-        upgrade_pkgs_key = {key_from_req(InstallRequirement.from_line(pkg).req) for pkg in upgrade_packages}
-        existing_pins = {key_from_req(ireq.req): ireq
+        upgrade_pkgs_key = {key_from_ireq(InstallRequirement.from_line(pkg)) for pkg in upgrade_packages}
+        existing_pins = {key_from_ireq(ireq): ireq
                          for ireq in ireqs
-                         if is_pinned_requirement(ireq) and key_from_req(ireq.req) not in upgrade_pkgs_key}
+                         if is_pinned_requirement(ireq) and key_from_ireq(ireq) not in upgrade_pkgs_key}
         repository = LocalRequirementsRepository(existing_pins, repository)
 
     log.debug('Using indexes:')
@@ -225,8 +225,8 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     writer.write(results=results,
                  unsafe_requirements=resolver.unsafe_constraints,
                  reverse_dependencies=reverse_dependencies,
-                 primary_packages={key_from_req(ireq.req) for ireq in constraints if not ireq.constraint},
-                 markers={key_from_req(ireq.req): ireq.markers
+                 primary_packages={key_from_ireq(ireq) for ireq in constraints if not ireq.constraint},
+                 markers={key_from_ireq(ireq): ireq.markers
                           for ireq in constraints if ireq.markers},
                  hashes=hashes,
                  allow_unsafe=allow_unsafe)
