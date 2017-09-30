@@ -271,7 +271,7 @@ def test_relative_editable_package(small_fake_package_dir):
         # Move the small_fake_package inside the temp directory
         shutil.copytree(small_fake_package_dir, new_package_dir)
         relative_package_dir = os.path.relpath(new_package_dir)
-        relative_package_req = '-e file:' + os.path.join('.', relative_package_dir)
+        relative_package_req = '-e ' + os.path.join('.', relative_package_dir)
 
         with open('requirements.in', 'w') as req_in:
             req_in.write('-e ' + 'small_fake_package')  # require editable fake package

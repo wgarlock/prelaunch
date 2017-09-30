@@ -142,8 +142,10 @@ def format_requirement(ireq, marker=None):
     if ireq.editable:
         path = ireq.link.path
         if ireq.link.scheme == 'file' and is_subdirectory(os.getcwd(), path):
-            # If the ireq.link is relative to the current directory then output a relative path
-            path = 'file:' + os.path.join('.', os.path.relpath(path))
+            # If the ireq.link is relative to the current directory then
+            # output a relative path
+            relpath = os.path.relpath(path)
+            path = '.' if relpath == '.' else os.path.join('.', relpath)
         else:
             path = ireq.link
 
