@@ -62,7 +62,7 @@ class _NeverRaisedException(Exception):
 
 try:
     rename_exception_to_handle = WindowsError
-except NameError:
+except NameError:  # pragma: non-windows only
     rename_exception_to_handle = _NeverRaisedException
 
 
@@ -79,7 +79,7 @@ def replace(src, dst):
     _copy_or_init_permissions(target_file=src, source_file=dst)
     try:
         return os.rename(src, dst)
-    except rename_exception_to_handle as error:  # pragma: no cover
+    except rename_exception_to_handle as error:  # pragma: windows only
         if error.errno != errno.EEXIST:
             raise
 

@@ -1,7 +1,7 @@
 try:
     from contextlib import ExitStack
     from tempfile import TemporaryDirectory
-except ImportError:
+except ImportError:  # pragma: py2 only
     from shutil import rmtree as _rmtree
 
     from contextlib2 import ExitStack
