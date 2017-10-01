@@ -9,6 +9,7 @@ environment:
     - TOXENV: py36-piplatest
 install:
   - pip install -U pip setuptools wheel
+  - pip install codecov
   - pip install -U tox
 build_script:
   - python setup.py bdist_wheel
@@ -16,3 +17,5 @@ test_script:
   - 'FOR %%w IN ("dist\*.whl") DO tox -v --installpkg "%%w"'
 cache:
   - '%LocalAppData%\pip\cache'
+after_test:
+  - codecov
