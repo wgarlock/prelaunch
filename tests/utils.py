@@ -7,6 +7,17 @@ import os
 import six
 from click.testing import CliRunner
 
+from prequ._compat import TemporaryDirectory
+
+
+@contextlib.contextmanager
+def in_temporary_directory():
+    olddir = os.getcwd()
+    with TemporaryDirectory() as tmpdir:
+        os.chdir(tmpdir)
+        yield tmpdir
+        os.chdir(olddir)
+
 
 def make_cli_runner(cli_function, cli_args):
     @contextlib.contextmanager
