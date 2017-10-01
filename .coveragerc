@@ -1,2 +1,13 @@
 [run]
 branch = True
+
+[report]
+precision = 1
+#show_missing = yes
+
+exclude_lines =
+    pragma: no cover
+    #pragma: non-windows only
+    #pragma: windows only
+    #pragma: py2 only
+    #pragma: py3 only

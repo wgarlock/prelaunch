@@ -17,7 +17,3 @@ main.add_command(compile_in.cli, 'compile-in')
 main.add_command(compile.main, 'compile')
 main.add_command(sync.cli, 'sync')
 main.add_command(update.main, 'update')
-
-
-if __name__ == '__main__':
-    main()

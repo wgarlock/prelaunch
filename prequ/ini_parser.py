@@ -36,10 +36,9 @@ def _parse_value(parser, section_name, key, value, spec):
     elif spec == text:
         return value
     elif isinstance(spec, list):
-        assert spec == [text], 'Unhandled type spec: %r' % (spec,)
-        return [x for x in value.splitlines() if x]
+        if spec == [text]:
+            return [x for x in value.splitlines() if x]
     elif isinstance(spec, dict):
-        assert spec == {text: text}, 'Unhandled type spec: %r' % (spec,)
-        return dict(x.split(' = ', 1) for x in value.splitlines() if x)
-    else:
-        assert False, 'Unhandled type spec: %r' % (spec,)
+        if spec == {text: text}:
+            return dict(x.split(' = ', 1) for x in value.splitlines() if x)
+    raise NotImplementedError("Type spec not implemented: {!r}".format(spec))
