@@ -171,14 +171,13 @@ def _get_file_url(local_path):
     return 'file://%s' % local_path
 
 
-def test_diff_with_editable(fake_dist, from_editable):
+def test_diff_with_editable(fake_dist, from_editable, small_fake_package_dir):
     installed = [
         fake_dist('small-fake-with-deps==0.0.1'),
         fake_dist('six==1.10.0'),
     ]
-    path_to_package = os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')
     reqs = [
-        from_editable(path_to_package),
+        from_editable(small_fake_package_dir),
     ]
     to_install, to_uninstall = diff(reqs, installed)
 
@@ -189,7 +188,7 @@ def test_diff_with_editable(fake_dist, from_editable):
     assert len(to_install) == 1
     package = list(to_install)[0]
     assert package.editable
-    assert str(package.link) == _get_file_url(path_to_package)
+    assert str(package.link) == _get_file_url(small_fake_package_dir)
 
 
 @pytest.mark.parametrize(
@@ -207,13 +206,12 @@ def test_sync_install(from_line, lines):
         check_call.assert_called_once_with(['pip', 'install', '-q'] + sorted(lines))
 
 
-def test_sync_with_editable(from_editable):
+def test_sync_with_editable(from_editable, small_fake_package_dir):
     with mock.patch('prequ.sync.check_call') as check_call:
-        path_to_package = os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')
-        to_install = {from_editable(path_to_package)}
+        to_install = {from_editable(small_fake_package_dir)}
 
         sync(to_install, set())
-        check_call.assert_called_once_with(['pip', 'install', '-q', '-e', _get_file_url(path_to_package)])
+        check_call.assert_called_once_with(['pip', 'install', '-q', '-e', _get_file_url(small_fake_package_dir)])
 
 
 def test_sync_sorting_ireqs(from_line):

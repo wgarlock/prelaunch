@@ -2,6 +2,7 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
+import os
 import sys
 from collections import OrderedDict
 from itertools import chain, groupby
@@ -74,12 +75,31 @@ def make_install_requirement(name, version, extras, constraint=False):
         constraint=constraint)
 
 
+def is_subdirectory(base, directory):
+    """
+    Return True if directory is a child directory of base
+    """
+    base = os.path.join(os.path.realpath(base), '')
+    directory = os.path.join(os.path.realpath(directory), '')
+
+    return os.path.commonprefix([base, directory]) == base
+
+
 def format_requirement(ireq, marker=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
     """
-    if ireq.editable or is_vcs_link(ireq):
+    if ireq.editable:
+        path = ireq.link.path
+        if ireq.link.scheme == 'file' and is_subdirectory(os.getcwd(), path):
+            # If the ireq.link is relative to the current directory then output a relative path
+            path = 'file:' + os.path.join('.', os.path.relpath(path))
+        else:
+            path = ireq.link
+
+        line = '-e {}'.format(path)
+    elif is_vcs_link(ireq):
         line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
     else:
         line = str(ireq.req).lower()

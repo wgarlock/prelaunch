@@ -113,6 +113,21 @@ def from_editable():
     return InstallRequirement.from_editable
 
 
+@fixture
+def fake_package_dir():
+    return os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'fake_package')
+
+
+@fixture
+def small_fake_package_dir():
+    return os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'small_fake_package')
+
+
+@fixture
+def minimal_wheels_dir():
+    return os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'minimal_wheels')
+
+
 @pytest.yield_fixture
 def pip_conf(tmpdir):
     with get_temporary_pip_conf(tmpdir) as path:
