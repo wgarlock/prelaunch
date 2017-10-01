@@ -108,6 +108,15 @@ def normalize_req_name(name):
 _REQUIREMENT_NORMALIZE_RX = re.compile(r'[-_.]+')
 
 
+def check_is_hashable(ireq):
+    if ireq.editable:
+        raise ValueError("Cannot hash editable requirement: {}".format(ireq))
+    if is_vcs_link(ireq):
+        raise ValueError("Cannot hash VCS link requirement: {}".format(ireq))
+    if not is_pinned_requirement(ireq):
+        raise ValueError("Cannot hash unpinned requirement: {}".format(ireq))
+
+
 def comment(text):
     return style(text, fg='green')
 

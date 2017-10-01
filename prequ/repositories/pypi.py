@@ -14,8 +14,8 @@ from pip.req.req_set import RequirementSet
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
-    fs_str, is_pinned_requirement, is_vcs_link, lookup_table,
-    make_install_requirement, pip_version_info)
+    check_is_hashable, fs_str, is_pinned_requirement, is_vcs_link,
+    lookup_table, make_install_requirement, pip_version_info)
 from .base import BaseRepository
 
 try:
@@ -160,9 +160,7 @@ class PyPIRepository(BaseRepository):
         all of the files for a given requirement. It is not acceptable for an
         editable or unpinned requirement to be passed to this function.
         """
-        if not is_pinned_requirement(ireq):
-            raise TypeError(
-                "Expected pinned requirement, not unpinned or editable, got {}".format(ireq))
+        check_is_hashable(ireq)
 
         # We need to get all of the candidates that match our current version
         # pin, these will represent all of the files that could possibly

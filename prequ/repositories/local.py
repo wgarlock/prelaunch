@@ -2,8 +2,8 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
-from prequ.utils import as_tuple, key_from_ireq, make_install_requirement
-
+from ..utils import (
+    as_tuple, check_is_hashable, key_from_ireq, make_install_requirement)
 from .base import BaseRepository
 
 
@@ -63,4 +63,19 @@ class LocalRequirementsRepository(BaseRepository):
         return self.repository.get_dependencies(ireq)
 
     def get_hashes(self, ireq):
+        check_is_hashable(ireq)
+        pinned_ireq = self.existing_pins.get(key_from_ireq(ireq))
+        if pinned_ireq and ireq_satisfied_by_existing_pin(ireq, pinned_ireq):
+            if pinned_ireq.has_hash_options:
+                return set(_get_hashes_from_ireq(pinned_ireq))
         return self.repository.get_hashes(ireq)
+
+
+def _get_hashes_from_ireq(ireq):
+    """
+    :type ireq: pip.req.InstallRequirement
+    """
+    hashes = ireq.hashes()
+    for (alg, hash_values) in hashes._allowed.items():
+        for hash_value in hash_values:
+            yield '{}:{}'.format(alg, hash_value)
