@@ -250,7 +250,7 @@ def test_editable_package_vcs(tmpdir):
     vcs_package = (
         'git+git://github.com/pytest-dev/pytest-django'
         '@21492afc88a19d4ca01cd0ac392a5325b14f95c7'
-        '#egg=pytest-django==3.1.3.dev32+g21492af'
+        '#egg=pytest-django'
     )
     runner = CliRunner()
     with runner.isolated_filesystem():

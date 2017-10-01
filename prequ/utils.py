@@ -245,8 +245,6 @@ def as_tuple(ireq):
     """
     name = key_from_ireq(ireq)  # Runs also egg_info if needed
     version = get_ireq_version(ireq)
-    if not version:
-        raise TypeError('Not pinned: {!r}'.format(ireq))
     extras = tuple(sorted(ireq.extras))
     return name, version, extras
 

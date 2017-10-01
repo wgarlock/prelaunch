@@ -82,6 +82,12 @@ class DependencyCache(object):
         ("ipython", "2.1.0[nbconvert,notebook]")
         """
         name, version, extras = as_tuple(ireq)
+        if not version:
+            if not ireq.link:
+                raise ValueError((
+                    "Cannot cache dependencies of unpinned non-link "
+                    "requirement: {}").format(ireq))
+            version = ':UNPINNED:'
         if not extras:
             extras_string = ""
         else:
@@ -103,7 +109,7 @@ class DependencyCache(object):
         """Writes the cache to disk as JSON."""
         doc = {
             '__format__': 1,
-            'dependencies': self._strip_editables(self._cache),
+            'dependencies': self._strip_unpinned_and_editables(self._cache),
         }
         with open(self._cache_file, 'w') as f:
             json.dump(doc, f, sort_keys=True)
@@ -168,15 +174,15 @@ class DependencyCache(object):
                             for dep_name in self.cache[name][version_and_extras])
 
     @classmethod
-    def _strip_editables(cls, cache):
+    def _strip_unpinned_and_editables(cls, cache):
         """
-        Strip out editable dependencies from given dependency cache map.
+        Strip out unpinned and editable deps from given dep cache map.
         """
         stripped = type(cache)()
         for (name, dep_map) in cache.items():
             stripped_dep_map = type(dep_map)()
             for (version, deps) in dep_map.items():
-                if ':EDITABLE:' not in version:
+                if ':UNPINNED:' not in version and ':EDITABLE:' not in version:
                     stripped_dep_map[version] = deps
             stripped[name] = stripped_dep_map
         return stripped

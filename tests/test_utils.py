@@ -1,8 +1,6 @@
 import os
 import shutil
 
-from pytest import raises
-
 from prequ.utils import (
     as_tuple, dedup, flat_map, format_requirement, format_specifier,
     is_subdirectory)
@@ -66,16 +64,15 @@ def test_as_tuple(from_line):
     assert version == '1.1'
     assert extras == ("extra1", "extra2")
 
-    # Non-pinned versions aren't accepted
-    should_be_rejected = [
+    # Non-pinned versions return None as version
+    non_pinneds = [
         'foo==1.*',
         'foo~=1.1,<1.5,>1.2',
         'foo',
     ]
-    for spec in should_be_rejected:
+    for spec in non_pinneds:
         ireq = from_line(spec)
-        with raises(TypeError):
-            as_tuple(ireq)
+        assert as_tuple(ireq)[1] is None
 
 
 def test_flat_map():
