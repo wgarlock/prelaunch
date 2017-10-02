@@ -129,7 +129,8 @@ class PyPIRepository(BaseRepository):
         """
         :type ireq: pip.req.InstallRequirement
         """
-        if ireq not in self._dependencies_cache:
+        deps = self._dependencies_cache.get(getattr(ireq.link, 'url', None))
+        if not deps:
             if ireq.link and not ireq.link.is_artifact:
                 # No download_dir for VCS sources.  This also works around pip
                 # using git-checkout-index, which gets rid of the .git dir.
@@ -147,8 +148,14 @@ class PyPIRepository(BaseRepository):
                                     wheel_download_dir=self._wheel_download_dir,
                                     session=self.session,
                                     ignore_installed=True)
-            self._dependencies_cache[ireq] = reqset._prepare_file(self.finder, ireq)
-        return set(self._dependencies_cache[ireq])
+            deps = reqset._prepare_file(self.finder, ireq)
+            if ireq.req and ireq._temp_build_dir and ireq._ideal_build_dir:
+                # Move the temporary build directory under self.build_dir
+                ireq.source_dir = None
+                ireq._correct_build_location()
+            assert ireq.link.url
+            self._dependencies_cache[ireq.link.url] = deps
+        return set(deps)
 
     def get_hashes(self, ireq):
         """
