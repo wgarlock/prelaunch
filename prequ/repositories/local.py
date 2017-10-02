@@ -59,8 +59,8 @@ class LocalRequirementsRepository(BaseRepository):
         else:
             return self.repository.find_best_match(ireq, prereleases)
 
-    def get_dependencies(self, ireq):
-        return self.repository.get_dependencies(ireq)
+    def _get_dependencies(self, ireq):
+        return self.repository._get_dependencies(ireq)
 
     def get_hashes(self, ireq):
         check_is_hashable(ireq)

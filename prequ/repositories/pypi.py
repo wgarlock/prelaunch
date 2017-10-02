@@ -14,8 +14,8 @@ from pip.req.req_set import RequirementSet
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
-    check_is_hashable, fs_str, is_pinned_requirement, is_vcs_link,
-    lookup_table, make_install_requirement, pip_version_info)
+    check_is_hashable, fs_str, is_vcs_link, lookup_table,
+    make_install_requirement, pip_version_info)
 from .base import BaseRepository
 
 try:
@@ -125,15 +125,10 @@ class PyPIRepository(BaseRepository):
             best_candidate.project, best_candidate.version, ireq.extras, constraint=ireq.constraint
         )
 
-    def get_dependencies(self, ireq):
+    def _get_dependencies(self, ireq):
         """
-        Given a pinned or an editable InstallRequirement, returns a set of
-        dependencies (also InstallRequirements, but not necessarily pinned).
-        They indicate the secondary dependencies for the given requirement.
+        :type ireq: pip.req.InstallRequirement
         """
-        if not (ireq.editable or is_pinned_requirement(ireq)):
-            raise TypeError('Expected pinned or editable InstallRequirement, got {}'.format(ireq))
-
         if ireq not in self._dependencies_cache:
             if ireq.link and not ireq.link.is_artifact:
                 # No download_dir for VCS sources.  This also works around pip

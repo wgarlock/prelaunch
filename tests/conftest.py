@@ -46,7 +46,7 @@ class FakeRepository(BaseRepository):
         best_version = max(versions, key=Version)
         return make_install_requirement(key_from_ireq(ireq), best_version, ireq.extras, constraint=ireq.constraint)
 
-    def get_dependencies(self, ireq):
+    def _get_dependencies(self, ireq):
         if ireq.editable:
             return self.editables[str(ireq.link)]
 

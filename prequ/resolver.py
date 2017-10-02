@@ -59,6 +59,20 @@ class Resolver(object):
         self.clear_caches = clear_caches
         self.allow_unsafe = allow_unsafe
         self.unsafe_constraints = set()
+        self._prepare_ireqs(self.our_constraints)
+        self._prepare_ireqs(self.limiters)
+
+    def _prepare_ireqs(self, constraints):
+        """
+        Prepare install requirements for analysis.
+
+        :type constraints: Iterable[pip.req.InstallRequirement]
+        """
+        for constraint in constraints:
+            if constraint.link and not constraint.prepared:
+                os.environ[str('PIP_EXISTS_ACTION')] = str('i')
+                self.repository.prepare_ireq(constraint)
+                del os.environ[str('PIP_EXISTS_ACTION')]
 
     @property
     def constraints(self):
