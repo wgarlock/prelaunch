@@ -165,6 +165,9 @@ class PyPIRepository(BaseRepository):
         """
         check_is_hashable(ireq)
 
+        if ireq.link and ireq.link.is_artifact:
+            return {self._get_file_hash(ireq.link)}
+
         # We need to get all of the candidates that match our current version
         # pin, these will represent all of the files that could possibly
         # satisify this constraint.

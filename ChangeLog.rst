@@ -11,6 +11,7 @@ Bug Fixes
 ~~~~~~~~~
 
 - Ignore installed packages when calulating dependencies
+- Generate hashes of artifacts correctly
 
 1.2.2
 -----
