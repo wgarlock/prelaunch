@@ -143,12 +143,18 @@ def is_subdirectory(base, directory):
     return os.path.commonprefix([base, directory]) == base
 
 
-def format_requirement(ireq, marker=None, root_dir='.'):
+def format_requirement(ireq, marker='', root_dir='.', find_links_dirs=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
+
+    :type ireq: InstallRequirement
+    :type marker: str
+    :type root_dir: str
+    :type find_links_dirs: list[str]|None
     """
-    if ireq.editable:
+    line_format = formatted_as(ireq, find_links_dirs)
+    if line_format in ['path', 'url']:
         path = ireq.link.path
         if ireq.link.scheme == 'file' and is_subdirectory(root_dir, path):
             # If the ireq.link is relative to the current directory then
@@ -156,11 +162,14 @@ def format_requirement(ireq, marker=None, root_dir='.'):
             relpath = os.path.relpath(path, start=root_dir)
             path = '.' if relpath == '.' else os.path.join('.', relpath)
         else:
-            path = ireq.link
+            path = ireq.link.url
 
-        line = '-e {}'.format(path)
-    elif is_vcs_link(ireq):
-        line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
+        if ireq.editable:
+            line = '-e {}'.format(path)
+        elif ireq.link.scheme == 'file':
+            line = '{}'.format(path)
+        else:
+            line = '{}#egg={}'.format(path, ireq.req)
     else:
         line = str(ireq.req).lower()
 
@@ -168,6 +177,28 @@ def format_requirement(ireq, marker=None, root_dir='.'):
         line = '{} ; {}'.format(line, marker)
 
     return line
+
+
+def formatted_as(ireq, find_links_dirs=None):
+    from_findlink_dir = _find_local_source(ireq, find_links_dirs or [])
+    if ireq.link and not ireq.link.comes_from and not from_findlink_dir:
+        if ireq.link.scheme == 'file':
+            return 'path'
+        else:
+            return 'url'
+    return 'simple'
+
+
+def _find_local_source(ireq, local_dirs):
+    """
+    Find if requirement comes from local directory and return it.
+    """
+    if not ireq.link or ireq.link.scheme != 'file':
+        return None
+    for local_dir in local_dirs:
+        if is_subdirectory(local_dir, ireq.link.path):
+            return local_dir
+    return None
 
 
 def format_specifier(ireq):
