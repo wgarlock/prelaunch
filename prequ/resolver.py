@@ -11,7 +11,6 @@ import click
 from pip.req import InstallRequirement
 
 from .cache import DependencyCache
-from .exceptions import UnsupportedConstraint
 from .logging import log
 from .utils import (
     UNSAFE_PACKAGES, first, format_requirement, format_specifier, full_groupby,
@@ -138,11 +137,7 @@ class Resolver(object):
 
     @staticmethod
     def check_constraints(constraints):
-        for constraint in constraints:
-            if ((is_vcs_link(constraint) and not constraint.editable and
-                 not is_pinned_requirement(constraint))):
-                msg = 'Prequ does not support non-editable vcs URLs that are not pinned to one version.'
-                raise UnsupportedConstraint(msg, constraint)
+        pass
 
     def _group_constraints(self, constraints):
         """

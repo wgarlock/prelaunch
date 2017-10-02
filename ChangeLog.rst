@@ -1,6 +1,11 @@
 Unreleased
 ----------
 
+Features
+~~~~~~~~
+
+- Add support for unpinned non-editable VCS URLs
+
 General Changes
 ~~~~~~~~~~~~~~~
 
