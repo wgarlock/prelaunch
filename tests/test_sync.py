@@ -1,10 +1,9 @@
 import os
-import platform
 from collections import Counter
 
 import mock
 import pytest
-from pip.download import url_to_path
+from pip.download import path_to_url, url_to_path
 
 from prequ.exceptions import IncompatibleRequirements
 from prequ.sync import dependency_tree, diff, merge, sync
@@ -167,12 +166,6 @@ def test_diff_leave_prequ_alone(fake_dist, from_line):
     assert to_uninstall == {'foobar'}
 
 
-def _get_file_url(local_path):
-    if platform.system() == 'Windows':
-        local_path = '/%s' % local_path.replace('\\', '/')
-    return 'file://%s' % local_path
-
-
 def test_diff_with_editable(
         fake_dist, from_editable, from_line, small_fake_package_dir):
     installed = [
@@ -193,7 +186,7 @@ def test_diff_with_editable(
     assert len(to_install) == 1
     package = list(to_install)[0]
     assert package.editable
-    assert str(package.link) == _get_file_url(small_fake_package_dir)
+    assert str(package.link) == path_to_url(small_fake_package_dir)
 
 
 def test_diff_with_editable_without_changes(
@@ -238,7 +231,9 @@ def test_sync_with_editable(from_editable, small_fake_package_dir):
         to_install = {from_editable(small_fake_package_dir)}
 
         sync(to_install, set())
-        check_call.assert_called_once_with(['pip', 'install', '-q', '-e', _get_file_url(small_fake_package_dir)])
+        check_call.assert_called_once_with(
+            ['pip', 'install', '-q',
+             '-e', path_to_url(small_fake_package_dir)])
 
 
 def test_sync_with_editable_uses_abspath(from_editable, small_fake_package_dir):
@@ -249,7 +244,7 @@ def test_sync_with_editable_uses_abspath(from_editable, small_fake_package_dir):
         sync({ireq}, set())
         check_call.assert_called_once_with(
             ['pip', 'install', '-q',
-             '-e', _get_file_url(os.path.abspath(small_fake_package_dir))])
+             '-e', path_to_url(os.path.abspath(small_fake_package_dir))])
 
 
 def test_sync_sorting_ireqs(from_line):

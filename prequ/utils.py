@@ -10,6 +10,7 @@ from itertools import chain, groupby
 
 import pip
 from click import style
+from pip.download import path_to_url, url_to_path
 from pip.req import InstallRequirement
 
 
@@ -137,39 +138,35 @@ def is_subdirectory(base, directory):
     """
     Return True if directory is a child directory of base
     """
-    base = os.path.join(os.path.realpath(base), '')
-    directory = os.path.join(os.path.realpath(directory), '')
+    abs_base = os.path.abspath(fs_str(base))
+    abs_dir = os.path.abspath(fs_str(directory))
+    (base_drive, base_path) = os.path.splitdrive(abs_base)
+    (dir_drive, dir_path) = os.path.splitdrive(abs_dir)
+    if base_drive.lower() != dir_drive.lower():
+        return False
+    relpath = os.path.relpath(abs_dir, start=abs_base)
+    return relpath.split(os.path.sep, 1)[0] != os.path.pardir
 
-    return os.path.commonprefix([base, directory]) == base
 
-
-def format_requirement(ireq, marker='', root_dir='.', find_links_dirs=None):
+def format_requirement(ireq, marker='', root_dir=None, find_links_dirs=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
 
     :type ireq: InstallRequirement
     :type marker: str
-    :type root_dir: str
+    :type root_dir: str|None
     :type find_links_dirs: list[str]|None
     """
     line_format = formatted_as(ireq, find_links_dirs)
     if line_format in ['path', 'url']:
-        path = ireq.link.path
-        if ireq.link.scheme == 'file' and is_subdirectory(root_dir, path):
-            # If the ireq.link is relative to the current directory then
-            # output a relative path
-            relpath = os.path.relpath(path, start=root_dir)
-            path = '.' if relpath == '.' else os.path.join('.', relpath)
-        else:
-            path = ireq.link.url
-
+        url_or_path = _format_link(ireq.link, root_dir)
         if ireq.editable:
-            line = '-e {}'.format(path)
+            line = '-e {}'.format(url_or_path)
         elif ireq.link.scheme == 'file':
-            line = '{}'.format(path)
+            line = '{}'.format(url_or_path)
         else:
-            line = '{}#egg={}'.format(path, ireq.req)
+            line = '{}#egg={}'.format(url_or_path, ireq.req)
     else:
         line = str(ireq.req).lower()
 
@@ -187,6 +184,29 @@ def formatted_as(ireq, find_links_dirs=None):
         else:
             return 'url'
     return 'simple'
+
+
+def _format_link(link, root_dir):
+    """
+    Format link as URL or path.
+
+    :type link: pip.index.Link
+    :type root_dir: str|None
+    :rtype: str
+    """
+    if link.scheme != 'file':
+        return link.url
+
+    path = url_to_path(link.url)
+
+    if root_dir is not None and is_subdirectory(root_dir, path):
+        relpath = os.path.relpath(path, start=root_dir)
+        if relpath == '.':
+            return '.'
+        return './' + relpath.replace(os.path.sep, '/')
+
+    # Make sure it's absolute
+    return path_to_url(path)
 
 
 def _find_local_source(ireq, local_dirs):

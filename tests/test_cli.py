@@ -7,7 +7,7 @@ from textwrap import dedent
 import mock
 import pytest
 from click.testing import CliRunner
-from six.moves.urllib.request import pathname2url
+from pip.download import path_to_url
 
 from prequ.scripts.compile_in import cli
 from prequ.scripts.sync import cli as sync_cli
@@ -235,16 +235,17 @@ def test_sync_quiet(tmpdir):
 
 def test_editable_package(small_fake_package_dir):
     """Prequ can compile an editable """
-    small_fake_package_dir = 'file:' + pathname2url(small_fake_package_dir)
+    small_fake_package_url = path_to_url(small_fake_package_dir)
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open('requirements.in', 'w') as req_in:
-            req_in.write('-e ' + small_fake_package_dir)  # require editable fake package
+            req_in.write('-e ' + small_fake_package_url)
 
         out = runner.invoke(cli, ['-n'])
 
         check_successful_exit(out)
-        assert small_fake_package_dir in out.output
+        assert small_fake_package_url in out.output
+        assert '-e ' + small_fake_package_url in out.output
         assert 'six==1.10.0' in out.output
 
 
@@ -273,7 +274,8 @@ def test_relative_editable_package(small_fake_package_dir):
         # Move the small_fake_package inside the temp directory
         shutil.copytree(small_fake_package_dir, new_package_dir)
         relative_package_dir = os.path.relpath(new_package_dir)
-        relative_package_req = '-e ' + os.path.join('.', relative_package_dir)
+        relative_package_req = '-e ./{}'.format(
+            relative_package_dir.replace(os.path.sep, '/'))
 
         with open('requirements.in', 'w') as req_in:
             req_in.write('-e ' + 'small_fake_package')  # require editable fake package
