@@ -5,6 +5,7 @@ Features
 ~~~~~~~~
 
 - Add support for unpinned non-editable VCS URLs
+- Make relative paths work as a requirement entry (editable or not)
 
 General Changes
 ~~~~~~~~~~~~~~~
