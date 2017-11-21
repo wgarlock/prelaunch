@@ -18,6 +18,7 @@ Bug Fixes
 
 - Ignore installed packages when calulating dependencies
 - Generate hashes of artifacts correctly
+- sync: Respect environment markers (jazzband/pip-tools#600)
 
 1.2.2
 -----
