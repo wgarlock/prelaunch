@@ -1,3 +1,24 @@
+Unreleased
+----------
+
+Features
+~~~~~~~~
+
+- Add support for unpinned non-editable VCS URLs
+- Make relative paths work as a requirement entry (editable or not)
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Make "via package" comments work for editable requirers too
+- Speedup: Do not regenerate hashes if they are already known
+
+Bug Fixes
+~~~~~~~~~
+
+- Ignore installed packages when calulating dependencies
+- Generate hashes of artifacts correctly
+
 1.2.2
 -----
 

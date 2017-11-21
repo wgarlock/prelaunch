@@ -14,7 +14,7 @@ from pip.req.req_set import RequirementSet
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
-    fs_str, is_pinned_requirement, is_vcs_link, lookup_table,
+    check_is_hashable, fs_str, is_vcs_link, lookup_table,
     make_install_requirement, pip_version_info)
 from .base import BaseRepository
 
@@ -125,16 +125,12 @@ class PyPIRepository(BaseRepository):
             best_candidate.project, best_candidate.version, ireq.extras, constraint=ireq.constraint
         )
 
-    def get_dependencies(self, ireq):
+    def _get_dependencies(self, ireq):
         """
-        Given a pinned or an editable InstallRequirement, returns a set of
-        dependencies (also InstallRequirements, but not necessarily pinned).
-        They indicate the secondary dependencies for the given requirement.
+        :type ireq: pip.req.InstallRequirement
         """
-        if not (ireq.editable or is_pinned_requirement(ireq)):
-            raise TypeError('Expected pinned or editable InstallRequirement, got {}'.format(ireq))
-
-        if ireq not in self._dependencies_cache:
+        deps = self._dependencies_cache.get(getattr(ireq.link, 'url', None))
+        if not deps:
             if ireq.link and not ireq.link.is_artifact:
                 # No download_dir for VCS sources.  This also works around pip
                 # using git-checkout-index, which gets rid of the .git dir.
@@ -150,9 +146,16 @@ class PyPIRepository(BaseRepository):
                                     self.source_dir,
                                     download_dir=download_dir,
                                     wheel_download_dir=self._wheel_download_dir,
-                                    session=self.session)
-            self._dependencies_cache[ireq] = reqset._prepare_file(self.finder, ireq)
-        return set(self._dependencies_cache[ireq])
+                                    session=self.session,
+                                    ignore_installed=True)
+            deps = reqset._prepare_file(self.finder, ireq)
+            if ireq.req and ireq._temp_build_dir and ireq._ideal_build_dir:
+                # Move the temporary build directory under self.build_dir
+                ireq.source_dir = None
+                ireq._correct_build_location()
+            assert ireq.link.url
+            self._dependencies_cache[ireq.link.url] = deps
+        return set(deps)
 
     def get_hashes(self, ireq):
         """
@@ -160,9 +163,10 @@ class PyPIRepository(BaseRepository):
         all of the files for a given requirement. It is not acceptable for an
         editable or unpinned requirement to be passed to this function.
         """
-        if not is_pinned_requirement(ireq):
-            raise TypeError(
-                "Expected pinned requirement, not unpinned or editable, got {}".format(ireq))
+        check_is_hashable(ireq)
+
+        if ireq.link and ireq.link.is_artifact:
+            return {self._get_file_hash(ireq.link)}
 
         # We need to get all of the candidates that match our current version
         # pin, these will represent all of the files that could possibly

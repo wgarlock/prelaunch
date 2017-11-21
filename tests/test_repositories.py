@@ -30,6 +30,9 @@ def test_pypirepo_calls_reqset_with_str_paths():
         mocked_reqset = MagicMock()
         mocked_init.return_value = mocked_reqset
 
+        # Fill link for ireq, because get_dependencies uses it as a cache key
+        ireq.link = MagicMock(url='http://localhost/ansible2400.zip')
+
         # Do the call
         repo.get_dependencies(ireq)
 

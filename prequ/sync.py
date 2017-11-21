@@ -8,7 +8,7 @@ import click
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
 from .utils import (
     flat_map, format_requirement, is_pinned_requirement, is_vcs_link,
-    key_from_ireq, key_from_req)
+    key_from_dist, key_from_ireq, key_from_req)
 
 PACKAGES_TO_IGNORE = [
     'pip',
@@ -38,7 +38,7 @@ def dependency_tree(installed_keys, root_key):
 
     while queue:
         v = queue.popleft()
-        key = key_from_req(v)
+        key = key_from_dist(v)
         if key in dependencies:
             continue
 
@@ -65,7 +65,7 @@ def get_dists_to_ignore(installed):
     locally, click should also be installed/uninstalled depending on the given
     requirements.
     """
-    installed_keys = {key_from_req(r): r for r in installed}
+    installed_keys = {key_from_dist(r): r for r in installed}
     return list(flat_map(lambda req: dependency_tree(installed_keys, req), PACKAGES_TO_IGNORE))
 
 
@@ -77,7 +77,7 @@ def merge(requirements, ignore_conflicts):
             msg = 'Prequ does not support non-editable vcs URLs that are not pinned to one version.'
             raise UnsupportedConstraint(msg, ireq)
 
-        key = ireq.link or key_from_req(ireq.req)
+        key = key_from_ireq(ireq)
 
         if not ignore_conflicts:
             existing_ireq = by_key.get(key)
@@ -98,7 +98,7 @@ def diff(compiled_requirements, installed_dists):
     Calculate which packages should be installed or uninstalled, given a set
     of compiled requirements and a list of currently installed modules.
     """
-    requirements_lut = {r.link if r.editable else key_from_req(r.req): r for r in compiled_requirements}
+    requirements_lut = {key_from_ireq(r): r for r in compiled_requirements}
 
     satisfied = set()  # holds keys
     to_install = set()  # holds InstallRequirement objects
@@ -106,7 +106,7 @@ def diff(compiled_requirements, installed_dists):
 
     pkgs_to_ignore = get_dists_to_ignore(installed_dists)
     for dist in installed_dists:
-        key = key_from_req(dist)
+        key = key_from_dist(dist)
         if key not in requirements_lut:
             to_uninstall.add(key)
         elif requirements_lut[key].specifier.contains(dist.version):
@@ -168,7 +168,10 @@ def sync(to_install, to_uninstall,  # noqa: C901
 
 
 def _ireq_to_install_args(ireq):
-    if ireq.editable:
-        return ['-e', str(ireq.link or ireq.req)]
-    else:
-        return [str(ireq.req)]
+    """
+    :type ireq: pip.req.InstallRequirement
+    """
+    line = format_requirement(ireq, root_dir=None)
+    if line.startswith('-e '):
+        return ['-e', line[3:]]
+    return [line]

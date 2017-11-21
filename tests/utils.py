@@ -27,12 +27,21 @@ def make_cli_runner(cli_function, cli_args):
         with runner.isolated_filesystem():
             create_configuration(options, requirements, **extra_conf)
             out = runner.invoke(cli_function, cli_args)
-            if out.exit_code == -1:
-                (exc_type, exc_value, traceback) = out.exc_info
-                exc_value.run_result = out
-                six.reraise(exc_type, exc_value, traceback)
+            _reraise_if_excepted(out)
             yield out
     return run_check
+
+
+def check_successful_exit(run_result):
+    _reraise_if_excepted(run_result)
+    assert run_result.exit_code == 0
+
+
+def _reraise_if_excepted(run_result):
+    if run_result.exit_code == -1:
+        (exc_type, exc_value, traceback) = run_result.exc_info
+        exc_value.run_result = run_result
+        six.reraise(exc_type, exc_value, traceback)
 
 
 def create_configuration(options=None, requirements=None,

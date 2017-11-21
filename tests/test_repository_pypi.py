@@ -95,7 +95,7 @@ def test_generate_hashes_without_interfering_with_each_other(from_line):
 
 def test_get_hashes_non_pinned(from_line):
     repository = get_repository()
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         repository.get_hashes(from_line('prequ'))
 
 

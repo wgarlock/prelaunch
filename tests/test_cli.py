@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 from textwrap import dedent
@@ -6,10 +7,12 @@ from textwrap import dedent
 import mock
 import pytest
 from click.testing import CliRunner
-from six.moves.urllib.request import pathname2url
+from pip.download import path_to_url
 
 from prequ.scripts.compile_in import cli
 from prequ.scripts.sync import cli as sync_cli
+
+from .utils import check_successful_exit
 
 
 @pytest.yield_fixture
@@ -67,8 +70,7 @@ def test_command_line_overrides_pip_conf(pip_conf):
         assert 'Using indexes:\n  http://override.com' in out.output
 
 
-def test_command_line_setuptools_read(pip_conf):
-
+def test_command_line_setuptools_read():
     runner = CliRunner()
     with runner.isolated_filesystem():
         package = open('setup.py', 'w')
@@ -168,7 +170,7 @@ def test_realistic_complex_sub_dependencies(tmpdir):
                                   '-n', '--rebuild',
                                   '-f', str(tmpdir)])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
 
 
 def _invoke(command):
@@ -186,7 +188,7 @@ def _invoke(command):
     return status, output
 
 
-def test_run_as_module_compile_in(tmpdir):
+def test_run_as_module_compile_in():
     """Prequ can be run as ``python -m prequ compile-in ...``."""
 
     status, output = _invoke([
@@ -225,25 +227,25 @@ def test_sync_quiet(tmpdir):
         with mock.patch('prequ.sync.check_call') as check_call:
             out = runner.invoke(sync_cli, ['-q'])
             assert out.output == ''
-            assert out.exit_code == 0
+            check_successful_exit(out)
             # for every call to pip ensure the `-q` flag is set
             for call in check_call.call_args_list:
                 assert '-q' in call[0][0]
 
 
-def test_editable_package(tmpdir):
+def test_editable_package(small_fake_package_dir):
     """Prequ can compile an editable """
-    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'small_fake_package')
-    fake_package_dir = 'file:' + pathname2url(fake_package_dir)
+    small_fake_package_url = path_to_url(small_fake_package_dir)
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open('requirements.in', 'w') as req_in:
-            req_in.write('-e ' + fake_package_dir)  # require editable fake package
+            req_in.write('-e ' + small_fake_package_url)
 
         out = runner.invoke(cli, ['-n'])
 
-        assert out.exit_code == 0
-        assert fake_package_dir in out.output
+        check_successful_exit(out)
+        assert small_fake_package_url in out.output
+        assert '-e ' + small_fake_package_url in out.output
         assert 'six==1.10.0' in out.output
 
 
@@ -259,12 +261,33 @@ def test_editable_package_vcs(tmpdir):
             req_in.write('-e ' + vcs_package)
         out = runner.invoke(cli, ['-n',
                                   '--rebuild'])
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert vcs_package in out.output
         assert 'pytest' in out.output  # dependency of pytest-django
 
 
-def test_input_file_without_extension(tmpdir):
+def test_relative_editable_package(small_fake_package_dir):
+    # fake_package_dir = 'file:' + pathname2url(fake_package_dir)
+    runner = CliRunner()
+    with runner.isolated_filesystem() as loc:
+        new_package_dir = os.path.join(loc, 'small_fake_package')
+        # Move the small_fake_package inside the temp directory
+        shutil.copytree(small_fake_package_dir, new_package_dir)
+        relative_package_dir = os.path.relpath(new_package_dir)
+        relative_package_req = '-e ./{}'.format(
+            relative_package_dir.replace(os.path.sep, '/'))
+
+        with open('requirements.in', 'w') as req_in:
+            req_in.write('-e ' + 'small_fake_package')  # require editable fake package
+
+        out = runner.invoke(cli, ['-n'])
+
+        print(out.output)
+        check_successful_exit(out)
+        assert relative_package_req in out.output
+
+
+def test_input_file_without_extension():
     """
     Prequ can compile a file without an extension,
     and add .txt as the defaut output file extension.
@@ -276,16 +299,15 @@ def test_input_file_without_extension(tmpdir):
 
         out = runner.invoke(cli, ['requirements'])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert os.path.exists('requirements.txt')
         assert 'six==1.10.0' in open('requirements.txt').read()
 
 
-def test_upgrade_packages_option(tmpdir):
+def test_upgrade_packages_option(minimal_wheels_dir):
     """
     Prequ respects --upgrade-package/-P inline list.
     """
-    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'minimal_wheels')
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open('requirements.in', 'w') as req_in:
@@ -295,9 +317,9 @@ def test_upgrade_packages_option(tmpdir):
 
         out = runner.invoke(cli, [
             '-P', 'small_fake_b',
-            '-f', fake_package_dir,
+            '-f', minimal_wheels_dir,
         ])
 
-        assert out.exit_code == 0
+        check_successful_exit(out)
         assert 'small-fake-a==0.1' in out.output
         assert 'small-fake-b==0.2' in out.output

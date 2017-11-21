@@ -2,8 +2,8 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
-from prequ.utils import as_tuple, key_from_req, make_install_requirement
-
+from ..utils import (
+    as_tuple, check_is_hashable, key_from_ireq, make_install_requirement)
 from .base import BaseRepository
 
 
@@ -49,7 +49,7 @@ class LocalRequirementsRepository(BaseRepository):
         self.repository.freshen_build_caches()
 
     def find_best_match(self, ireq, prereleases=None):
-        key = key_from_req(ireq.req)
+        key = key_from_ireq(ireq)
         existing_pin = self.existing_pins.get(key)
         if existing_pin and ireq_satisfied_by_existing_pin(ireq, existing_pin):
             project, version, _ = as_tuple(existing_pin)
@@ -59,8 +59,23 @@ class LocalRequirementsRepository(BaseRepository):
         else:
             return self.repository.find_best_match(ireq, prereleases)
 
-    def get_dependencies(self, ireq):
-        return self.repository.get_dependencies(ireq)
+    def _get_dependencies(self, ireq):
+        return self.repository._get_dependencies(ireq)
 
     def get_hashes(self, ireq):
+        check_is_hashable(ireq)
+        pinned_ireq = self.existing_pins.get(key_from_ireq(ireq))
+        if pinned_ireq and ireq_satisfied_by_existing_pin(ireq, pinned_ireq):
+            if pinned_ireq.has_hash_options:
+                return set(_get_hashes_from_ireq(pinned_ireq))
         return self.repository.get_hashes(ireq)
+
+
+def _get_hashes_from_ireq(ireq):
+    """
+    :type ireq: pip.req.InstallRequirement
+    """
+    hashes = ireq.hashes()
+    for (alg, hash_values) in hashes._allowed.items():
+        for hash_value in hash_values:
+            yield '{}:{}'.format(alg, hash_value)

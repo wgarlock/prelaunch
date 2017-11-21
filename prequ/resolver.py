@@ -11,12 +11,10 @@ import click
 from pip.req import InstallRequirement
 
 from .cache import DependencyCache
-from .exceptions import UnsupportedConstraint
 from .logging import log
 from .utils import (
     UNSAFE_PACKAGES, first, format_requirement, format_specifier, full_groupby,
-    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_ireq,
-    key_from_req)
+    get_pinned_version, is_pinned_requirement, is_vcs_link, key_from_ireq)
 
 green = partial(click.style, fg='green')
 magenta = partial(click.style, fg='magenta')
@@ -28,7 +26,7 @@ class RequirementSummary(object):
     """
     def __init__(self, ireq):
         self.req = ireq.req
-        self.key = key_from_req(ireq.req)
+        self.key = key_from_ireq(ireq)
         self.extras = str(sorted(ireq.extras))
         self.specifier = str(ireq.specifier)
 
@@ -60,6 +58,20 @@ class Resolver(object):
         self.clear_caches = clear_caches
         self.allow_unsafe = allow_unsafe
         self.unsafe_constraints = set()
+        self._prepare_ireqs(self.our_constraints)
+        self._prepare_ireqs(self.limiters)
+
+    def _prepare_ireqs(self, constraints):
+        """
+        Prepare install requirements for analysis.
+
+        :type constraints: Iterable[pip.req.InstallRequirement]
+        """
+        for constraint in constraints:
+            if constraint.link and not constraint.prepared:
+                os.environ[str('PIP_EXISTS_ACTION')] = str('i')
+                self.repository.prepare_ireq(constraint)
+                del os.environ[str('PIP_EXISTS_ACTION')]
 
     @property
     def constraints(self):
@@ -125,11 +137,7 @@ class Resolver(object):
 
     @staticmethod
     def check_constraints(constraints):
-        for constraint in constraints:
-            if ((is_vcs_link(constraint) and not constraint.editable and
-                 not is_pinned_requirement(constraint))):
-                msg = 'Prequ does not support non-editable vcs URLs that are not pinned to one version.'
-                raise UnsupportedConstraint(msg, constraint)
+        pass
 
     def _group_constraints(self, constraints):
         """
@@ -227,13 +235,13 @@ class Resolver(object):
         if has_changed:
             log.debug('')
             log.debug('New dependencies found in this round:')
-            for new_dependency in sorted(diff, key=lambda req: key_from_req(req.req)):
+            for new_dependency in sorted(diff, key=lambda ireq: key_from_ireq(ireq)):
                 log.debug('  adding {}'.format(new_dependency))
             log.debug('Removed dependencies in this round:')
-            for removed_dependency in sorted(removed, key=lambda req: key_from_req(req.req)):
+            for removed_dependency in sorted(removed, key=lambda ireq: key_from_ireq(ireq)):
                 log.debug('  removing {}'.format(removed_dependency))
             log.debug('Unsafe dependencies in this round:')
-            for unsafe_dependency in sorted(unsafe, key=lambda req: key_from_req(req.req)):
+            for unsafe_dependency in sorted(unsafe, key=lambda ireq: key_from_ireq(ireq)):
                 log.debug('  remembering unsafe {}'.format(unsafe_dependency))
 
         # Store the last round's results in the their_constraints
@@ -282,11 +290,7 @@ class Resolver(object):
         Editable requirements will never be looked up, as they may have
         changed at any time.
         """
-        if ireq.editable:
-            for dependency in self.repository.get_dependencies(ireq):
-                yield dependency
-            return
-        elif not is_pinned_requirement(ireq):
+        if not is_pinned_requirement(ireq) and not ireq.editable:
             raise TypeError('Expected pinned or editable requirement, got {}'.format(ireq))
 
         # Now, either get the dependencies from the dependency cache (for
@@ -306,5 +310,4 @@ class Resolver(object):
             yield InstallRequirement.from_line(dependency_string, constraint=ireq.constraint)
 
     def reverse_dependencies(self, ireqs):
-        non_editable = [ireq for ireq in ireqs if not ireq.editable]
-        return self.dependency_cache.reverse_dependencies(non_editable)
+        return self.dependency_cache.reverse_dependencies(ireqs)

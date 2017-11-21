@@ -2,12 +2,15 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
+import os
+import re
 import sys
 from collections import OrderedDict
 from itertools import chain, groupby
 
 import pip
 from click import style
+from pip.download import path_to_url, url_to_path
 from pip.req import InstallRequirement
 
 
@@ -38,24 +41,81 @@ def assert_compatible_pip_version():
 
 
 def key_from_ireq(ireq):
-    """Get a standardized key for an InstallRequirement."""
-    if ireq.req is None and ireq.link is not None:
-        return str(ireq.link)
-    else:
-        return key_from_req(ireq.req)
+    """
+    Get a normalized key for an InstallRequirement.
+
+    :type ireq: InstallRequirement|.resolver.RequirementSummary
+    :rtype: str
+    """
+    # from .resolver import RequirementSummary
+    # assert isinstance(ireq, InstallRequirement) or (
+    #     isinstance(ireq, RequirementSummary)), repr(ireq)
+    if not ireq.req:
+        ireq.source_dir = os.path.abspath(ireq.source_dir)
+        ireq.run_egg_info()
+        assert ireq.req, "run_egg_info should fill req: {!r}".format(ireq)
+    return key_from_req(ireq.req)
 
 
 def key_from_req(req):
-    """Get an all-lowercase version of the requirement's name."""
-    if hasattr(req, 'key'):
-        # pip 8.1.1 or below, using pkg_resources
-        key = req.key
-    else:
-        # pip 8.1.2 or above, using packaging
-        key = req.name
+    """
+    Get normalized key of a requirement.
 
-    key = key.replace('_', '-').lower()
-    return key
+    :type req: packaging.requirements.Requirement
+    :rtype: str
+    """
+    # import packaging.requirements
+    # import pkg_resources
+    # assert isinstance(req, packaging.requirements.Requirement) or (
+    #     isinstance(req, pip._vendor.packaging.requirements.Requirement) or
+    #     isinstance(req, pkg_resources.Requirement)), (type(req), repr(req))
+    #
+    # Note: On pip 8.1.1 req doesn't have a name but has a key
+    return normalize_req_name(req.name if hasattr(req, 'name') else req.key)
+
+
+def key_from_dist(dist):
+    """
+    Get normalized key of a distribution.
+
+    :type dist: pkg_resources.Distribution
+    :rtype: str
+    """
+    # import pkg_resources
+    # assert isinstance(dist, pkg_resources.Distribution) or (
+    #     isinstance(dist, pip._vendor.pkg_resources.Distribution)), repr(dist)
+    return normalize_req_name(dist.key)
+
+
+def normalize_req_name(name):
+    """
+    Normalize name of a requirement (in the style of PEP 503).
+
+    >>> str(normalize_req_name('hello'))
+    'hello'
+
+    >>> str(normalize_req_name('hello_world'))
+    'hello-world'
+
+    >>> str(normalize_req_name('foo.bar--ding__dong'))
+    'foo-bar-ding-dong'
+
+    :type name: str
+    :rtype: str
+    """
+    return _REQUIREMENT_NORMALIZE_RX.sub('-', name).lower()
+
+
+_REQUIREMENT_NORMALIZE_RX = re.compile(r'[-_.]+')
+
+
+def check_is_hashable(ireq):
+    if ireq.editable:
+        raise ValueError("Cannot hash editable requirement: {}".format(ireq))
+    if is_vcs_link(ireq):
+        raise ValueError("Cannot hash VCS link requirement: {}".format(ireq))
+    if not is_pinned_requirement(ireq):
+        raise ValueError("Cannot hash unpinned requirement: {}".format(ireq))
 
 
 def comment(text):
@@ -74,13 +134,39 @@ def make_install_requirement(name, version, extras, constraint=False):
         constraint=constraint)
 
 
-def format_requirement(ireq, marker=None):
+def is_subdirectory(base, directory):
+    """
+    Return True if directory is a child directory of base
+    """
+    abs_base = os.path.abspath(fs_str(base))
+    abs_dir = os.path.abspath(fs_str(directory))
+    (base_drive, base_path) = os.path.splitdrive(abs_base)
+    (dir_drive, dir_path) = os.path.splitdrive(abs_dir)
+    if base_drive.lower() != dir_drive.lower():
+        return False
+    relpath = os.path.relpath(abs_dir, start=abs_base)
+    return relpath.split(os.path.sep, 1)[0] != os.path.pardir
+
+
+def format_requirement(ireq, marker='', root_dir=None, find_links_dirs=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
+
+    :type ireq: InstallRequirement
+    :type marker: str
+    :type root_dir: str|None
+    :type find_links_dirs: list[str]|None
     """
-    if ireq.editable or is_vcs_link(ireq):
-        line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
+    line_format = formatted_as(ireq, find_links_dirs)
+    if line_format in ['path', 'url']:
+        url_or_path = _format_link(ireq.link, root_dir)
+        if ireq.editable:
+            line = '-e {}'.format(url_or_path)
+        elif ireq.link.scheme == 'file':
+            line = '{}'.format(url_or_path)
+        else:
+            line = '{}#egg={}'.format(url_or_path, ireq.req)
     else:
         line = str(ireq.req).lower()
 
@@ -88,6 +174,51 @@ def format_requirement(ireq, marker=None):
         line = '{} ; {}'.format(line, marker)
 
     return line
+
+
+def formatted_as(ireq, find_links_dirs=None):
+    from_findlink_dir = _find_local_source(ireq, find_links_dirs or [])
+    if ireq.link and not ireq.link.comes_from and not from_findlink_dir:
+        if ireq.link.scheme == 'file':
+            return 'path'
+        else:
+            return 'url'
+    return 'simple'
+
+
+def _format_link(link, root_dir):
+    """
+    Format link as URL or path.
+
+    :type link: pip.index.Link
+    :type root_dir: str|None
+    :rtype: str
+    """
+    if link.scheme != 'file':
+        return link.url
+
+    path = url_to_path(link.url)
+
+    if root_dir is not None and is_subdirectory(root_dir, path):
+        relpath = os.path.relpath(path, start=root_dir)
+        if relpath == '.':
+            return '.'
+        return './' + relpath.replace(os.path.sep, '/')
+
+    # Make sure it's absolute
+    return path_to_url(path)
+
+
+def _find_local_source(ireq, local_dirs):
+    """
+    Find if requirement comes from local directory and return it.
+    """
+    if not ireq.link or ireq.link.scheme != 'file':
+        return None
+    for local_dir in local_dirs:
+        if is_subdirectory(local_dir, ireq.link.path):
+            return local_dir
+    return None
 
 
 def format_specifier(ireq):
@@ -129,6 +260,9 @@ def is_pinned_requirement(ireq):
 def get_pinned_version(ireq):
     """
     Get pinned version of a requirement, if it is pinned.
+
+    :type ireq: InstallRequirement|str
+    :type ignore_editables: bool
     """
     if not isinstance(ireq, InstallRequirement):
         ireq = InstallRequirement(ireq, None)
@@ -137,7 +271,16 @@ def get_pinned_version(ireq):
     if ireq.editable:
         return None
 
-    if not ireq.specifier._specs:
+    return get_ireq_version(ireq)
+
+
+def get_ireq_version(ireq):
+    """
+    Get version of a requirement even if it's editable.
+
+    :type ireq: InstallRequirement|str
+    """
+    if not ireq.req or not ireq.specifier or not ireq.specifier._specs:
         return None
 
     specs = (x._spec for x in ireq.specifier._specs)
@@ -159,12 +302,11 @@ def is_vcs_link(ireq):
 def as_tuple(ireq):
     """
     Pulls out the (name: str, version:str, extras:(str)) tuple from the pinned InstallRequirement.
-    """
-    if not is_pinned_requirement(ireq):
-        raise TypeError('Expected a pinned InstallRequirement, got {}'.format(ireq))
 
-    name = key_from_req(ireq.req)
-    version = first(ireq.specifier._specs)._spec[1]
+    :type ireq: InstallRequirement
+    """
+    name = key_from_ireq(ireq)  # Runs also egg_info if needed
+    version = get_ireq_version(ireq)
     extras = tuple(sorted(ireq.extras))
     return name, version, extras
 

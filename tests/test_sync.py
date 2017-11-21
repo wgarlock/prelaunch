@@ -1,12 +1,13 @@
 import os
-import platform
 from collections import Counter
 
 import mock
 import pytest
+from pip.download import path_to_url, url_to_path
 
 from prequ.exceptions import IncompatibleRequirements
 from prequ.sync import dependency_tree, diff, merge, sync
+from prequ.utils import get_ireq_version
 
 
 @pytest.mark.parametrize(
@@ -165,31 +166,49 @@ def test_diff_leave_prequ_alone(fake_dist, from_line):
     assert to_uninstall == {'foobar'}
 
 
-def _get_file_url(local_path):
-    if platform.system() == 'Windows':
-        local_path = '/%s' % local_path.replace('\\', '/')
-    return 'file://%s' % local_path
-
-
-def test_diff_with_editable(fake_dist, from_editable):
+def test_diff_with_editable(
+        fake_dist, from_editable, from_line, small_fake_package_dir):
     installed = [
         fake_dist('small-fake-with-deps==0.0.1'),
         fake_dist('six==1.10.0'),
     ]
-    path_to_package = os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')
     reqs = [
-        from_editable(path_to_package),
+        from_editable(small_fake_package_dir),
+        from_line('six==1.10.0'),
     ]
     to_install, to_uninstall = diff(reqs, installed)
 
-    # FIXME: The editable package is uninstalled and reinstalled, including all its dependencies,
-    # even if the version numbers match.
-    assert to_uninstall == {'six', 'small-fake-with-deps'}
+    assert to_uninstall == set(), "No packages should be uninstalled"
 
+    # The editable should be upgraded, since the installed version
+    # (0.0.1) was different than the version specified in setup.py of
+    # the editable package (0.1)
     assert len(to_install) == 1
     package = list(to_install)[0]
     assert package.editable
-    assert str(package.link) == _get_file_url(path_to_package)
+    assert str(package.link) == path_to_url(small_fake_package_dir)
+
+
+def test_diff_with_editable_without_changes(
+        fake_dist, from_editable, from_line, small_fake_package_dir):
+    installed = [
+        fake_dist('small-fake-with-deps==0.1'),
+        fake_dist('six==1.10.0'),
+    ]
+    reqs = [
+        from_editable(small_fake_package_dir),
+        from_line('six==1.10.0'),
+    ]
+    assert reqs[0].req is None, "Editable doesn't have Requirement data yet"
+
+    to_install, to_uninstall = diff(reqs, installed)
+
+    assert reqs[0].req is not None, "Requirement data has been filled"
+    pinned_ver = get_ireq_version(reqs[0])
+    assert installed[0].version == pinned_ver
+
+    assert to_uninstall == set(), "No packages should be uninstalled"
+    assert to_install == set(), "No packages should be (re)installed"
 
 
 @pytest.mark.parametrize(
@@ -207,13 +226,25 @@ def test_sync_install(from_line, lines):
         check_call.assert_called_once_with(['pip', 'install', '-q'] + sorted(lines))
 
 
-def test_sync_with_editable(from_editable):
+def test_sync_with_editable(from_editable, small_fake_package_dir):
     with mock.patch('prequ.sync.check_call') as check_call:
-        path_to_package = os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')
-        to_install = {from_editable(path_to_package)}
+        to_install = {from_editable(small_fake_package_dir)}
 
         sync(to_install, set())
-        check_call.assert_called_once_with(['pip', 'install', '-q', '-e', _get_file_url(path_to_package)])
+        check_call.assert_called_once_with(
+            ['pip', 'install', '-q',
+             '-e', path_to_url(small_fake_package_dir)])
+
+
+def test_sync_with_editable_uses_abspath(from_editable, small_fake_package_dir):
+    ireq = from_editable(small_fake_package_dir)
+    rel_path = os.path.relpath(url_to_path(ireq.link.url))
+    ireq.link.url = 'file:{}'.format(rel_path.replace(os.path.sep, '/'))
+    with mock.patch('prequ.sync.check_call') as check_call:
+        sync({ireq}, set())
+        check_call.assert_called_once_with(
+            ['pip', 'install', '-q',
+             '-e', path_to_url(os.path.abspath(small_fake_package_dir))])
 
 
 def test_sync_sorting_ireqs(from_line):
@@ -237,4 +268,4 @@ def test_sync_sorting_ireqs_with_editable(from_line, from_editable):
         sync(to_install, {})
         check_call.assert_called_once_with(
             ['pip', 'install', '-q',
-             'django==1.8', '-e', str(editable_ireq.link), 'first==2.0.1'])
+             'django==1.8', 'first==2.0.1', '-e', str(editable_ireq.link)])
