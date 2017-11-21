@@ -2,6 +2,8 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
+from contextlib import contextmanager
+
 from ..utils import (
     as_tuple, check_is_hashable, key_from_ireq, make_install_requirement)
 from .base import BaseRepository
@@ -69,6 +71,11 @@ class LocalRequirementsRepository(BaseRepository):
             if pinned_ireq.has_hash_options:
                 return set(_get_hashes_from_ireq(pinned_ireq))
         return self.repository.get_hashes(ireq)
+
+    @contextmanager
+    def allow_all_wheels(self):
+        with self.repository.allow_all_wheels():
+            yield
 
 
 def _get_hashes_from_ireq(ireq):
