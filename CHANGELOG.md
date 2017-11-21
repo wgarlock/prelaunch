@@ -8,6 +8,12 @@
 Features:
 - Made local, editable, and relative requirements resolve to relative paths instead of absolute ones ([#507](https://github.com/jazzband/pip-tools/pull/507). Thanks to @orf)
 
+# 1.10.2 (UNRELEASED)
+
+Bug Fixes:
+- Fixed bug causing dependencies from invalid wheels for the current platform to be included ([#571](https://github.com/jazzband/pip-tools/pull/571)).
+- `pip-sync` will respect environment markers in the requirements.txt ([600](https://github.com/jazzband/pip-tools/pull/600)). Thanks @hazmat345
+
 # 1.10.1 (2017-09-27)
 
 Bug Fixes:
