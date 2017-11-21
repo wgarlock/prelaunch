@@ -7,6 +7,7 @@ cache: pip
 matrix:
   include:
     - {env: TOXENV=style, python: "3.4"}
+    - {env: TOXENV=packaging, python: "3.4"}
     - python: "2.7"
     - python: "3.4"
     - python: "3.5"
