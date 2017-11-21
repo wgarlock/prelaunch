@@ -1,7 +1,6 @@
 import contextlib
 import json
 import os
-from contextlib import contextmanager
 from functools import partial
 
 import pkg_resources
@@ -56,11 +55,6 @@ class FakeRepository(BaseRepository):
         extras += ("",)
         dependencies = [dep for extra in extras for dep in self.index[name][version][extra]]
         return [InstallRequirement.from_line(dep, constraint=ireq.constraint) for dep in dependencies]
-
-    @contextmanager
-    def allow_all_wheels(self):
-        # No need to do an actual pip.Wheel mock here.
-        yield
 
 
 class FakeInstalledDistribution(pkg_resources.Distribution):

@@ -189,37 +189,6 @@ class PyPIRepository(BaseRepository):
                 h.update(chunk)
         return ":".join([FAVORITE_HASH, h.hexdigest()])
 
-    @contextmanager
-    def allow_all_wheels(self):
-        """
-        Monkey patches pip.Wheel to allow wheels from all platforms and Python versions.
-
-        This also saves the candidate cache and set a new one, or else the results from the
-        previous non-patched calls will interfere.
-        """
-        def _wheel_supported(self, tags=None):
-            # Ignore current platform. Support everything.
-            return True
-
-        def _wheel_support_index_min(self, tags=None):
-            # All wheels are equal priority for sorting.
-            return 0
-
-        original_wheel_supported = Wheel.supported
-        original_support_index_min = Wheel.support_index_min
-        original_cache = self._available_candidates_cache
-
-        Wheel.supported = _wheel_supported
-        Wheel.support_index_min = _wheel_support_index_min
-        self._available_candidates_cache = {}
-
-        try:
-            yield
-        finally:
-            Wheel.supported = original_wheel_supported
-            Wheel.support_index_min = original_support_index_min
-            self._available_candidates_cache = original_cache
-
 
 @contextmanager
 def open_local_or_remote_file(link, session):
