@@ -45,3 +45,12 @@ def test_find_best_match(existing_pin, to_find, pin_matches,
     else:
         fallback_repo.find_best_match.assert_called_with(ireq_to_find, None)
         assert result == 'fallback_result'
+
+
+def test_find_best_match_preserves_period():
+    fallback_repo = mock.create_autospec(PyPIRepository)
+    pin = ireq('foo.bar==42.0')
+    existing_pins = {key_from_ireq(pin): pin}
+    repo = LocalRequirementsRepository(existing_pins, fallback_repo)
+    result = repo.find_best_match(ireq('foo.bar'))
+    assert repr(result) == repr(ireq('foo.bar==42.0'))
