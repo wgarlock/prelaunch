@@ -10,7 +10,7 @@ from pkg_resources import Requirement
 
 from .exceptions import PrequError
 from .locations import CACHE_DIR
-from .utils import as_tuple, key_from_req, lookup_table
+from .utils import as_tuple, key_from_req, lookup_table, name_from_ireq
 
 
 class CorruptCacheError(PrequError):
@@ -145,33 +145,35 @@ class DependencyCache(object):
         This is typically no problem if you use this function after the entire
         dependency tree is resolved.
         """
-        ireqs_as_cache_values = [self.as_cache_key(ireq) for ireq in ireqs]
-        return self._reverse_dependencies(ireqs_as_cache_values)
-
-    def _reverse_dependencies(self, cache_keys):
+        cache_key_names = {
+            self.as_cache_key(ireq): name_from_ireq(ireq)
+            for ireq in ireqs
+        }
         """
-        Returns a lookup table of reverse dependencies for all the given cache keys.
+        Generate a lookup table of reverse dependencies for all the given
+        cache keys.
 
-        Example input:
+        Example cache keys:
 
             [('pep8', '1.5.7'),
              ('flake8', '2.4.0'),
              ('mccabe', '0.3'),
              ('pyflakes', '0.8.1')]
 
-        Example output:
+        Example result:
 
             {'pep8': ['flake8'],
              'flake8': [],
              'mccabe': ['flake8'],
              'pyflakes': ['flake8']}
-
         """
+
         # First, collect all the dependencies into a sequence of (parent, child) tuples, like [('flake8', 'pep8'),
         # ('flake8', 'mccabe'), ...]
-        return lookup_table((key_from_req(Requirement.parse(dep_name)), name)
-                            for name, version_and_extras in cache_keys
-                            for dep_name in self.cache[name][version_and_extras])
+        return lookup_table(
+            (key_from_req(Requirement.parse(dep_name)), req_name)
+            for (cache_key, req_name) in cache_key_names.items()
+            for dep_name in self.cache[cache_key[0]][cache_key[1]])
 
     @classmethod
     def _strip_unpinned_and_editables(cls, cache):

@@ -15,7 +15,8 @@ from prequ.exceptions import NoCandidateFound
 from prequ.repositories.base import BaseRepository
 from prequ.resolver import Resolver
 from prequ.utils import (
-    as_tuple, key_from_ireq, key_from_req, make_install_requirement)
+    as_tuple, key_from_ireq, key_from_req, make_install_requirement,
+    name_from_req)
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
 
@@ -44,7 +45,9 @@ class FakeRepository(BaseRepository):
         if not versions:
             raise NoCandidateFound(ireq, self.index[key_from_ireq(ireq)])
         best_version = max(versions, key=Version)
-        return make_install_requirement(key_from_ireq(ireq), best_version, ireq.extras, constraint=ireq.constraint)
+        return make_install_requirement(
+            name_from_req(ireq).lower(), best_version, ireq.extras,
+            constraint=ireq.constraint)
 
     def _get_dependencies(self, ireq):
         if ireq.editable:
