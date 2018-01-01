@@ -11,7 +11,8 @@ class PipCommand(pip.basecommand.Command):
 
 def get_pip_options_and_pypi_repository(  # noqa: C901
         index_url=None, extra_index_url=None, no_index=None,
-        find_links=None, client_cert=None, pre=None, trusted_host=None):
+        find_links=None, cert=None, client_cert=None, pre=None,
+        trusted_host=None):
     pip_command = get_pip_command()
 
     pip_args = []
@@ -25,6 +26,8 @@ def get_pip_options_and_pypi_repository(  # noqa: C901
     if extra_index_url:
         for extra_index in extra_index_url:
             pip_args.extend(['--extra-index-url', extra_index])
+    if cert:
+        pip_args.extend(['--cert', cert])
     if client_cert:
         pip_args.extend(['--client-cert', client_cert])
     if pre:

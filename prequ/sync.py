@@ -11,6 +11,7 @@ from .utils import (
     key_from_dist, key_from_ireq, key_from_req)
 
 PACKAGES_TO_IGNORE = [
+    '-markerlib',
     'pip',
     'prequ',
     'pip-review',

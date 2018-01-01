@@ -11,6 +11,7 @@ from pip.download import is_file_url, url_to_path
 from pip.index import PackageFinder
 from pip.req.req_set import RequirementSet
 
+from .._compat import TemporaryDirectory
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
@@ -22,12 +23,6 @@ try:
     from pip.utils.hashes import FAVORITE_HASH
 except ImportError:
     FAVORITE_HASH = 'sha256'
-
-
-try:
-    from tempfile import TemporaryDirectory  # added in 3.2
-except ImportError:
-    from .._compat import TemporaryDirectory
 
 
 class PyPIRepository(BaseRepository):
@@ -117,7 +112,7 @@ class PyPIRepository(BaseRepository):
         # Reuses pip's internal candidate sort key to sort
         matching_candidates = [candidates_by_version[ver] for ver in matching_versions]
         if not matching_candidates:
-            raise NoCandidateFound(ireq, all_candidates)
+            raise NoCandidateFound(ireq, all_candidates, self.finder.index_urls)
         best_candidate = max(matching_candidates, key=self.finder._candidate_sort_key)
 
         # Turn the candidate into a pinned InstallRequirement
@@ -131,7 +126,12 @@ class PyPIRepository(BaseRepository):
         """
         deps = self._dependencies_cache.get(getattr(ireq.link, 'url', None))
         if not deps:
-            if ireq.link and not ireq.link.is_artifact:
+            if ireq.editable and (ireq.source_dir and os.path.exists(ireq.source_dir)):
+                # No download_dir for locally available editable requirements.
+                # If a download_dir is passed, pip will  unnecessarely
+                # archive the entire source directory
+                download_dir = None
+            elif ireq.link and not ireq.link.is_artifact:
                 # No download_dir for VCS sources.  This also works around pip
                 # using git-checkout-index, which gets rid of the .git dir.
                 download_dir = None
@@ -159,10 +159,13 @@ class PyPIRepository(BaseRepository):
 
     def get_hashes(self, ireq):
         """
-        Given a pinned InstallRequire, returns a set of hashes that represent
-        all of the files for a given requirement. It is not acceptable for an
-        editable or unpinned requirement to be passed to this function.
+        Given an InstallRequirement, return a set of hashes that represent all
+        of the files for a given requirement. Editable requirements return an
+        empty set. Unpinned requirements raise a TypeError.
         """
+        if ireq.editable:
+            return set()
+
         check_is_hashable(ireq)
 
         if ireq.link and ireq.link.is_artifact:
