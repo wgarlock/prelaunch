@@ -1,4 +1,4 @@
-|buildstatus| |jazzband|
+|buildstatus-travis| |buildstatus-appveyor| |jazzband| |pypi|
 
 ==================================
 pip-tools = pip-compile + pip-sync
@@ -10,35 +10,49 @@ even when you've pinned them.  `You do pin them, right?`_
 .. image:: https://github.com/jazzband/pip-tools/raw/master/img/pip-tools-overview.png
    :alt: pip-tools overview for phase II
 
-.. |buildstatus| image:: https://img.shields.io/travis/jazzband/pip-tools/master.svg
-   :alt: Build status
+.. |buildstatus-travis| image:: https://img.shields.io/travis/jazzband/pip-tools/master.svg
+   :alt: Travis-CI build status
    :target: https://travis-ci.org/jazzband/pip-tools
+.. |buildstatus-appveyor| image:: https://img.shields.io/appveyor/ci/jazzband/pip-tools/master.svg
+   :alt: Appveyor build status
+   :target: https://ci.appveyor.com/project/jazzband/pip-tools
 .. |jazzband| image:: https://jazzband.co/static/img/badge.svg
    :alt: Jazzband
    :target: https://jazzband.co/
+.. |pypi| image:: https://img.shields.io/pypi/v/pip-tools.svg
+   :alt: PyPi
+   :target: https://pypi.python.org/pypi/pip-tools/
 .. _You do pin them, right?: http://nvie.com/posts/pin-your-packages/
 
 
 Installation
 ============
 
-.. code-block::
+As part of a Python project's environment tooling (similar to ``pip``), it's
+recommended to install ``pip-tools`` in each project's `virtual environment`_:
 
-    $ pip install --upgrade pip  # pip-tools needs pip==8.0 or higher (!)
-    $ pip install pip-tools
+.. code-block:: bash
 
+    $ source /path/to/venv/bin/activate
+    (venv)$ pip install --upgrade pip  # pip-tools needs pip==8.0 or higher (!)
+    (venv)$ pip install pip-tools
+
+**Note**: all of the remaining example commands assume you've activated your
+project's virtual environment.
+
+.. _virtual environment: https://packaging.python.org/tutorials/installing-packages/#creating-virtual-environments
 
 Example usage for ``pip-compile``
 =================================
 
-Requirements from setup.py
---------------------------
+Requirements from ``setup.py``
+------------------------------
 
 Suppose you have a Flask project, and want to pin it for production.
 If you have a ``setup.py`` with ``install_requires=['Flask']``, then run
 ``pip-compile`` without any arguments:
 
-.. code-block::
+.. code-block:: bash
 
     $ pip-compile
     #
@@ -55,23 +69,23 @@ If you have a ``setup.py`` with ``install_requires=['Flask']``, then run
     werkzeug==0.12.2          # via flask
 
 ``pip-compile`` will produce your ``requirements.txt``, with all the Flask
-dependencies (and all underlying dependencies) pinned.  You should put your
-requirements file under version control.
+dependencies (and all underlying dependencies) pinned.  You should put
+``requirements.txt`` under version control.
 
-Without setup.py
-----------------
+Without ``setup.py``
+--------------------
 
-If you don't use ``setup.py`` (`it's easy to write one`_), you can instead
-write the following line to a file:
+If you don't use ``setup.py`` (`it's easy to write one`_), you can create a
+``requirements.in`` file to declare the Flask dependency:
 
-.. code-block::
+.. code-block:: ini
 
     # requirements.in
     Flask
 
-This time, run ``pip-compile requirements.in``:
+Now, run ``pip-compile requirements.in``:
 
-.. code-block::
+.. code-block:: bash
 
     $ pip-compile requirements.in
     #
@@ -88,18 +102,18 @@ This time, run ``pip-compile requirements.in``:
     werkzeug==0.12.2          # via flask
 
 And it will produce your ``requirements.txt``, with all the Flask dependencies
-(and all underlying dependencies) pinned.  Don't forget to put this file under
-version control as well.
+(and all underlying dependencies) pinned.  You should put both
+``requirements.in`` and ``requirements.txt`` under version control.
 
 .. _it's easy to write one: https://packaging.python.org/distributing/#configuring-your-project
 
 Using hashes
 ------------
 
-If you would like to use *Hash-Checking Mode* available in *pip* since version
-8.0, ``pip-compile`` offers ``--generate-hashes`` flag:
+If you would like to use *Hash-Checking Mode* available in ``pip`` since
+version 8.0, ``pip-compile`` offers ``--generate-hashes`` flag:
 
-.. code-block::
+.. code-block:: bash
 
     $ pip-compile --generate-hashes requirements.in
     #
@@ -138,7 +152,7 @@ To update all packages, periodically re-run ``pip-compile --upgrade``.
 To update a specific package to the latest or a specific version use the
 ``--upgrade-package`` or ``-P`` flag:
 
-.. code-block::
+.. code-block:: bash
 
     $ pip-compile --upgrade-package flask  # only update the flask package
     $ pip-compile --upgrade-package flask --upgrade-package requests  # update both the flask and requests packages
@@ -151,12 +165,12 @@ If you use multiple Python versions, you can run ``pip-compile`` as
 Configuration
 -------------
 
-You might be wrapping the pip-compile command in another script. To avoid
+You might be wrapping the ``pip-compile`` command in another script. To avoid
 confusing consumers of your custom script you can override the update command
 generated at the top of requirements files by setting the
 ``CUSTOM_COMPILE_COMMAND`` environment variable.
 
-.. code-block::
+.. code-block:: bash
 
     $ CUSTOM_COMPILE_COMMAND="./pipcompilewrapper" pip-compile requirements.in
     #
@@ -171,15 +185,18 @@ generated at the top of requirements files by setting the
     markupsafe==0.23          # via jinja2
     werkzeug==0.10.4          # via flask
 
-Example usage for `pip-sync`
-============================
+Example usage for ``pip-sync``
+==============================
 
 Now that you have a ``requirements.txt``, you can use ``pip-sync`` to update
-your virtual env to reflect exactly what's in there.  Note: this will
-install/upgrade/uninstall everything necessary to match the ``requirements.txt``
-contents.
+your virtual environment to reflect exactly what's in there. This will
+install/upgrade/uninstall everything necessary to match the
+``requirements.txt`` contents.
 
-.. code-block::
+**Be careful**: ``pip-sync`` is meant to be used only with a
+``requirements.txt`` generated by ``pip-compile``.
+
+.. code-block:: bash
 
     $ pip-sync
     Uninstalling flake8-2.4.1:
@@ -195,7 +212,7 @@ contents.
 To sync multiple ``*.txt`` dependency lists, just pass them in via command
 line arguments, e.g.
 
-.. code-block::
+.. code-block:: bash
 
     $ pip-sync dev-requirements.txt requirements.txt
 
@@ -204,3 +221,14 @@ Passing in empty arguments would cause it to default to ``requirements.txt``.
 If you use multiple Python versions, you can run ``pip-sync`` as
 ``py -X.Y -m piptools sync ...`` on Windows and
 ``pythonX.Y -m piptools sync ...`` on other systems.
+
+**Note**: ``pip-sync`` will not upgrade or uninstall packaging tools like
+``setuptools``, ``pip``, or ``pip-tools`` itself. Use ``pip install --upgrade``
+to upgrade those packages.
+
+Other useful tools
+==================
+
+- `pipdeptree`_ to print the dependency tree of the installed packages.
+
+.. _pipdeptree: https://github.com/naiquevin/pipdeptree

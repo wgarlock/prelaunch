@@ -8,11 +8,24 @@
 Features:
 - Made local, editable, and relative requirements resolve to relative paths instead of absolute ones ([#507](https://github.com/jazzband/pip-tools/pull/507). Thanks to @orf)
 
-# 1.10.2 (UNRELEASED)
+# 1.11.0 (2017-11-30)
+
+Features:
+- Allow editable packages in requirements.in with `pip-compile --generate-hashes` ([#524](https://github.com/jazzband/pip-tools/pull/524)). Thanks @jdufresne
+- Allow for CA bundles with `pip-compile --cert` ([#612](https://github.com/jazzband/pip-tools/pull/612)). Thanks @khwilson
+- Improved `pip-compile` duration with large locally available editable requirement by skipping a copy to the cache
+([#583](https://github.com/jazzband/pip-tools/pull/583)). Thanks @costypetrisor
+- Slightly improved the `NoCandidateFound` error message on potential causes ([#614](https://github.com/jazzband/pip-tools/pull/614)). Thanks @vphilippon
+
+Bug Fixes:
+- Add `-markerlib` to the list of `PACKAGES_TO_IGNORE` of `pip-sync` ([#613](https://github.com/jazzband/pip-tools/pull/613)).
+
+# 1.10.2 (2017-11-22)
 
 Bug Fixes:
 - Fixed bug causing dependencies from invalid wheels for the current platform to be included ([#571](https://github.com/jazzband/pip-tools/pull/571)).
 - `pip-sync` will respect environment markers in the requirements.txt ([600](https://github.com/jazzband/pip-tools/pull/600)). Thanks @hazmat345
+- Converted the ReadMe to have a nice description rendering on PyPi. Thanks @bittner
 
 # 1.10.1 (2017-09-27)
 
