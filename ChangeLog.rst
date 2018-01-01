@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+Bug Fixes
+~~~~~~~~~
+
+- Fix handling of requirements with a period in name
+
 1.3.0
 -----
 

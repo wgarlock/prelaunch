@@ -38,11 +38,10 @@ def dependency_tree(installed_keys, root_key):
 
     while queue:
         v = queue.popleft()
-        key = key_from_dist(v)
-        if key in dependencies:
+        if v.key in dependencies:
             continue
 
-        dependencies.add(key)
+        dependencies.add(v.key)
 
         for dep_specifier in v.requires():
             dep_name = key_from_req(dep_specifier)
@@ -108,7 +107,7 @@ def diff(compiled_requirements, installed_dists):
     for dist in installed_dists:
         key = key_from_dist(dist)
         if key not in requirements_lut or not requirements_lut[key].match_markers():
-            to_uninstall.add(key)
+            to_uninstall.add(dist.key)
         elif requirements_lut[key].specifier.contains(dist.version):
             satisfied.add(key)
 

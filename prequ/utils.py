@@ -50,16 +50,36 @@ def key_from_ireq(ireq):
     # from .resolver import RequirementSummary
     # assert isinstance(ireq, InstallRequirement) or (
     #     isinstance(ireq, RequirementSummary)), repr(ireq)
+    return normalize_req_name(name_from_ireq(ireq))
+
+
+def name_from_ireq(ireq):
+    """
+    Get the distribution name from an InstallRequirement.
+
+    :type ireq: InstallRequirement|.resolver.RequirementSummary
+    :rtype: str
+    """
     if not ireq.req:
         ireq.source_dir = os.path.abspath(ireq.source_dir)
         ireq.run_egg_info()
         assert ireq.req, "run_egg_info should fill req: {!r}".format(ireq)
-    return key_from_req(ireq.req)
+    return name_from_req(ireq.req)
 
 
 def key_from_req(req):
     """
     Get normalized key of a requirement.
+
+    :type req: packaging.requirements.Requirement
+    :rtype: str
+    """
+    return normalize_req_name(name_from_req(req))
+
+
+def name_from_req(req):
+    """
+    Get the distribution name from a requirement.
 
     :type req: packaging.requirements.Requirement
     :rtype: str
@@ -71,7 +91,7 @@ def key_from_req(req):
     #     isinstance(req, pkg_resources.Requirement)), (type(req), repr(req))
     #
     # Note: On pip 8.1.1 req doesn't have a name but has a key
-    return normalize_req_name(req.name if hasattr(req, 'name') else req.key)
+    return req.name if hasattr(req, 'name') else req.key
 
 
 def key_from_dist(dist):
