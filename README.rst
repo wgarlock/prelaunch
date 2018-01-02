@@ -11,7 +11,7 @@ requirements files complete and up-to-date.
    :target: https://pypi.python.org/pypi/prequ/
 
 .. |Test Status on Travis| image::
-   https://travis-ci.org/suutari/prequ.svg?branch=master
+   https://img.shields.io/travis/suutari/prequ.svg
    :target: https://travis-ci.org/suutari/prequ
 
 .. |Test Status on AppVeyor| image::
@@ -19,7 +19,7 @@ requirements files complete and up-to-date.
    :target: https://ci.appveyor.com/project/suutari/prequ
 
 .. |Coverage| image::
-   https://codecov.io/gh/suutari/prequ/branch/master/graph/badge.svg
+   https://img.shields.io/codecov/c/github/suutari/prequ.svg
    :target: https://codecov.io/gh/suutari/prequ
 
 Background
