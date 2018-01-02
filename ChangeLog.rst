@@ -1,6 +1,27 @@
 Prequ Change Log
 ================
 
+Unreleased
+----------
+
+This version of Prequ is synced with pip-tools 1.11.0.
+
+Features
+~~~~~~~~
+
+- Allow editable packages in source requirements even if generating
+  hashes is enabled (jazzband/pip-tools#524)
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Improve compile speed of locally available editable requirement by
+  avoiding creation of an sdist archive (jazzband/pip-tools#583)
+- Improve the ``NoCandidateFound`` error message on potential causes
+  (jazzband/pip-tools#614)
+- sync: Add ``-markerlib`` to the list of packages to ignore
+  (jazzband/pip-tools#613)
+
 1.3.1
 -----
 
