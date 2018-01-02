@@ -1,4 +1,4 @@
-branches: {only: [master]}
+branches: {only: [master, test]}
 
 sudo: false
 language: python

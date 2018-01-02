@@ -1,4 +1,4 @@
-branches: {only: [master]}
+branches: {only: [master, test]}
 environment:
   matrix:
     - TOXENV: py27-pip8.1.1
