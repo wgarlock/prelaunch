@@ -14,19 +14,21 @@ def test_no_candidate_found_with_versions():
     tried = [
         InstallationCandidate('some-package', ver, None)
         for ver in ['1.2.3', '12.3.0', '12.3.5']]
-    no_candidate_found = NoCandidateFound(ireq, tried)
+    no_candidate_found = NoCandidateFound(ireq, tried, ['pypi.localhost'])
     assert '{}'.format(no_candidate_found) == (
         "Could not find a version that matches some-package==12.3.4\n"
-        "Tried: 1.2.3, 12.3.0, 12.3.5")
+        "Tried: 1.2.3, 12.3.0, 12.3.5\n"
+        "There are incompatible versions in the resolved dependencies.")
 
 
 def test_no_candidate_found_no_versions():
     ireq = InstallRequirement.from_line('some-package==12.3.4')
     tried = []
-    no_candidate_found = NoCandidateFound(ireq, tried)
+    no_candidate_found = NoCandidateFound(ireq, tried, ['pypi.localhost'])
     assert '{}'.format(no_candidate_found) == (
         "Could not find a version that matches some-package==12.3.4\n"
-        "Tried: (no version found at all)")
+        "Tried: (no version found at all)\n"
+        "Was pypi.localhost reachable?")
 
 
 def test_unsupported_constraint_simple():
