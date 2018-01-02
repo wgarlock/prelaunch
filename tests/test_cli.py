@@ -317,6 +317,33 @@ def test_locally_available_editable_package_is_not_archived_in_cache_dir(tmpdir)
     assert not os.listdir(os.path.join(str(cache_dir), 'pkgs'))
 
 
+def test_local_dir_package_is_not_archived(tmpdir, small_fake_package_dir):
+    """
+    Prequ will not create an archive for a local dir requirement.
+    """
+    cache_dir = str(tmpdir.mkdir('cache_dir'))
+    pkg_dir = os.path.join(cache_dir, 'pkgs')
+    os.mkdir(pkg_dir)
+
+    fake_package_url = path_to_url(small_fake_package_dir)
+
+    with mock.patch('prequ.repositories.pypi.CACHE_DIR', new=cache_dir):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            with open('requirements.in', 'w') as req_in:
+                req_in.write(fake_package_url)
+
+            run_result = runner.invoke(cli, ['-n', '--no-header'])
+
+            assert run_result.exit_code == 0
+            assert run_result.output == (
+                fake_package_url + '\n' +
+                'six==1.10.0               # via small-fake-with-deps\n'
+                'Dry-run, so nothing updated.\n')
+
+    assert os.listdir(pkg_dir) == [], "Package directory should be empty"
+
+
 def test_input_file_without_extension():
     """
     Prequ can compile a file without an extension,
