@@ -296,6 +296,7 @@ def test_relative_editable_package(small_fake_package_dir):
 def test_locally_available_editable_package_is_not_archived_in_cache_dir(tmpdir):
     """ Prequ will not create an archive for a locally available editable requirement """
     cache_dir = tmpdir.mkdir('cache_dir')
+    os.mkdir(os.path.join(str(cache_dir), 'pkgs'))
 
     fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'small_fake_package')
     fake_package_dir = path_to_url(fake_package_dir)
