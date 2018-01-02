@@ -355,11 +355,12 @@ def test_upgrade_packages_option(minimal_wheels_dir):
         assert 'small-fake-b==0.2' in out.output
 
 
-def test_generate_hashes_with_editable():
+def test_generate_hashes_with_editable(small_fake_package_dir):
+    small_fake_package_url = path_to_url(small_fake_package_dir)
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open('requirements.in', 'w') as fp:
-            fp.write('-e git+https://github.com/django/django.git@1.11.1#egg=django\n')
+            fp.write('-e {}\n'.format(small_fake_package_url))
             fp.write('pytz==2017.2\n')
         out = runner.invoke(cli, ['--generate-hashes'])
     expected = (
@@ -367,10 +368,10 @@ def test_generate_hashes_with_editable():
         '#\n'
         '#   prequ update\n'
         '#\n'
-        '-e git+https://github.com/django/django.git@1.11.1#egg=django\n'
+        '-e {}\n'
         'pytz==2017.2 \\\n'
         '    --hash=sha256:d1d6729c85acea5423671382868627129432fba9a89ecbb248d8d1c7a9f01c67 \\\n'
         '    --hash=sha256:f5c056e8f62d45ba8215e5cb8f50dfccb198b4b9fbea8500674f3443e4689589\n'
-    )
+    ).format(small_fake_package_url)
     assert out.exit_code == 0
     assert expected in out.output
