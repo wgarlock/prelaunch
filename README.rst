@@ -4,11 +4,19 @@ Prequ
 Tools for Python requirement handling.  Helps in keeping your
 requirements files complete and up-to-date.
 
-|Build Status|  |Coverage|
+|PyPI| |Test Status on Travis| |Test Status on AppVeyor| |Coverage|
 
-.. |Build Status| image::
+.. |PyPI| image::
+   https://img.shields.io/pypi/v/prequ.svg
+   :target: https://pypi.python.org/pypi/prequ/
+
+.. |Test Status on Travis| image::
    https://travis-ci.org/suutari/prequ.svg?branch=master
    :target: https://travis-ci.org/suutari/prequ
+
+.. |Test Status on AppVeyor| image::
+   https://img.shields.io/appveyor/ci/suutari/prequ.svg?logo=appveyor
+   :target: https://ci.appveyor.com/project/suutari/prequ
 
 .. |Coverage| image::
    https://codecov.io/gh/suutari/prequ/branch/master/graph/badge.svg
