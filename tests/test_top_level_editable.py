@@ -29,7 +29,7 @@ def _get_repository():
     ('input', 'expected'),
 
     ((tup) for tup in [
-        ([os.path.join(os.path.dirname(__file__), 'fake_pypi', 'small_fake_package')],
+        ([os.path.join(os.path.dirname(__file__), 'test_data', 'small_fake_package')],
          ['six']),
     ])
 )

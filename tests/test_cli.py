@@ -165,7 +165,7 @@ def test_realistic_complex_sub_dependencies(tmpdir):
     subprocess.check_output(['pip', 'wheel',
                              '--no-deps',
                              '-w', str(tmpdir),
-                             os.path.join('.', 'tests', 'fake_pypi', 'fake_package', '.')])
+                             os.path.join('.', 'tests', 'test_data', 'fake_package', '.')])
 
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -239,6 +239,39 @@ def test_sync_quiet(tmpdir):
                 assert '-q' in call[0][0]
 
 
+@pytest.mark.parametrize('option_name', [
+    'find-links', 'f', 'no-index', 'index-url', 'i', 'extra-index-url'])
+def test_sync_uses_opts_from_txt_file(option_name):
+    """sync command uses pip options from the txt file."""
+    (opt_in_txt_file, pip_opt) = {
+        'find-links': ('--find-links ./pkg-dir', '-f ./pkg-dir'),
+        'f': ('-f ./pkg-dir', '-f ./pkg-dir'),
+        'no-index': ('--no-index', '--no-index'),
+        'index-url': ('--index-url http://index-url', '-i http://index-url'),
+        'i': ('-i http://index.localhost', '-i http://index.localhost'),
+        'extra-index-url': (
+            '--extra-index-url http://extra-index.localhost',
+            '--extra-index-url http://extra-index.localhost'),
+    }[option_name]
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with open('requirements.txt', 'w') as req_txt:
+            req_txt.write('{}\n'.format(opt_in_txt_file))
+            req_txt.write('foobar==0.42\n')
+
+        with mock.patch('prequ.sync.check_call') as check_call:
+            run_result = runner.invoke(sync_cli, ['-q'])
+            assert run_result.output == ''
+            assert run_result.exit_code == 0
+            number_of_install_calls = 0
+            for (call_args, _call_kwargs) in check_call.call_args_list:
+                cmd = ' '.join(call_args[0])
+                if cmd.startswith('pip install'):
+                    assert pip_opt in cmd
+                    number_of_install_calls += 1
+            assert number_of_install_calls == 1
+
+
 def test_editable_package(small_fake_package_dir):
     """Prequ can compile an editable """
     small_fake_package_url = path_to_url(small_fake_package_dir)
@@ -298,7 +331,7 @@ def test_locally_available_editable_package_is_not_archived_in_cache_dir(tmpdir)
     cache_dir = tmpdir.mkdir('cache_dir')
     os.mkdir(os.path.join(str(cache_dir), 'pkgs'))
 
-    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'small_fake_package')
+    fake_package_dir = os.path.join(os.path.split(__file__)[0], 'test_data', 'small_fake_package')
     fake_package_dir = path_to_url(fake_package_dir)
 
     with mock.patch('prequ.repositories.pypi.CACHE_DIR', new=str(cache_dir)):
@@ -382,7 +415,9 @@ def test_upgrade_packages_option(minimal_wheels_dir):
         assert 'small-fake-b==0.2' in out.output
 
 
-def test_generate_hashes_with_editable(small_fake_package_dir):
+def test_generate_hashes_with_editable():
+    small_fake_package_dir = os.path.join(
+        os.path.split(__file__)[0], 'test_data', 'small_fake_package')
     small_fake_package_url = path_to_url(small_fake_package_dir)
     runner = CliRunner()
     with runner.isolated_filesystem():

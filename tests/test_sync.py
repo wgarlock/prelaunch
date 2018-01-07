@@ -278,7 +278,7 @@ def test_sync_sorting_ireqs(from_line):
 def test_sync_sorting_ireqs_with_editable(from_line, from_editable):
     with mock.patch('prequ.sync.check_call') as check_call:
         path_to_package = os.path.join(os.path.dirname(__file__),
-                                       'fake_pypi', 'small_fake_package')
+                                       'test_data', 'small_fake_package')
         editable_ireq = from_editable(path_to_package)
         to_install = {
             from_line('django==1.8'),

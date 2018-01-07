@@ -23,10 +23,10 @@ from .dirs import FAKE_PYPI_WHEELS_DIR
 
 class FakeRepository(BaseRepository):
     def __init__(self):
-        with open('tests/fake_pypi/fake-index.json', 'r') as f:
+        with open('tests/test_data/fake-index.json', 'r') as f:
             self.index = json.load(f)
 
-        with open('tests/fake_pypi/fake-editables.json', 'r') as f:
+        with open('tests/test_data/fake-editables.json', 'r') as f:
             self.editables = json.load(f)
 
     def get_hashes(self, ireq):
@@ -120,17 +120,17 @@ def from_editable():
 
 @fixture
 def fake_package_dir():
-    return os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'fake_package')
+    return os.path.join(os.path.split(__file__)[0], 'test_data', 'fake_package')
 
 
 @fixture
 def small_fake_package_dir():
-    return os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'small_fake_package')
+    return os.path.join(os.path.split(__file__)[0], 'test_data', 'small_fake_package')
 
 
 @fixture
 def minimal_wheels_dir():
-    return os.path.join(os.path.split(__file__)[0], 'fake_pypi', 'minimal_wheels')
+    return os.path.join(os.path.split(__file__)[0], 'test_data', 'minimal_wheels')
 
 
 @pytest.yield_fixture
