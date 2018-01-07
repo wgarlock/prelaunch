@@ -11,8 +11,8 @@ from .utils import comment, dedup, format_requirement, key_from_req, UNSAFE_PACK
 class OutputWriter(object):
     def __init__(self, src_files, dst_file, dry_run, emit_header, emit_index,
                  emit_trusted_host, annotate, generate_hashes,
-                 default_index_url, index_urls, trusted_hosts, find_links,
-                 format_control):
+                 default_index_url, index_urls, trusted_hosts,
+                 find_links, format_control):
         self.src_files = src_files
         self.dst_file = dst_file
         self.dry_run = dry_run
