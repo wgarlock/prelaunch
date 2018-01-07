@@ -36,7 +36,7 @@ def test_format_requirement_non_relative_editable(from_editable, small_fake_pack
 
 def test_format_requirement_relative_editable(from_editable, small_fake_package_dir):
     ireq = from_editable(small_fake_package_dir)
-    assert format_requirement(ireq) == '-e file:./tests/fixtures/small_fake_package'
+    assert format_requirement(ireq) == '-e file:./tests/test_data/small_fake_package'
 
 
 def test_format_specifier(from_line):

@@ -19,8 +19,8 @@ def writer():
 
 
 def test_format_requirements_relative_path(from_editable, writer):
-    ireq = from_editable('file:fixtures/fake_package#egg=fake_package')
-    assert writer._format_requirement(ireq, {}, primary_packages=['fake_package']) == '-e file:./fixtures/fake_package'
+    ireq = from_editable('file:test_data/fake_package#egg=fake_package')
+    assert writer._format_requirement(ireq, {}, primary_packages=['fake_package']) == '-e file:./test_data/fake_package'
 
 
 def test_format_requirement_annotation_editable(from_editable, writer):
