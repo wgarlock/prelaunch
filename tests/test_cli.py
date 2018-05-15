@@ -11,6 +11,16 @@ from click.testing import CliRunner
 import pytest
 from piptools.scripts.compile import cli
 from piptools.scripts.sync import cli as sync_cli
+from pip._vendor.packaging.version import parse as parse_version
+from pip import __version__ as pip_version
+
+
+PIP_VERSION = parse_version(os.environ.get('PIP', pip_version))
+
+fail_below_pip9 = pytest.mark.xfail(
+    PIP_VERSION < parse_version('9'),
+    reason="needs pip 9 or greater"
+)
 
 
 @pytest.yield_fixture
@@ -409,3 +419,47 @@ def test_generate_hashes_with_editable():
     ).format(small_fake_package_url)
     assert out.exit_code == 0
     assert expected in out.output
+
+
+@fail_below_pip9
+def test_filter_pip_markes():
+    """
+    Check that pip-compile works with pip environment markers (PEP496)
+    """
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with open('requirements', 'w') as req_in:
+            req_in.write(
+                "six==1.10.0\n"
+                "unknown_package==0.1; python_version == '1'")
+
+        out = runner.invoke(cli, ['-n', 'requirements'])
+
+        assert out.exit_code == 0
+        assert '--output-file requirements.txt' in out.output
+        assert 'six==1.10.0' in out.output
+        assert 'unknown_package' not in out.output
+
+
+def test_no_candidates():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with open('requirements', 'w') as req_in:
+            req_in.write('six>1.0b0,<1.0b0')
+
+        out = runner.invoke(cli, ['-n', 'requirements'])
+
+        assert out.exit_code == 2
+        assert 'Skipped pre-versions:' in out.output
+
+
+def test_no_candidates_pre():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with open('requirements', 'w') as req_in:
+            req_in.write('six>1.0b0,<1.0b0')
+
+        out = runner.invoke(cli, ['-n', 'requirements', '--pre'])
+
+        assert out.exit_code == 2
+        assert 'Tried pre-versions:' in out.output

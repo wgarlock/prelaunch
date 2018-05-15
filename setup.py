@@ -19,12 +19,13 @@ setup(
     description=__doc__.strip(),
     long_description=read_file('README.rst'),
     packages=find_packages(exclude=['tests']),
+    package_data={},
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     setup_requires=['setuptools_scm'],
     install_requires=[
         'click>=6',
         'first',
         'six',
-        'setuptools'
     ],
     zip_safe=False,
     entry_points={

@@ -6,26 +6,26 @@ import os
 import sys
 import tempfile
 
-import pip
-from pip.req import InstallRequirement, parse_requirements
+from .._compat import (
+    InstallRequirement,
+    parse_requirements,
+    cmdoptions,
+    Command,
+)
 
 from .. import click
 from ..exceptions import PipToolsError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository
 from ..resolver import Resolver
-from ..utils import (assert_compatible_pip_version, dedup, is_pinned_requirement,
-                     key_from_req, UNSAFE_PACKAGES)
+from ..utils import (dedup, is_pinned_requirement, key_from_req, UNSAFE_PACKAGES)
 from ..writer import OutputWriter
 from ._repo import get_pip_options_and_pypi_repository
-
-# Make sure we're using a compatible version of pip
-assert_compatible_pip_version()
 
 DEFAULT_REQUIREMENTS_FILE = 'requirements.in'
 
 
-class PipCommand(pip.basecommand.Command):
+class PipCommand(Command):
     name = 'PipCommand'
 
 
@@ -156,6 +156,10 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
         else:
             constraints.extend(parse_requirements(
                 src_file, finder=repository.finder, session=repository.session, options=pip_options))
+
+    # Filter out pip environment markers which do not match (PEP496)
+    constraints = [req for req in constraints
+                   if req.markers is None or req.markers.evaluate()]
 
     # Check the given base set of constraints first
     Resolver.check_constraints(constraints)
