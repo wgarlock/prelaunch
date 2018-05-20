@@ -37,7 +37,6 @@ class PyPIRepository(BaseRepository):
     def __init__(self, pip_options, session):
         self.session = session
         self.pip_options = pip_options
-        self.wheel_cache = WheelCache(CACHE_DIR, pip_options.format_control)
 
         index_urls = [pip_options.index_url] + pip_options.extra_index_urls
         if pip_options.no_index:
@@ -119,6 +118,14 @@ class PyPIRepository(BaseRepository):
         )
 
     def _get_dependencies(self, ireq):
+        wheel_cache = WheelCache(CACHE_DIR, self.pip_options.format_control)
+        try:
+            return self._get_dependencies_with_wheel_cache(ireq, wheel_cache)
+        finally:
+            if callable(getattr(wheel_cache, 'cleanup', None)):
+                wheel_cache.cleanup()
+
+    def _get_dependencies_with_wheel_cache(self, ireq, wheel_cache):
         """
         :type ireq: pip.req.InstallRequirement
         """
@@ -149,7 +156,7 @@ class PyPIRepository(BaseRepository):
                     wheel_download_dir=self._wheel_download_dir,
                     session=self.session,
                     ignore_installed=True,
-                    wheel_cache=self.wheel_cache,
+                    wheel_cache=wheel_cache,
                 )
                 deps = reqset._prepare_file(
                     self.finder,
@@ -178,7 +185,7 @@ class PyPIRepository(BaseRepository):
                     ignore_requires_python=False,
                     ignore_installed=True,
                     isolated=False,
-                    wheel_cache=self.wheel_cache,
+                    wheel_cache=wheel_cache,
                     use_user_site=False,
                 )
                 self.resolver.resolve(reqset)
