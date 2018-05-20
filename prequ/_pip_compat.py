@@ -1,7 +1,9 @@
 from pip import __version__ as pip_version
 from pkg_resources import parse_version
 
-if parse_version(pip_version) >= parse_version('10.0'):
+PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
+
+if PIP_10_OR_NEWER:
     from pip._internal.cache import WheelCache
     from pip._internal.req.req_install import InstallRequirement
     from pip._internal.req.req_file import parse_requirements
