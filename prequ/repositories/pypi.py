@@ -183,10 +183,6 @@ class PyPIRepository(BaseRepository):
                 )
                 self.resolver.resolve(reqset)
                 deps = reqset.requirements.values()
-            if ireq.req and ireq._temp_build_dir and ireq._ideal_build_dir:
-                # Move the temporary build directory under self.build_dir
-                ireq.source_dir = None
-                ireq._correct_build_location()
             assert ireq.link.url
             self._dependencies_cache[ireq.link.url] = deps
             reqset.cleanup_files()
