@@ -47,8 +47,8 @@ def test_resolving_respects_platform(from_line):
     repository.finder.valid_tags = PY27_LINUX64_TAGS
     ireq = from_line('cryptography==2.0.3')
     deps = repository.get_dependencies(ireq)
-    assert set(x.name for x in deps) == {
-        'asn1crypto', 'cffi', 'enum34', 'idna', 'ipaddress', 'six'}
+    assert 'enum34' in set(x.name for x in deps)
+    assert 'ipaddress' in set(x.name for x in deps)
 
 
 def test_generate_hashes_only_current_platform(from_line):
