@@ -6,12 +6,12 @@ import os
 import re
 import sys
 from collections import OrderedDict
+from contextlib import contextmanager
 from itertools import chain, groupby
 
-import pip
 from click import style
-from pip.download import path_to_url, url_to_path
-from pip.req import InstallRequirement
+
+from ._pip_compat import InstallRequirement, path_to_url, url_to_path
 
 
 def first(iterable):
@@ -20,24 +20,7 @@ def first(iterable):
     return None
 
 
-def safeint(s):
-    try:
-        return int(s)
-    except ValueError:
-        return 0
-
-
-pip_version_info = tuple(safeint(digit) for digit in pip.__version__.split('.'))
-
 UNSAFE_PACKAGES = {'setuptools', 'distribute', 'pip'}
-
-
-def assert_compatible_pip_version():
-    # Make sure we're using a reasonably modern version of pip
-    if not pip_version_info >= (8, 0):
-        raise SystemExit((
-            'Prequ requires at least version 8.0 of pip ({} found), '
-            'perhaps run `pip install --upgrade pip`?').format(pip.__version__))
 
 
 def key_from_ireq(ireq):
@@ -436,3 +419,17 @@ def fs_str(string):
 
 
 _fs_encoding = sys.getfilesystemencoding() or sys.getdefaultencoding()
+
+
+# Borrowed from pew to avoid importing pew which imports psutil
+# See https://github.com/berdario/pew/blob/master/pew/_utils.py#L82
+@contextmanager
+def temp_environ():
+    """Allow the ability to set os.environ temporarily"""
+    environ = dict(os.environ)
+    try:
+        yield
+
+    finally:
+        os.environ.clear()
+        os.environ.update(environ)

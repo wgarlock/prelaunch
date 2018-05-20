@@ -1,7 +1,6 @@
 from mock import MagicMock, patch
-from pip.index import PackageFinder
-from pip.req import InstallRequirement
 
+from prequ._pip_compat import InstallRequirement, PackageFinder
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
 
