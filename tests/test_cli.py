@@ -16,7 +16,7 @@ from prequ.scripts.sync import cli as sync_cli
 
 from .utils import check_successful_exit
 
-PIP_VERSION = parse_version(os.environ.get('PIP', pip_version))
+PIP_VERSION = parse_version(pip_version)
 
 fail_below_pip9 = pytest.mark.xfail(
     PIP_VERSION < parse_version('9'),
