@@ -1,6 +1,7 @@
 # -*- coding=utf-8 -*-
 import importlib
 
+
 def do_import(module_path, subimport=None, old_path=None):
     internal = 'pip._internal.{0}'.format(module_path)
     old_path = old_path or module_path
@@ -12,7 +13,7 @@ def do_import(module_path, subimport=None, old_path=None):
     if subimport:
         return getattr(_tmp, subimport, _tmp)
     return _tmp
-    
+
 
 InstallRequirement = do_import('req.req_install', 'InstallRequirement')
 parse_requirements = do_import('req.req_file', 'parse_requirements')

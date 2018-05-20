@@ -8,12 +8,7 @@ import tempfile
 
 import click
 
-from .._pip_compat import (
-    InstallRequirement,
-    parse_requirements,
-    cmdoptions,
-    Command,
-)
+from .._pip_compat import Command, InstallRequirement, parse_requirements
 from ..exceptions import PrequError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository

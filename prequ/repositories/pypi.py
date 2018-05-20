@@ -9,13 +9,8 @@ from shutil import rmtree
 
 from .._compat import TemporaryDirectory
 from .._pip_compat import (
-    is_file_url,
-    url_to_path,
-    PackageFinder,
-    RequirementSet,
-    FAVORITE_HASH,
-    PyPI
-)
+    FAVORITE_HASH, PackageFinder, PyPI, RequirementSet, is_file_url,
+    url_to_path)
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (

@@ -5,7 +5,6 @@ from __future__ import (
 from ..utils import (
     as_tuple, check_is_hashable, key_from_ireq, make_install_requirement)
 from .base import BaseRepository
-from .._compat import FAVORITE_HASH
 
 
 def ireq_satisfied_by_existing_pin(ireq, existing_pin):

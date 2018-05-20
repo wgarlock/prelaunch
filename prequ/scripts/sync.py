@@ -8,7 +8,7 @@ import sys
 import click
 
 from .. import sync
-from .._pip_compat import parse_requirements, get_installed_distributions
+from .._pip_compat import get_installed_distributions, parse_requirements
 from ..exceptions import PrequError
 from ..logging import log
 from ..utils import flat_map
