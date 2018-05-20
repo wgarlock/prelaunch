@@ -1,32 +1,47 @@
-# -*- coding=utf-8 -*-
-import importlib
+from pip import __version__ as pip_version
+from pkg_resources import parse_version
 
+if parse_version(pip_version) >= parse_version('10.0'):
+    from pip._internal.req.req_install import InstallRequirement
+    from pip._internal.req.req_file import parse_requirements
+    from pip._internal.req.req_set import RequirementSet
+    from pip._internal.utils.appdirs import user_cache_dir
+    from pip._internal.utils.hashes import FAVORITE_HASH
+    from pip._internal.download import is_file_url, path_to_url, url_to_path
+    from pip._internal.index import FormatControl, PackageFinder
+    from pip._internal.wheel import Wheel
+    from pip._internal.basecommand import Command
+    from pip._internal import cmdoptions
+    from pip._internal.utils.misc import get_installed_distributions
+    from pip._internal.models.index import PyPI
+else:
+    from pip.req.req_install import InstallRequirement
+    from pip.req.req_file import parse_requirements
+    from pip.req.req_set import RequirementSet
+    from pip.utils.appdirs import user_cache_dir
+    from pip.utils.hashes import FAVORITE_HASH
+    from pip.download import is_file_url, path_to_url, url_to_path
+    from pip.index import FormatControl, PackageFinder
+    from pip.wheel import Wheel
+    from pip.basecommand import Command
+    from pip import cmdoptions
+    from pip.utils import get_installed_distributions
+    from pip.models.index import PyPI
 
-def do_import(module_path, subimport=None, old_path=None):
-    internal = 'pip._internal.{0}'.format(module_path)
-    old_path = old_path or module_path
-    pip9 = 'pip.{0}'.format(old_path)
-    try:
-        _tmp = importlib.import_module(internal)
-    except ImportError:
-        _tmp = importlib.import_module(pip9)
-    if subimport:
-        return getattr(_tmp, subimport, _tmp)
-    return _tmp
-
-
-InstallRequirement = do_import('req.req_install', 'InstallRequirement')
-parse_requirements = do_import('req.req_file', 'parse_requirements')
-RequirementSet = do_import('req.req_set', 'RequirementSet')
-user_cache_dir = do_import('utils.appdirs', 'user_cache_dir')
-FAVORITE_HASH = do_import('utils.hashes', 'FAVORITE_HASH')
-is_file_url = do_import('download', 'is_file_url')
-path_to_url = do_import('download', 'path_to_url')
-url_to_path = do_import('download', 'url_to_path')
-PackageFinder = do_import('index', 'PackageFinder')
-FormatControl = do_import('index', 'FormatControl')
-Wheel = do_import('wheel', 'Wheel')
-Command = do_import('basecommand', 'Command')
-cmdoptions = do_import('cmdoptions')
-get_installed_distributions = do_import('utils.misc', 'get_installed_distributions', old_path='utils')
-PyPI = do_import('models.index', 'PyPI')
+__all__ = [
+    'Command',
+    'FAVORITE_HASH',
+    'FormatControl',
+    'InstallRequirement',
+    'PackageFinder',
+    'PyPI',
+    'RequirementSet',
+    'Wheel',
+    'cmdoptions',
+    'get_installed_distributions',
+    'is_file_url',
+    'parse_requirements',
+    'path_to_url',
+    'url_to_path',
+    'user_cache_dir',
+]
