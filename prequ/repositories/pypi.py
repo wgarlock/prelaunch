@@ -182,7 +182,9 @@ class PyPIRepository(BaseRepository):
                     use_user_site=False,
                 )
                 self.resolver.resolve(reqset)
-                deps = reqset.requirements.values()
+                deps = [
+                    x for x in reqset.requirements.values() if not x.is_direct
+                ]
             assert ireq.link.url
             self._dependencies_cache[ireq.link.url] = deps
             reqset.cleanup_files()
