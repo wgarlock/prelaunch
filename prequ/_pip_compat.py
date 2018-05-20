@@ -1,4 +1,5 @@
 from pip import __version__ as pip_version
+from pip._vendor.pkg_resources import Requirement
 from pkg_resources import parse_version
 
 PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
@@ -31,6 +32,7 @@ else:
     from pip.utils import get_installed_distributions
     from pip.models.index import PyPI
 
+
 __all__ = [
     'Command',
     'FAVORITE_HASH',
@@ -38,6 +40,7 @@ __all__ = [
     'InstallRequirement',
     'PackageFinder',
     'PyPI',
+    'Requirement',
     'RequirementSet',
     'Wheel',
     'WheelCache',

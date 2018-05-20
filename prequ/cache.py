@@ -6,8 +6,7 @@ import json
 import os
 import sys
 
-from pip._vendor.packaging.requirements import Requirement
-
+from ._pip_compat import Requirement
 from .exceptions import PrequError
 from .locations import CACHE_DIR
 from .utils import as_tuple, key_from_req, lookup_table, name_from_ireq
@@ -171,7 +170,7 @@ class DependencyCache(object):
         # First, collect all the dependencies into a sequence of (parent, child) tuples, like [('flake8', 'pep8'),
         # ('flake8', 'mccabe'), ...]
         return lookup_table(
-            (key_from_req(Requirement(dep_name)), req_name)
+            (key_from_req(Requirement.parse(dep_name)), req_name)
             for (cache_key, req_name) in cache_key_names.items()
             for dep_name in self.cache[cache_key[0]][cache_key[1]])
 
