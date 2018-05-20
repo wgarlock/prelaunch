@@ -9,8 +9,8 @@ from shutil import rmtree
 
 from .._compat import TemporaryDirectory
 from .._pip_compat import (
-    FAVORITE_HASH, PackageFinder, PyPI, RequirementSet, is_file_url,
-    url_to_path)
+    FAVORITE_HASH, PackageFinder, PyPI, RequirementSet, WheelCache,
+    is_file_url, url_to_path)
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
@@ -23,11 +23,6 @@ try:
     from pip._internal.resolve import Resolver as PipResolver
 except ImportError:
     pass
-
-try:
-    from pip._internal.cache import WheelCache
-except ImportError:
-    from pip.wheel import WheelCache
 
 
 class PyPIRepository(BaseRepository):
