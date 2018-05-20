@@ -1,12 +1,15 @@
 import os
 
-from pip.index import InstallationCandidate
-from pip.req import InstallRequirement
-
+from prequ._pip_compat import InstallRequirement
 from prequ.exceptions import (
     IncompatibleRequirements, NoCandidateFound, UnsupportedConstraint)
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
+
+try:
+    from pip.index import InstallationCandidate
+except ImportError:
+    from pip._internal.index import InstallationCandidate
 
 
 def test_no_candidate_found_with_versions():

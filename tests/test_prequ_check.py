@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import pytest
-from pip.exceptions import DistributionNotFound
 
 from prequ.scripts.check import main as check_main
 
@@ -10,6 +9,10 @@ from .utils import check_successful_exit, make_cli_runner
 
 run_check = make_cli_runner(check_main, [])
 
+try:
+    from pip.exceptions import DistributionNotFound
+except ImportError:
+    from pip._internal.exceptions import DistributionNotFound
 
 UP_TO_DATE_REQ_TXT = """
 --trusted-host localhost

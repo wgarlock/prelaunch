@@ -1,8 +1,7 @@
 import os
 import shutil
 
-from pip.download import path_to_url
-
+from prequ._pip_compat import path_to_url
 from prequ.utils import (
     as_tuple, dedup, flat_map, format_requirement, format_specifier,
     is_subdirectory)
