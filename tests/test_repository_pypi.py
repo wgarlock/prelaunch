@@ -1,6 +1,7 @@
 import mock
 import pytest
 
+from prequ._pip_compat import PIP_10_OR_NEWER
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
 
@@ -25,14 +26,29 @@ PY27_LINUX64_TAGS = [
 ]
 
 
-@mock.patch('pip.pep425tags.supported_tags', new=PY27_LINUX64_TAGS)
+def _patch_supported_tags(func):
+    if PIP_10_OR_NEWER:
+        def get_supported_tags(versions=None, noarch=False, platform=None,
+                               impl=None, abi=None):
+            return PY27_LINUX64_TAGS
+
+        return mock.patch(
+            'pip._internal.pep425tags.get_supported',
+            new=get_supported_tags)(func)
+    else:
+        return mock.patch(
+            'pip.pep425tags.supported_tags',
+            new=PY27_LINUX64_TAGS)(func)
+
+
+@_patch_supported_tags
 def test_resolving_respects_platform(from_line):
     repository = get_repository()
     repository.finder.valid_tags = PY27_LINUX64_TAGS
     ireq = from_line('cryptography==2.0.3')
     deps = repository.get_dependencies(ireq)
-    assert set(x.name for x in deps) == {
-        'asn1crypto', 'cffi', 'enum34', 'idna', 'ipaddress', 'six'}
+    assert 'enum34' in set(x.name for x in deps)
+    assert 'ipaddress' in set(x.name for x in deps)
 
 
 def test_generate_hashes_only_current_platform(from_line):

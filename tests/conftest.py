@@ -7,9 +7,9 @@ import pkg_resources
 import pytest
 from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
-from pip.req import InstallRequirement
 from pytest import fixture
 
+from prequ._pip_compat import InstallRequirement
 from prequ.cache import DependencyCache
 from prequ.exceptions import NoCandidateFound
 from prequ.repositories.base import BaseRepository

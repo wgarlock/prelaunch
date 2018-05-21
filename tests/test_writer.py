@@ -1,6 +1,6 @@
-from pip.index import FormatControl
 from pytest import fixture
 
+from prequ._pip_compat import FormatControl
 from prequ.utils import comment
 from prequ.writer import OutputWriter
 

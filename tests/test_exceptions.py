@@ -1,12 +1,26 @@
 import os
 
-from pip.index import InstallationCandidate
-from pip.req import InstallRequirement
-
+from prequ._pip_compat import InstallRequirement, PackageFinder
 from prequ.exceptions import (
     IncompatibleRequirements, NoCandidateFound, UnsupportedConstraint)
 
 from .dirs import FAKE_PYPI_WHEELS_DIR
+from .test_repositories import get_pypi_repository
+
+try:
+    from pip.index import InstallationCandidate
+except ImportError:
+    from pip._internal.index import InstallationCandidate
+
+
+def get_finder():
+    repo = get_pypi_repository()
+    finder = PackageFinder(
+        find_links=[],
+        index_urls=['pypi.localhost'],
+        allow_all_prereleases=False,
+        session=repo.session)
+    return finder
 
 
 def test_no_candidate_found_with_versions():
@@ -14,7 +28,7 @@ def test_no_candidate_found_with_versions():
     tried = [
         InstallationCandidate('some-package', ver, None)
         for ver in ['1.2.3', '12.3.0', '12.3.5']]
-    no_candidate_found = NoCandidateFound(ireq, tried, ['pypi.localhost'])
+    no_candidate_found = NoCandidateFound(ireq, tried, get_finder())
     assert '{}'.format(no_candidate_found) == (
         "Could not find a version that matches some-package==12.3.4\n"
         "Tried: 1.2.3, 12.3.0, 12.3.5\n"
@@ -24,10 +38,10 @@ def test_no_candidate_found_with_versions():
 def test_no_candidate_found_no_versions():
     ireq = InstallRequirement.from_line('some-package==12.3.4')
     tried = []
-    no_candidate_found = NoCandidateFound(ireq, tried, ['pypi.localhost'])
+    no_candidate_found = NoCandidateFound(ireq, tried, get_finder())
     assert '{}'.format(no_candidate_found) == (
         "Could not find a version that matches some-package==12.3.4\n"
-        "Tried: (no version found at all)\n"
+        "No versions found\n"
         "Was pypi.localhost reachable?")
 
 

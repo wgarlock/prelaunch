@@ -7,26 +7,26 @@ import os
 from contextlib import contextmanager
 from shutil import rmtree
 
-from pip.download import is_file_url, url_to_path
-from pip.index import PackageFinder
-from pip.req.req_set import RequirementSet
-
 from .._compat import TemporaryDirectory
+from .._pip_compat import (
+    FAVORITE_HASH, PIP_10_OR_NEWER, PackageFinder, PyPI, RequirementSet,
+    WheelCache, is_file_url, url_to_path)
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
     check_is_hashable, fs_str, is_vcs_link, lookup_table,
-    make_install_requirement, pip_version_info)
+    make_install_requirement)
 from .base import BaseRepository
 
 try:
-    from pip.utils.hashes import FAVORITE_HASH
+    from pip._internal.operations.prepare import RequirementPreparer
+    from pip._internal.resolve import Resolver as PipResolver
 except ImportError:
-    FAVORITE_HASH = 'sha256'
+    pass
 
 
 class PyPIRepository(BaseRepository):
-    DEFAULT_INDEX_URL = 'https://pypi.python.org/simple'
+    DEFAULT_INDEX_URL = PyPI.simple_url
 
     """
     The PyPIRepository will use the provided Finder instance to lookup
@@ -36,6 +36,7 @@ class PyPIRepository(BaseRepository):
     """
     def __init__(self, pip_options, session):
         self.session = session
+        self.pip_options = pip_options
 
         index_urls = [pip_options.index_url] + pip_options.extra_index_urls
         if pip_options.no_index:
@@ -88,11 +89,7 @@ class PyPIRepository(BaseRepository):
 
     def find_all_candidates(self, req_name):
         if req_name not in self._available_candidates_cache:
-            # pip 8 changed the internal API, making this a public method
-            if pip_version_info >= (8, 0):
-                candidates = self.finder.find_all_candidates(req_name)
-            else:
-                candidates = self.finder._find_all_versions(req_name)
+            candidates = self.finder.find_all_candidates(req_name)
             self._available_candidates_cache[req_name] = candidates
         return self._available_candidates_cache[req_name]
 
@@ -112,7 +109,7 @@ class PyPIRepository(BaseRepository):
         # Reuses pip's internal candidate sort key to sort
         matching_candidates = [candidates_by_version[ver] for ver in matching_versions]
         if not matching_candidates:
-            raise NoCandidateFound(ireq, all_candidates, self.finder.index_urls)
+            raise NoCandidateFound(ireq, all_candidates, self.finder)
         best_candidate = max(matching_candidates, key=self.finder._candidate_sort_key)
 
         # Turn the candidate into a pinned InstallRequirement
@@ -121,6 +118,14 @@ class PyPIRepository(BaseRepository):
         )
 
     def _get_dependencies(self, ireq):
+        wheel_cache = WheelCache(CACHE_DIR, self.pip_options.format_control)
+        try:
+            return self._get_dependencies_with_wheel_cache(ireq, wheel_cache)
+        finally:
+            if callable(getattr(wheel_cache, 'cleanup', None)):
+                wheel_cache.cleanup()
+
+    def _get_dependencies_with_wheel_cache(self, ireq, wheel_cache):
         """
         :type ireq: pip.req.InstallRequirement
         """
@@ -142,19 +147,54 @@ class PyPIRepository(BaseRepository):
             if not os.path.isdir(self._wheel_download_dir):
                 os.makedirs(self._wheel_download_dir)
 
-            reqset = RequirementSet(self.build_dir,
-                                    self.source_dir,
-                                    download_dir=download_dir,
-                                    wheel_download_dir=self._wheel_download_dir,
-                                    session=self.session,
-                                    ignore_installed=True)
-            deps = reqset._prepare_file(self.finder, ireq)
-            if ireq.req and ireq._temp_build_dir and ireq._ideal_build_dir:
-                # Move the temporary build directory under self.build_dir
-                ireq.source_dir = None
-                ireq._correct_build_location()
+            if not PIP_10_OR_NEWER:
+                # Pip < 9 and below
+                reqset = RequirementSet(
+                    self.build_dir,
+                    self.source_dir,
+                    download_dir=download_dir,
+                    wheel_download_dir=self._wheel_download_dir,
+                    session=self.session,
+                    ignore_installed=True,
+                    wheel_cache=wheel_cache,
+                )
+                deps = reqset._prepare_file(
+                    self.finder,
+                    ireq
+                )
+            else:
+                # Pip >= 10 (new resolver!)
+                preparer = RequirementPreparer(
+                    build_dir=self.build_dir,
+                    src_dir=self.source_dir,
+                    download_dir=download_dir,
+                    wheel_download_dir=self._wheel_download_dir,
+                    progress_bar='off',
+                    build_isolation=False
+                )
+                reqset = RequirementSet()
+                ireq.is_direct = True
+                reqset.add_requirement(ireq)
+                self.resolver = PipResolver(
+                    preparer=preparer,
+                    finder=self.finder,
+                    session=self.session,
+                    upgrade_strategy="to-satisfy-only",
+                    force_reinstall=False,
+                    ignore_dependencies=False,
+                    ignore_requires_python=False,
+                    ignore_installed=True,
+                    isolated=False,
+                    wheel_cache=wheel_cache,
+                    use_user_site=False,
+                )
+                self.resolver.resolve(reqset)
+                deps = [
+                    x for x in reqset.requirements.values() if not x.is_direct
+                ]
             assert ireq.link.url
             self._dependencies_cache[ireq.link.url] = deps
+            reqset.cleanup_files()
         return set(deps)
 
     def get_hashes(self, ireq):

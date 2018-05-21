@@ -1,11 +1,10 @@
 import optparse
 
-import pip
-
+from .._pip_compat import Command, cmdoptions
 from ..repositories import PyPIRepository
 
 
-class PipCommand(pip.basecommand.Command):
+class PipCommand(Command):
     name = 'PipCommand'
 
 
@@ -48,8 +47,10 @@ def get_pip_command():
     # General options (find_links, index_url, extra_index_url, trusted_host,
     # and pre) are defered to pip.
     pip_command = PipCommand()
-    index_opts = pip.cmdoptions.make_option_group(
-        pip.cmdoptions.index_group,
+    pip_command.parser.add_option(cmdoptions.no_binary())
+    pip_command.parser.add_option(cmdoptions.only_binary())
+    index_opts = cmdoptions.make_option_group(
+        cmdoptions.index_group,
         pip_command.parser,
     )
     pip_command.parser.insert_option_group(0, index_opts)

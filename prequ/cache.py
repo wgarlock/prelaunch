@@ -6,8 +6,7 @@ import json
 import os
 import sys
 
-from pkg_resources import Requirement
-
+from ._pip_compat import Requirement
 from .exceptions import PrequError
 from .locations import CACHE_DIR
 from .utils import as_tuple, key_from_req, lookup_table, name_from_ireq

@@ -8,8 +8,8 @@ from functools import partial
 from itertools import chain, count
 
 import click
-from pip.req import InstallRequirement
 
+from ._pip_compat import InstallRequirement
 from .cache import DependencyCache
 from .logging import log
 from .utils import (
