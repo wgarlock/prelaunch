@@ -267,7 +267,7 @@ def get_pinned_version(ireq):
     :type ignore_editables: bool
     """
     if not isinstance(ireq, InstallRequirement):
-        ireq = InstallRequirement(ireq, None)
+        ireq = InstallRequirement.from_line(ireq)
     assert isinstance(ireq, InstallRequirement)
 
     if ireq.editable:
