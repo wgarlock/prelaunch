@@ -2,8 +2,10 @@
 #
 #   prequ update
 #
+-e .
+click==6.7                # via prequ
 pluggy==0.6.0             # via tox
 py==1.5.3                 # via tox
-six==1.11.0               # via tox
+six==1.11.0               # via prequ, tox
 tox==3.0.0
 virtualenv==16.0.0        # via tox
