@@ -9,8 +9,8 @@ from shutil import rmtree
 
 from .._compat import TemporaryDirectory
 from .._pip_compat import (
-    FAVORITE_HASH, PackageFinder, PyPI, RequirementSet, WheelCache,
-    is_file_url, url_to_path)
+    FAVORITE_HASH, PIP_10_OR_NEWER, PackageFinder, PyPI, RequirementSet,
+    WheelCache, is_file_url, url_to_path)
 from ..cache import CACHE_DIR
 from ..exceptions import NoCandidateFound
 from ..utils import (
@@ -147,7 +147,7 @@ class PyPIRepository(BaseRepository):
             if not os.path.isdir(self._wheel_download_dir):
                 os.makedirs(self._wheel_download_dir)
 
-            try:
+            if not PIP_10_OR_NEWER:
                 # Pip < 9 and below
                 reqset = RequirementSet(
                     self.build_dir,
@@ -162,7 +162,7 @@ class PyPIRepository(BaseRepository):
                     self.finder,
                     ireq
                 )
-            except TypeError:
+            else:
                 # Pip >= 10 (new resolver!)
                 preparer = RequirementPreparer(
                     build_dir=self.build_dir,
