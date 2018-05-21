@@ -7,19 +7,15 @@ from textwrap import dedent
 import mock
 import pytest
 from click.testing import CliRunner
-from pip import __version__ as pip_version
-from pip._vendor.packaging.version import parse as parse_version
 
-from prequ._pip_compat import path_to_url
+from prequ._pip_compat import PIP_9_OR_NEWER, path_to_url
 from prequ.scripts.compile_in import cli
 from prequ.scripts.sync import cli as sync_cli
 
 from .utils import check_successful_exit
 
-PIP_VERSION = parse_version(pip_version)
-
 fail_below_pip9 = pytest.mark.xfail(
-    PIP_VERSION < parse_version('9'),
+    not PIP_9_OR_NEWER,
     reason="needs pip 9 or greater"
 )
 
