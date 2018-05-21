@@ -326,7 +326,6 @@ def test_relative_editable_package(small_fake_package_dir):
 
         out = runner.invoke(cli, ['-n'])
 
-        print(out.output)
         check_successful_exit(out)
         assert relative_package_req in out.output
 
