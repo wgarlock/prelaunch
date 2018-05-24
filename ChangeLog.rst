@@ -1,6 +1,30 @@
 Prequ Change Log
 ================
 
+This version of Prequ contains all the changes from pip-tools 2.0.2 and
+is in sync with pip-tools master commit 9cb41d8.
+
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Add support for Pip 10
+- Improve error messages when skipping pre-releases
+  (jazzband/pip-tools#655)
+- tests: Do not download Django from Git (jazzband/pip-tools#629)
+
+Features
+~~~~~~~~
+
+- sync: Add "--user" option to install packages into user-local
+  directory (jazzband/pip-tools#642)
+
+Bug Fixes
+~~~~~~~~~
+
+- Handle environment markers in the source requirements
+  (jazzband/pip-tools#647)
+
 1.4.0 (Release Candidate 1)
 ---------------------------
 
