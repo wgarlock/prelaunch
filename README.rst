@@ -55,7 +55,6 @@ Installation
 
 ::
 
-   $ pip install --upgrade pip  # Prequ needs pip==8.0 or higher
    $ pip install prequ
 
 
