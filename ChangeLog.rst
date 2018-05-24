@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+Bug Fixes
+~~~~~~~~~
+
+- Fix Pip 10 dependency resolving
+
 1.4.0 (Release Candidate 2)
 ---------------------------
 

@@ -188,10 +188,8 @@ class PyPIRepository(BaseRepository):
                     wheel_cache=wheel_cache,
                     use_user_site=False,
                 )
-                self.resolver.resolve(reqset)
-                deps = [
-                    x for x in reqset.requirements.values() if not x.is_direct
-                ]
+                self.resolver.require_hashes = False
+                deps = self.resolver._resolve_one(reqset, ireq)
             assert ireq.link.url
             self._dependencies_cache[ireq.link.url] = deps
             reqset.cleanup_files()
