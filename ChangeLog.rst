@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+1.4.0 (Release Candidate 2)
+---------------------------
+
+Released on 2018-05-25 01:40 +03:00.
+
 This version of Prequ contains all the changes from pip-tools 2.0.2 and
 is in sync with pip-tools master commit 9cb41d8.
 
