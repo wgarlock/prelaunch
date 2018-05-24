@@ -1,6 +1,5 @@
 from pip import __version__ as pip_version
-from pip._vendor.pkg_resources import Requirement
-from pkg_resources import parse_version
+from pip._vendor.pkg_resources import Requirement, parse_version
 
 PIP_9_OR_NEWER = (parse_version(pip_version) >= parse_version('9.0'))
 PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
