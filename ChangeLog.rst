@@ -1,26 +1,31 @@
 Prequ Change Log
 ================
 
-Bug Fixes
-~~~~~~~~~
+1.4.0
+-----
 
-- Fix Pip 10 dependency resolving
-
-1.4.0 (Release Candidate 2)
----------------------------
-
-Released on 2018-05-25 01:40 +03:00.
+Released on 2018-05-26 19:35 +03:00.
 
 This version of Prequ contains all the changes from pip-tools 2.0.2 and
 is in sync with pip-tools master commit 9cb41d8.
-
 
 General Changes
 ~~~~~~~~~~~~~~~
 
 - Add support for Pip 10
+
 - Improve error messages when skipping pre-releases
   (jazzband/pip-tools#655)
+
+- Improve compile speed of locally available editable requirement by
+  avoiding creation of an sdist archive (jazzband/pip-tools#583)
+
+- Improve the ``NoCandidateFound`` error message on potential causes
+  (jazzband/pip-tools#614)
+
+- sync: Add ``-markerlib`` to the list of packages to ignore
+  (jazzband/pip-tools#613)
+
 - tests: Do not download Django from Git (jazzband/pip-tools#629)
 
 Features
@@ -29,34 +34,14 @@ Features
 - sync: Add "--user" option to install packages into user-local
   directory (jazzband/pip-tools#642)
 
+- Allow editable packages in source requirements even if generating
+  hashes is enabled (jazzband/pip-tools#524)
+
 Bug Fixes
 ~~~~~~~~~
 
 - Handle environment markers in the source requirements
   (jazzband/pip-tools#647)
-
-1.4.0 (Release Candidate 1)
----------------------------
-
-Released on 2018-01-03 23:05 +02:00.
-
-This version of Prequ is synced with pip-tools 1.11.0.
-
-Features
-~~~~~~~~
-
-- Allow editable packages in source requirements even if generating
-  hashes is enabled (jazzband/pip-tools#524)
-
-General Changes
-~~~~~~~~~~~~~~~
-
-- Improve compile speed of locally available editable requirement by
-  avoiding creation of an sdist archive (jazzband/pip-tools#583)
-- Improve the ``NoCandidateFound`` error message on potential causes
-  (jazzband/pip-tools#614)
-- sync: Add ``-markerlib`` to the list of packages to ignore
-  (jazzband/pip-tools#613)
 
 1.3.1
 -----
