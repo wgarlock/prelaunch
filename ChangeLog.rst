@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+General Changes
+~~~~~~~~~~~~~~~
+
+- Remove dependency on setuptools
+
 1.4.0
 -----
 

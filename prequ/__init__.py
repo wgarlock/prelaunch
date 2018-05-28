@@ -1,4 +1,4 @@
-import pkg_resources
+from pip._vendor import pkg_resources
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
