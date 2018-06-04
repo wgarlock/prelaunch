@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+1.4.1
+-----
+
+Released on 2018-06-05 1:15 +03:00.
+
 General Changes
 ~~~~~~~~~~~~~~~
 
