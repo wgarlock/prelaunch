@@ -6,6 +6,7 @@ PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
 
 if PIP_10_OR_NEWER:
     from pip._internal.cache import WheelCache
+    from pip._internal.exceptions import InstallationError
     from pip._internal.req.req_install import InstallRequirement
     from pip._internal.req.req_file import parse_requirements
     from pip._internal.req.req_set import RequirementSet
@@ -19,6 +20,7 @@ if PIP_10_OR_NEWER:
     from pip._internal.utils.misc import get_installed_distributions
     from pip._internal.models.index import PyPI
 else:
+    from pip.exceptions import InstallationError
     from pip.req.req_install import InstallRequirement
     from pip.req.req_file import parse_requirements
     from pip.req.req_set import RequirementSet
@@ -38,6 +40,7 @@ __all__ = [
     'FAVORITE_HASH',
     'FormatControl',
     'InstallRequirement',
+    'InstallationError',
     'PackageFinder',
     'PyPI',
     'Requirement',

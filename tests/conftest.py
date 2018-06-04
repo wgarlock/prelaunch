@@ -3,8 +3,8 @@ import json
 import os
 from functools import partial
 
-import pkg_resources
 import pytest
+from pip._vendor import pkg_resources
 from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
 from pytest import fixture

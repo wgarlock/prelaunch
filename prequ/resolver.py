@@ -198,7 +198,7 @@ class Resolver(object):
             for constraint in original_constraints:
                 if constraint.name in UNSAFE_PACKAGES:
                     constraints.remove(constraint)
-                    constraint.req.specifier = None
+                    constraint.req.specifier = type(constraint.req.specifier)()
                     unsafe_constraints.append(constraint)
 
         log.debug('Current constraints:')
@@ -218,6 +218,11 @@ class Resolver(object):
             for dep in self._iter_dependencies(best_match):
                 if self.allow_unsafe or dep.name not in UNSAFE_PACKAGES:
                     safe_constraints.append(dep)
+                else:
+                    dep.req.specifier = type(dep.req.specifier)()
+                    unsafe_constraints.append(dep)
+                    unsafe_constraints = list(
+                        self._group_constraints(unsafe_constraints))
         # Grouping constraints to make clean diff between rounds
         theirs = set(
             ireq for ireq in self._group_constraints(safe_constraints)

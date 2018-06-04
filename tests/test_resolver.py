@@ -97,7 +97,7 @@ import pytest
          ),
 
         # Exclude package dependcy of setuptools as it is unsafe.
-        (['html5lib'], ['html5lib==0.999999999']),
+        (['html5lib'], (['html5lib==0.999999999'], ['setuptools'])),
 
         # We shouldn't include irrelevant pip constraints
         # See: GH-471
@@ -107,19 +107,34 @@ import pytest
          ),
 
         # Unsafe dependencies should be filtered
-        (['setuptools==35.0.0', 'anyjson==0.3.3'], ['anyjson==0.3.3']),
+        (['setuptools==35.0.0', 'anyjson==0.3.3'],
+         (['anyjson==0.3.3'], ['setuptools'])),
 
         (['fake-prequ-test-with-unsafe-deps==0.1'],
-         ['fake-prequ-test-with-unsafe-deps==0.1']
+         (['fake-prequ-test-with-unsafe-deps==0.1'], ['setuptools'])
          ),
     ])
 )
 def test_resolver(resolver, from_line, input, expected, prereleases):
-    input = [line if isinstance(line, tuple) else (line, False) for line in input]
-    input = [from_line(req[0], constraint=req[1]) for req in input]
-    output = resolver(input, prereleases=prereleases).resolve()
-    output = {str(line) for line in output}
-    assert output == {str(line) for line in expected}
+    input_tuples = (
+        line if isinstance(line, tuple) else (line, False)
+        for line in input)
+    input_ireqs = [
+        from_line(req, constraint=is_constraint)
+        for (req, is_constraint) in input_tuples]
+    (expected_results, expected_unsafe) = (
+        expected if isinstance(expected, tuple) else (expected, []))
+
+    resolver_obj = resolver(input_ireqs, prereleases=prereleases)
+    result = resolver_obj.resolve()
+
+    result_output = {str(line) for line in result}
+    expected_output = {str(line) for line in expected_results}
+    assert result_output == expected_output
+
+    result_unsafe = [
+        str(x) for x in resolver_obj.unsafe_constraints]
+    assert result_unsafe == expected_unsafe
 
 
 @pytest.mark.parametrize(
