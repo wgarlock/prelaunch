@@ -1,7 +1,10 @@
+import os
+
 import mock
 import pytest
 
-from prequ._pip_compat import PIP_10_OR_NEWER
+from prequ._pip_compat import PIP_10_OR_NEWER, path_to_url
+from prequ.exceptions import DependencyResolutionFailed
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
 
@@ -119,6 +122,30 @@ def test_get_dependencies_non_pinned_non_editable(from_line):
     repository = get_repository()
     with pytest.raises(TypeError):
         repository.get_dependencies(from_line('prequ'))
+
+
+def test_failing_setup_script(from_editable):
+    repository = get_repository()
+    failing_package_dir = os.path.join(
+        os.path.split(__file__)[0], 'test_data', 'failing_package')
+    failing_package_url = path_to_url(failing_package_dir)
+    ireq = from_editable(failing_package_url)
+
+    with pytest.raises(DependencyResolutionFailed) as excinfo:
+        repository.get_dependencies(ireq)
+
+    # Check the contents of the error message
+    error_message = '{}'.format(excinfo.value)
+    assert error_message.startswith(
+        'Dependency resolution of {url} failed:\n'.format(
+            url=failing_package_url))
+
+    egg_info_failed = 'Command "python setup.py egg_info" failed'
+    assert egg_info_failed in error_message
+
+    import_error = "No module named 'non_existing_setup_helper'"
+    import_error2 = import_error.replace("'", '')  # On Python 2
+    assert (import_error in error_message) or (import_error2 in error_message)
 
 
 def get_repository():

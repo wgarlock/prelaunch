@@ -2,6 +2,20 @@ class PrequError(Exception):
     pass
 
 
+class DependencyResolutionFailed(PrequError):
+    def __init__(self, ireq, pip_error, log_messages=None):
+        self.ireq = ireq
+        self.pip_error = pip_error
+        self.log_messages = log_messages or []
+
+    def __str__(self):
+        return (
+            'Dependency resolution of {self.ireq} failed:\n'
+            '{self.pip_error}\n\n'
+            '{error_log}').format(
+                self=self, error_log='\n'.join(self.log_messages))
+
+
 class NoCandidateFound(PrequError):
     def __init__(self, ireq, candidates_tried, finder):
         """

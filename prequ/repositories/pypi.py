@@ -8,11 +8,12 @@ from contextlib import contextmanager
 from shutil import rmtree
 
 from .._compat import TemporaryDirectory
+from .._log_utils import collect_logs
 from .._pip_compat import (
-    FAVORITE_HASH, PIP_10_OR_NEWER, PackageFinder, PyPI, RequirementSet,
-    WheelCache, is_file_url, url_to_path)
+    FAVORITE_HASH, PIP_10_OR_NEWER, InstallationError, PackageFinder, PyPI,
+    RequirementSet, WheelCache, is_file_url, url_to_path)
 from ..cache import CACHE_DIR
-from ..exceptions import NoCandidateFound
+from ..exceptions import DependencyResolutionFailed, NoCandidateFound
 from ..utils import (
     check_is_hashable, fs_str, is_vcs_link, lookup_table,
     make_install_requirement)
@@ -119,11 +120,16 @@ class PyPIRepository(BaseRepository):
 
     def _get_dependencies(self, ireq):
         wheel_cache = WheelCache(CACHE_DIR, self.pip_options.format_control)
-        try:
-            return self._get_dependencies_with_wheel_cache(ireq, wheel_cache)
-        finally:
-            if callable(getattr(wheel_cache, 'cleanup', None)):
-                wheel_cache.cleanup()
+        with collect_logs() as log_collector:
+            try:
+                return self._get_dependencies_with_wheel_cache(
+                    ireq, wheel_cache)
+            except InstallationError as error:
+                raise DependencyResolutionFailed(
+                    ireq, error, log_collector.get_messages())
+            finally:
+                if callable(getattr(wheel_cache, 'cleanup', None)):
+                    wheel_cache.cleanup()
 
     def _get_dependencies_with_wheel_cache(self, ireq, wheel_cache):
         """

@@ -6,6 +6,8 @@ General Changes
 
 - Remove dependency on setuptools
 
+- Improve error messages on dependency resolution failures
+
 1.4.0
 -----
 

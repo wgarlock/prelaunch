@@ -9,11 +9,6 @@ from .utils import check_successful_exit, make_cli_runner
 
 run_check = make_cli_runner(check_main, [])
 
-try:
-    from pip.exceptions import DistributionNotFound
-except ImportError:
-    from pip._internal.exceptions import DistributionNotFound
-
 UP_TO_DATE_REQ_TXT = """
 --trusted-host localhost
 
@@ -61,10 +56,10 @@ def test_simple_case(pip_conf, txt_status, mode):
 
 @pytest.mark.parametrize('mode', ['default', 'silent', 'verbose'])
 def test_error_in_input(pip_conf, mode):
-    with pytest.raises(DistributionNotFound) as excinfo:
-        run_check(pip_conf, 'tiny-dependee==0.1\n', mode)
-    assert '{}'.format(excinfo.value) == (
-        'No matching distribution found for tiny-dependee==0.1')
+    result = run_check(pip_conf, 'tiny-dependee==0.1\n', mode)
+    assert result.exit_code == 2
+    error_msg = 'No matching distribution found for tiny-dependee==0.1'
+    assert error_msg in result.output
 
 
 def run_check(pip_conf, txt_content, mode='default'):
