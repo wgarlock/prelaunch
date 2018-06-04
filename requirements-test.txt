@@ -2,14 +2,15 @@
 #
 #   prequ update
 #
+atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
 coverage==4.5.1           # via pytest-cov
 mock==2.0.0
-more-itertools==4.1.0     # via pytest
+more-itertools==4.2.0     # via pytest
 pbr==4.0.3                # via mock
 pluggy==0.6.0             # via pytest
 py==1.5.3                 # via pytest
-pytest==3.5.1
+pytest==3.6.0
 pytest-cov==2.5.1
 pytest-sugar==0.9.1
 pyyaml==3.12
