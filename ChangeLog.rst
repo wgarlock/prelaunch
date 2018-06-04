@@ -8,6 +8,11 @@ General Changes
 
 - Improve error messages on dependency resolution failures
 
+Bug Fixes
+~~~~~~~~~
+
+- Fix unsafe package reporting in the generated output file
+
 1.4.0
 -----
 
