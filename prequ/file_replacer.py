@@ -4,7 +4,7 @@ import shutil
 import sys
 from tempfile import NamedTemporaryFile
 
-from six import text_type
+text_type = type(u'')
 
 
 class FileReplacer(object):

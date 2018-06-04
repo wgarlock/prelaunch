@@ -4,13 +4,16 @@ from __future__ import (
 
 from abc import ABCMeta, abstractmethod
 
-from six import add_metaclass
-
 from ..utils import is_pinned_requirement
 
+try:
+    from abc import ABC
+except ImportError:
+    class ABC(object):
+        __metaclass__ = ABCMeta
 
-@add_metaclass(ABCMeta)
-class BaseRepository(object):
+
+class BaseRepository(ABC):
 
     def clear_caches(self):
         """Should clear any caches used by the implementation."""

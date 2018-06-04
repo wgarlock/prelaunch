@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 
-from six.moves import configparser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 text = type('')
 

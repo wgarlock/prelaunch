@@ -6,6 +6,8 @@ General Changes
 
 - Remove dependency on setuptools
 
+- Remove dependency on six
+
 - Improve error messages on dependency resolution failures
 
 Bug Fixes
