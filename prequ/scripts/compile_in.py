@@ -63,7 +63,7 @@ class PipCommand(Command):
               help="Generate pip 8 style hashes in the resulting requirements file.")
 @click.option('--max-rounds', default=10,
               help="Maximum number of rounds before resolving the requirements aborts.")
-@click.argument('src_files', nargs=-1, type=click.Path(exists=True, allow_dash=True))
+@click.argument('src_files', nargs=-1, type=click.Path())
 def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
         extra_index_url, cert, client_cert, trusted_host, header, index,
         emit_trusted_host, annotate, upgrade, upgrade_packages, output_file,
