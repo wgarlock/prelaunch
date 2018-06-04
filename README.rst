@@ -8,7 +8,7 @@ requirements files complete and up-to-date.
 
 .. |PyPI| image::
    https://img.shields.io/pypi/v/prequ.svg
-   :target: https://pypi.python.org/pypi/prequ/
+   :target: https://pypi.org/project/prequ/
 
 .. |Test Status on Travis| image::
    https://img.shields.io/travis/suutari/prequ.svg
