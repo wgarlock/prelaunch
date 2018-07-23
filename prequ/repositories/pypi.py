@@ -22,8 +22,14 @@ from .base import BaseRepository
 try:
     from pip._internal.operations.prepare import RequirementPreparer
     from pip._internal.resolve import Resolver as PipResolver
+    from pip._internal.req.req_tracker import RequirementTracker
 except ImportError:
-    pass
+    class RequirementTracker(object):
+        def __enter__(self):
+            return None
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
 
 
 class PyPIRepository(BaseRepository):
@@ -135,6 +141,18 @@ class PyPIRepository(BaseRepository):
         """
         :type ireq: pip.req.InstallRequirement
         """
+        old_env = os.environ.get('PIP_REQ_TRACKER')
+        try:
+            with RequirementTracker() as req_tracker:
+                return self._get_dependencies_with_req_tracker(ireq, wheel_cache, req_tracker)
+        finally:
+            if old_env is None:
+                if 'PIP_REQ_TRACKER' in os.environ:
+                    del os.environ['PIP_REQ_TRACKER']
+            else:
+                os.environ['PIP_REQ_TRACKER'] = old_env
+
+    def _get_dependencies_with_req_tracker(self, ireq, wheel_cache, req_tracker):
         deps = self._dependencies_cache.get(getattr(ireq.link, 'url', None))
         if not deps:
             if ireq.editable and (ireq.source_dir and os.path.exists(ireq.source_dir)):
@@ -170,7 +188,7 @@ class PyPIRepository(BaseRepository):
                 )
             else:
                 # Pip >= 10 (new resolver!)
-                preparer = RequirementPreparer(
+                preparer_kwargs = dict(
                     build_dir=self.build_dir,
                     src_dir=self.source_dir,
                     download_dir=download_dir,
@@ -178,6 +196,9 @@ class PyPIRepository(BaseRepository):
                     progress_bar='off',
                     build_isolation=False
                 )
+                if req_tracker:
+                    preparer_kwargs['req_tracker'] = req_tracker
+                preparer = RequirementPreparer(**preparer_kwargs)
                 reqset = RequirementSet()
                 ireq.is_direct = True
                 reqset.add_requirement(ireq)

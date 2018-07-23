@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+General Changes
+~~~~~~~~~~~~~~~
+
+- Add support for Pip 18
+
 1.4.1
 -----
 

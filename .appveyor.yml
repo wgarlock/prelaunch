@@ -4,12 +4,15 @@ environment:
     - TOXENV: py27-pip8
     - TOXENV: py27-pip9
     - TOXENV: py27-pip10
+    - TOXENV: py27-pip18
     - TOXENV: py34-pip8
     - TOXENV: py34-pip9
     - TOXENV: py34-pip10
+    - TOXENV: py34-pip18
     - TOXENV: py35-pip9
     - TOXENV: py36-pip9
     - TOXENV: py36-pip10
+    - TOXENV: py36-pip18
     - TOXENV: py36-pipmaster
 install:
   - python -m pip install -U pip setuptools wheel
