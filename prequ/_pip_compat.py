@@ -4,6 +4,15 @@ from pip._vendor.pkg_resources import Requirement, parse_version
 PIP_9_OR_NEWER = (parse_version(pip_version) >= parse_version('9.0'))
 PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
 
+try:
+    from pip._internal.cli.base_command import Command
+except ImportError:
+    if PIP_10_OR_NEWER:
+        from pip._internal.basecommand import Command
+    else:
+        from pip.basecommand import Command
+
+
 if PIP_10_OR_NEWER:
     from pip._internal.cache import WheelCache
     from pip._internal.exceptions import InstallationError
@@ -15,7 +24,6 @@ if PIP_10_OR_NEWER:
     from pip._internal.download import is_file_url, path_to_url, url_to_path
     from pip._internal.index import FormatControl, PackageFinder
     from pip._internal.wheel import Wheel
-    from pip._internal.basecommand import Command
     from pip._internal import cmdoptions
     from pip._internal.utils.misc import get_installed_distributions
     from pip._internal.models.index import PyPI
@@ -29,7 +37,6 @@ else:
     from pip.download import is_file_url, path_to_url, url_to_path
     from pip.index import FormatControl, PackageFinder
     from pip.wheel import Wheel, WheelCache
-    from pip.basecommand import Command
     from pip import cmdoptions
     from pip.utils import get_installed_distributions
     from pip.models.index import PyPI
