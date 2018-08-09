@@ -12,6 +12,14 @@ except ImportError:
     else:
         from pip.basecommand import Command
 
+try:
+    from pip._internal.cli import cmdoptions
+except ImportError:
+    if PIP_10_OR_NEWER:
+        from pip._internal import cmdoptions
+    else:
+        from pip import cmdoptions
+
 
 if PIP_10_OR_NEWER:
     from pip._internal.cache import WheelCache
@@ -24,7 +32,6 @@ if PIP_10_OR_NEWER:
     from pip._internal.download import is_file_url, path_to_url, url_to_path
     from pip._internal.index import FormatControl, PackageFinder
     from pip._internal.wheel import Wheel
-    from pip._internal import cmdoptions
     from pip._internal.utils.misc import get_installed_distributions
     from pip._internal.models.index import PyPI
 else:
@@ -37,7 +44,6 @@ else:
     from pip.download import is_file_url, path_to_url, url_to_path
     from pip.index import FormatControl, PackageFinder
     from pip.wheel import Wheel, WheelCache
-    from pip import cmdoptions
     from pip.utils import get_installed_distributions
     from pip.models.index import PyPI
 
