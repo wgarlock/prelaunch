@@ -48,6 +48,18 @@ else:
     from pip.models.index import PyPI
 
 
+try:
+    from pip._internal.req.constructors import install_req_from_editable
+except ImportError:
+    install_req_from_editable = InstallRequirement.from_editable
+
+
+try:
+    from pip._internal.req.constructors import install_req_from_line
+except ImportError:
+    install_req_from_line = InstallRequirement.from_line
+
+
 __all__ = [
     'Command',
     'FAVORITE_HASH',
@@ -62,6 +74,8 @@ __all__ = [
     'WheelCache',
     'cmdoptions',
     'get_installed_distributions',
+    'install_req_from_editable',
+    'install_req_from_line',
     'is_file_url',
     'parse_requirements',
     'path_to_url',

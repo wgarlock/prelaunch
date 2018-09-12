@@ -9,7 +9,7 @@ from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
 from pytest import fixture
 
-from prequ._pip_compat import InstallRequirement
+from prequ._pip_compat import install_req_from_editable, install_req_from_line
 from prequ.cache import DependencyCache
 from prequ.exceptions import NoCandidateFound
 from prequ.repositories.base import BaseRepository
@@ -57,7 +57,7 @@ class FakeRepository(BaseRepository):
         # Store non-extra dependencies under the empty string
         extras += ("",)
         dependencies = [dep for extra in extras for dep in self.index[name][version][extra]]
-        return [InstallRequirement.from_line(dep, constraint=ireq.constraint) for dep in dependencies]
+        return [install_req_from_line(dep, constraint=ireq.constraint) for dep in dependencies]
 
 
 class FakeInstalledDistribution(pkg_resources.Distribution):
@@ -110,12 +110,12 @@ def base_resolver(depcache):
 
 @fixture
 def from_line():
-    return InstallRequirement.from_line
+    return install_req_from_line
 
 
 @fixture
 def from_editable():
-    return InstallRequirement.from_editable
+    return install_req_from_editable
 
 
 @fixture

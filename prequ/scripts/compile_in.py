@@ -8,7 +8,7 @@ import tempfile
 
 import click
 
-from .._pip_compat import Command, InstallRequirement, parse_requirements
+from .._pip_compat import Command, install_req_from_line, parse_requirements
 from ..exceptions import PrequError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository
@@ -117,7 +117,10 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
     if not upgrade and os.path.exists(dst_file):
         ireqs = parse_requirements(dst_file, finder=repository.finder, session=repository.session, options=pip_options)
         # Exclude packages from --upgrade-package/-P from the existing pins: We want to upgrade.
-        upgrade_pkgs_key = {key_from_ireq(InstallRequirement.from_line(pkg)) for pkg in upgrade_packages}
+        upgrade_pkgs_key = {
+            key_from_ireq(install_req_from_line(pkg))
+            for pkg in upgrade_packages
+        }
         existing_pins = {key_from_ireq(ireq): ireq
                          for ireq in ireqs
                          if is_pinned_requirement(ireq) and key_from_ireq(ireq) not in upgrade_pkgs_key}

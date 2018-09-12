@@ -3,7 +3,7 @@ import re
 import mock
 import pytest
 
-from prequ._pip_compat import InstallRequirement
+from prequ._pip_compat import install_req_from_line
 from prequ.repositories.local import LocalRequirementsRepository
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
@@ -86,7 +86,7 @@ def ireq(line, extras=None):
     extras_str = '[{}]'.format(sorted_extras) if sorted_extras else ''
     parts = re.split('([<>=])', line)
     line_with_extras = parts[0] + extras_str + ''.join(parts[1:])
-    return InstallRequirement.from_line(line_with_extras)
+    return install_req_from_line(line_with_extras)
 
 
 @pytest.mark.parametrize('existing_pin,to_find,pin_matches', [

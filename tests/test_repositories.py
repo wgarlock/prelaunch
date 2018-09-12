@@ -2,7 +2,7 @@ import pytest
 from mock import MagicMock, patch
 
 from prequ._pip_compat import (
-    PIP_10_OR_NEWER, InstallRequirement, PackageFinder)
+    PIP_10_OR_NEWER, PackageFinder, install_req_from_line)
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
 
@@ -26,7 +26,7 @@ def test_pypirepo_calls_reqset_with_str_paths():
     """
     with patch('prequ.repositories.pypi.RequirementSet') as mocked_init:
         repo = get_pypi_repository()
-        ireq = InstallRequirement.from_line('ansible==2.4.0.0')
+        ireq = install_req_from_line('ansible==2.4.0.0')
 
         # Setup a mock object to be returned from the RequirementSet call
         mocked_reqset = MagicMock()
@@ -67,7 +67,7 @@ def test_pypirepo_calls_preparer_with_str_paths(
     Similar to `test_pypirepo_calls_reqset_with_str_paths` but for Pip 10.
     """
     repo = get_pypi_repository()
-    ireq = InstallRequirement.from_line('ansible==2.4.0.0')
+    ireq = install_req_from_line('ansible==2.4.0.0')
     ireq.link = MagicMock(url='http://localhost/ansible2400.zip')
 
     mocked_resolve_func = MagicMock()

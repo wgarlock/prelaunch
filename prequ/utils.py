@@ -10,7 +10,8 @@ from itertools import chain, groupby
 
 from click import style
 
-from ._pip_compat import InstallRequirement, path_to_url, url_to_path
+from ._pip_compat import (
+    InstallRequirement, install_req_from_line, path_to_url, url_to_path)
 
 
 def first(iterable):
@@ -131,7 +132,7 @@ def make_install_requirement(name, version, extras, constraint=False):
         # Sort extras for stability
         extras_string = "[{}]".format(",".join(sorted(extras)))
 
-    return InstallRequirement.from_line(
+    return install_req_from_line(
         str('{}{}=={}'.format(name, extras_string, version)),
         constraint=constraint)
 
@@ -267,7 +268,7 @@ def get_pinned_version(ireq):
     :type ignore_editables: bool
     """
     if not isinstance(ireq, InstallRequirement):
-        ireq = InstallRequirement.from_line(ireq)
+        ireq = install_req_from_line(ireq)
     assert isinstance(ireq, InstallRequirement)
 
     if ireq.editable:

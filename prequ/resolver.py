@@ -9,7 +9,7 @@ from itertools import chain, count
 
 import click
 
-from ._pip_compat import InstallRequirement
+from ._pip_compat import install_req_from_line
 from .cache import DependencyCache
 from .logging import log
 from .utils import (
@@ -312,7 +312,8 @@ class Resolver(object):
         log.debug('  {:25} requires {}'.format(format_requirement(ireq),
                                                ', '.join(sorted(dependency_strings, key=lambda s: s.lower())) or '-'))
         for dependency_string in dependency_strings:
-            yield InstallRequirement.from_line(dependency_string, constraint=ireq.constraint)
+            yield install_req_from_line(
+                dependency_string, constraint=ireq.constraint)
 
     def reverse_dependencies(self, ireqs):
         return self.dependency_cache.reverse_dependencies(ireqs)
