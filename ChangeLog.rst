@@ -10,6 +10,7 @@ Bug Fixes
   e.g. sometimes "Jinja2", sometimes "jinja2".  This made the generated
   requirements file unstable and caused problems with "prequ check".
 
+
 1.4.2
 -----
 
@@ -19,6 +20,7 @@ General Changes
 ~~~~~~~~~~~~~~~
 
 - Add support for Pip 18
+
 
 1.4.1
 -----
@@ -38,6 +40,7 @@ Bug Fixes
 ~~~~~~~~~
 
 - Fix unsafe package reporting in the generated output file
+
 
 1.4.0
 -----
@@ -81,6 +84,7 @@ Bug Fixes
 - Handle environment markers in the source requirements
   (jazzband/pip-tools#647)
 
+
 1.3.1
 -----
 
@@ -90,6 +94,7 @@ Bug Fixes
 ~~~~~~~~~
 
 - Fix handling of requirements with a period in name
+
 
 1.3.0
 -----
@@ -117,6 +122,7 @@ Bug Fixes
 - Generate hashes of artifacts correctly
 - sync: Respect environment markers (jazzband/pip-tools#600)
 
+
 1.2.2
 -----
 
@@ -133,6 +139,7 @@ Bug Fixes
   non-ASCII file names (jazzband/pip-tools#567)
 - sync: Fix syncing when there were editables present
 
+
 1.2.1
 -----
 
@@ -142,6 +149,7 @@ Bug Fixes
 ~~~~~~~~~
 
 - Correctly follow only the dependencies of the current platform
+
 
 1.2.0
 -----
@@ -159,6 +167,7 @@ Bug Fixes
 ~~~~~~~~~
 
 - Fix "prequ check --silent" not being silent on outdated txt files
+
 
 1.1.0
 -----
@@ -181,6 +190,7 @@ Bug Fixes
 - (jazzband/pip-tools#557) Fix package hashing doing unnecessary
   unpacking
 
+
 1.0.2
 -----
 
@@ -192,6 +202,7 @@ Bug Fixes
 - Prevent conflicting package versions as expeceted.  The resolver used
   to allow selecting a pinned version V for a package P1 even though
   another package P2 required a version of P1 that is not V.
+
 
 1.0.1
 -----
@@ -207,6 +218,7 @@ Bug Fixes
   would have a ``download_dir`` and be exposed to ``git-checkout-index``,
   (thus losing their VCS directory) and ``python setup.py egg_info``
   fails.
+
 
 1.0.0
 -----
@@ -236,6 +248,7 @@ Bug Fixes
   pinned in generated requirements files
 - sync: Fix sync to work on Python 3 (TypeError: unorderable types...)
 
+
 0.500.0
 -------
 
@@ -258,6 +271,7 @@ Bug Fixes
 - (jazzband/pip-tools#476) Fix editable requirements loosing their
   dependencies after first round
 
+
 0.400.0
 -------
 
@@ -273,15 +287,18 @@ Bug Fixes
 - Add new command "prequ check" for checking generated requirements
 - Sort generated requirements by lower case distribution name
 
+
 0.300.0
 -------
 
 - Use ``[prequ]`` section in ``setup.cfg`` as default pre-requirements
 
+
 0.200.1
 -------
 
 - (jazzband/pip-tools#464) sync: Use options from the txt file
+
 
 0.200.0
 -------
@@ -293,6 +310,7 @@ Bug Fixes
 - (jazzband/pip-tools#452) Fix capitalization in the generated
   requirements.txt, packages will always be lowercased
 
+
 0.180.9
 -------
 
@@ -301,10 +319,12 @@ Bug Fixes
 - Rename "prequ compile" to "prequ compile-in"
 - Use ``requirements.pre`` as input for ``prequ update``
 
+
 0.180.8
 -------
 
 - Rename Pip Requ to Prequ
+
 
 0.180.7
 -------
@@ -315,10 +335,12 @@ Bug Fixes
 - Convert README and ChangeLog to restructured text (ReST)
 - Include README as package long description in setup.py
 
+
 0.180.6
 -------
 
 - (jazzband/pip-tools#417) Exclude irrelevant pip constraints
+
 
 0.180.5
 -------
@@ -326,15 +348,18 @@ Bug Fixes
 - Fix "pip-requ compile-all" to handle "-e" and "-c" lines correctly
 - Remove "pip-compile" and "pip-sync" commands
 
+
 0.180.4
 -------
 
 - Fix "pip-requ compile --no-annotate"
 
+
 0.180.3
 -------
 
 - Add support for "pip-requ --version"
+
 
 0.180.2
 -------
@@ -346,6 +371,7 @@ Bug Fixes
 - (jazzband/pip-tools#389) Ignore pkg-resources
 - (jazzband/pip-tools#355) Support non-editable pinned VCS dependencies
 
+
 0.180.1
 -------
 
@@ -353,6 +379,7 @@ Bug Fixes
 - Add "pip-requ build-wheels" command
 - Add "pip-requ compile-all" command
 - Add "pip-requ update" command
+
 
 0.180.0
 -------
