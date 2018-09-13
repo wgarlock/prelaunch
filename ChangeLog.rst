@@ -12,8 +12,8 @@ Bug Fixes
 - Normalize requirement names in annotations
 
   - Previously the annotations were rendered with inconsistent case,
-  e.g. sometimes "Jinja2", sometimes "jinja2".  This made the generated
-  requirements file unstable and caused problems with "prequ check".
+    e.g. sometimes "Jinja2", sometimes "jinja2".  This made the generated
+    requirements file unstable and caused problems with "prequ check".
 
 
 1.4.2
