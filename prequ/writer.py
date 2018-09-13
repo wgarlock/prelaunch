@@ -8,7 +8,7 @@ from .file_replacer import FileReplacer
 from .logging import log
 from .utils import (
     UNSAFE_PACKAGES, comment, dedup, format_requirement, formatted_as,
-    key_from_ireq)
+    key_from_ireq, normalize_req_name)
 
 
 class OutputWriter(object):
@@ -152,7 +152,8 @@ class OutputWriter(object):
         # Annotate what packages this package is required by
         required_by = reverse_dependencies.get(key_from_ireq(ireq), [])
         if required_by:
-            annotation = ", ".join(sorted(required_by))
+            annotation = ", ".join(
+                normalize_req_name(x) for x in sorted(required_by))
             line = "{:24}{}{}".format(
                 line,
                 " \\\n    " if ireq_hashes else "  ",
