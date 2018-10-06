@@ -3,9 +3,14 @@
 #   prequ update
 #
 -e .
-click==6.7                # via prequ
-pluggy==0.6.0             # via tox
-py==1.5.3                 # via tox
+click==7.0                # via prequ
+pluggy==0.7.1             # via tox
+py==1.6.0                 # via tox
 six==1.11.0               # via tox
-tox==3.0.0
+toml==0.10.0              # via tox
+tox==3.4.0
 virtualenv==16.0.0        # via tox
+
+# The following packages are considered to be unsafe in a requirements file:
+# pip                       # via prequ
+# setuptools                # via tox
