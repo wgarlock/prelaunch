@@ -19,6 +19,7 @@ dist
 .coverage
 .cache
 .eggs/
+.pytest_cache
 
 # IDE
 .idea
