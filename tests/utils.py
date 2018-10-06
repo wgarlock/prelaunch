@@ -38,7 +38,7 @@ def check_successful_exit(run_result):
 
 
 def _reraise_if_excepted(run_result):
-    if run_result.exit_code == -1:
+    if run_result.exc_info and run_result.exc_info[0] != SystemExit:
         (exc_type, exc_value, traceback) = run_result.exc_info
         exc_value.run_result = run_result
         six.reraise(exc_type, exc_value, traceback)
