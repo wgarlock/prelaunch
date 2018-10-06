@@ -6,17 +6,37 @@ cache: pip
 
 matrix:
   include:
-    - {env: TOXENV=style, python: "3.6"}
-    - {env: TOXENV=packaging, python: "3.6"}
-    - {env: TOXENV=requirements, python: "3.6"}
-    - python: "pypy"
-    - python: "3.7"
+    - name: Style
+      env: TOXENV=style
+      python: "3.6"
+
+    - name: Packaging
+      env: TOXENV=packaging
+      python: "3.6"
+
+    - name: Requirements
+      env: TOXENV=requirements
+      python: "3.6"
+
+    - name: PyPy
+      python: "pypy"
+
+    - name: Python 3.7
+      python: "3.7"
       dist: xenial
       sudo: required
-    - python: "3.6"
-    - python: "3.5"
-    - python: "3.4"
-    - python: "2.7"
+
+    - name: Python 3.6
+      python: "3.6"
+
+    - name: Python 3.5
+      python: "3.5"
+
+    - name: Python 3.4
+      python: "3.4"
+
+    - name: Python 2.7
+      python: "2.7"
 
 install:
   - pip install tox-travis
