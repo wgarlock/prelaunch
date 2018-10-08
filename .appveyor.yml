@@ -18,7 +18,7 @@ environment:
 install:
   - python -m pip install -U pip setuptools wheel
   - pip install codecov
-  - pip install -U tox
+  - pip install tox==3.4.0
 build_script:
   - python setup.py bdist_wheel
 test_script:
