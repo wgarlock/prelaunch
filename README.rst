@@ -21,6 +21,8 @@ requirements files complete and up-to-date.
 .. |Coverage| image::
    https://img.shields.io/codecov/c/github/suutari/prequ.svg
    :target: https://codecov.io/gh/suutari/prequ
+   
+**Note:** Prequ is currently designed to work with a virtual env, so compatibility with non-virtual Python environments are not guaranteed to work at the moment.
 
 Background
 ----------
