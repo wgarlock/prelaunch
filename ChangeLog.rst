@@ -1,6 +1,12 @@
 Prequ Change Log
 ================
 
+General Changes
+~~~~~~~~~~~~~~~
+
+- Add support for Pip 19
+
+
 1.4.3
 -----
 
