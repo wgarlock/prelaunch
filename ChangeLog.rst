@@ -1,6 +1,11 @@
 Prequ Change Log
 ================
 
+1.4.4
+-----
+
+Released on 2019-01-27 19:45 +02:00.
+
 General Changes
 ~~~~~~~~~~~~~~~
 
