@@ -2,15 +2,18 @@ branches: {only: [master, test]}
 environment:
   matrix:
     - TOXENV: py37-pipmaster
+    - TOXENV: py37-pip190
     - TOXENV: py37-pip181
     - TOXENV: py37-pip10
     - TOXENV: py36-pipmaster
+    - TOXENV: py36-pip190
     - TOXENV: py36-pip180
     - TOXENV: py36-pip10
     - TOXENV: py36-pip9
     - TOXENV: py35-pip9
     - TOXENV: py34-pip9
     - TOXENV: py34-pip8
+    - TOXENV: py27-pip190
     - TOXENV: py27-pip181
     - TOXENV: py27-pip10
     - TOXENV: py27-pip9
