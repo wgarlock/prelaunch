@@ -39,11 +39,11 @@ matrix:
 
 install:
   - pip install tox==3.7.0 tox-travis==0.11
-  - pip install codecov
-  - pip install -U pip setuptools
-  - python setup.py bdist_wheel
+  - pip install -U setuptools
+  - python setup.py sdist
 
-script: tox -v --installpkg dist/*.whl
+script: tox -v --installpkg dist/*.tar.gz
 
 after_success:
+  - pip install codecov
   - codecov -e TRAVIS_PYTHON_VERSION
