@@ -45,8 +45,11 @@ def name_from_ireq(ireq):
     """
     if not ireq.req:
         ireq.source_dir = os.path.abspath(ireq.source_dir)
-        ireq.run_egg_info()
-        assert ireq.req, "run_egg_info should fill req: {!r}".format(ireq)
+        if hasattr(ireq, 'prepare_metadata'):
+            ireq.prepare_metadata()
+        else:
+            ireq.run_egg_info()
+        assert ireq.req, "prepare_metadata should fill req: {!r}".format(ireq)
     return name_from_req(ireq.req)
 
 
