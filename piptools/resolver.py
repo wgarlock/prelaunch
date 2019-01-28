@@ -7,8 +7,7 @@ from functools import partial
 from itertools import chain, count
 import os
 
-from first import first
-from ._compat import InstallRequirement
+from ._compat import install_req_from_line
 
 from . import click
 from .cache import DependencyCache
@@ -151,7 +150,7 @@ class Resolver(object):
         """
         for _, ireqs in full_groupby(constraints, key=key_from_ireq):
             ireqs = list(ireqs)
-            exception_ireq = first(ireqs, key=lambda ireq: ireq.editable or is_vcs_link(ireq))
+            exception_ireq = next((ireq for ireq in ireqs if ireq.editable or is_vcs_link(ireq)), None)
             if exception_ireq:
                 yield exception_ireq  # ignore all the other specs: the editable/vcs one is the one that counts
                 continue
@@ -304,7 +303,7 @@ class Resolver(object):
         log.debug('  {:25} requires {}'.format(format_requirement(ireq),
                                                ', '.join(sorted(dependency_strings, key=lambda s: s.lower())) or '-'))
         for dependency_string in dependency_strings:
-            yield InstallRequirement.from_line(dependency_string, constraint=ireq.constraint)
+            yield install_req_from_line(dependency_string, constraint=ireq.constraint)
 
     def reverse_dependencies(self, ireqs):
         non_editable = [ireq for ireq in ireqs if not ireq.editable]

@@ -8,9 +8,7 @@ from itertools import chain, groupby
 from collections import OrderedDict
 from contextlib import contextmanager
 
-from ._compat import InstallRequirement
-
-from first import first
+from ._compat import install_req_from_line
 
 from .click import style
 
@@ -50,7 +48,7 @@ def make_install_requirement(name, version, extras, constraint=False):
         # Sort extras for stability
         extras_string = "[{}]".format(",".join(sorted(extras)))
 
-    return InstallRequirement.from_line(
+    return install_req_from_line(
         str('{}{}=={}'.format(name, extras_string, version)),
         constraint=constraint)
 
@@ -65,7 +63,7 @@ def is_subdirectory(base, directory):
     return os.path.commonprefix([base, directory]) == base
 
 
-def format_requirement(ireq, marker=None):
+def format_requirement(ireq, marker=None, hashes=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
@@ -83,6 +81,10 @@ def format_requirement(ireq, marker=None):
         line = '{}{}'.format('-e ' if ireq.editable else '', ireq.link)
     else:
         line = str(ireq.req).lower()
+
+    if hashes:
+        for hash_ in sorted(hashes):
+            line += " \\\n    --hash={}".format(hash_)
 
     if marker:
         line = '{} ; {}'.format(line, marker)
@@ -145,7 +147,7 @@ def get_pinned_version(ireq):
         version for (op, version) in specs
         if (op == '==' or op == '===') and not version.endswith('.*'))
     good_versions = ireq.specifier.filter(versions, prereleases=True)
-    return first(good_versions)
+    return next(iter(good_versions), None)
 
 
 def is_vcs_link(ireq):
@@ -164,7 +166,7 @@ def as_tuple(ireq):
         raise TypeError('Expected a pinned InstallRequirement, got {}'.format(ireq))
 
     name = key_from_req(ireq.req)
-    version = first(ireq.specifier._specs)._spec[1]
+    version = next(iter(ireq.specifier._specs))._spec[1]
     extras = tuple(sorted(ireq.extras))
     return name, version, extras
 
@@ -298,3 +300,16 @@ def temp_environ():
     finally:
         os.environ.clear()
         os.environ.update(environ)
+
+
+def get_hashes_from_ireq(ireq):
+    """
+    Given an InstallRequirement, return a list of string hashes in the format "{algorithm}:{hash}".
+    Return an empty list if there are no hashes in the requirement options.
+    """
+    result = []
+    ireq_hashes = ireq.options.get('hashes', {})
+    for algorithm, hexdigests in ireq_hashes.items():
+        for hash_ in hexdigests:
+            result.append("{}:{}".format(algorithm, hash_))
+    return result

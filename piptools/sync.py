@@ -1,11 +1,15 @@
 import collections
 import os
 import sys
+import tempfile
 from subprocess import check_call
 
+from piptools._compat import stdlib_pkgs, DEV_PKGS
 from . import click
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
-from .utils import flat_map, format_requirement, key_from_ireq, key_from_req, is_pinned_requirement, is_vcs_link
+from .utils import (
+    flat_map, format_requirement, key_from_ireq, key_from_req,
+    get_hashes_from_ireq, is_pinned_requirement, is_vcs_link)
 
 PACKAGES_TO_IGNORE = [
     '-markerlib',
@@ -13,9 +17,7 @@ PACKAGES_TO_IGNORE = [
     'pip-tools',
     'pip-review',
     'pkg-resources',
-    'setuptools',
-    'wheel',
-]
+] + list(stdlib_pkgs) + list(DEV_PKGS)
 
 
 def dependency_tree(installed_keys, root_key):
@@ -155,11 +157,20 @@ def sync(to_install, to_uninstall, verbose=False, dry_run=False, pip_flags=None,
             for ireq in to_install:
                 click.echo("  {}".format(format_requirement(ireq)))
         else:
-            package_args = []
+            # prepare requirement lines
+            req_lines = []
             for ireq in sorted(to_install, key=key_from_ireq):
-                if ireq.editable:
-                    package_args.extend(['-e', str(ireq.link or ireq.req)])
-                else:
-                    package_args.append(str(ireq.req))
-            check_call([pip, 'install'] + pip_flags + install_flags + package_args)
+                ireq_hashes = get_hashes_from_ireq(ireq)
+                req_lines.append(format_requirement(ireq, hashes=ireq_hashes))
+
+            # save requirement lines to a temporary file
+            tmp_req_file = tempfile.NamedTemporaryFile(mode='wt', delete=False)
+            tmp_req_file.write('\n'.join(req_lines))
+            tmp_req_file.close()
+
+            try:
+                check_call([pip, 'install', '-r', tmp_req_file.name] + pip_flags + install_flags)
+            finally:
+                os.unlink(tmp_req_file.name)
+
     return 0

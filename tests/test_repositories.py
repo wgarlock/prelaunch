@@ -1,8 +1,11 @@
 from mock import MagicMock, patch
-from piptools._compat import PackageFinder, InstallRequirement
+from pip._vendor.packaging.version import parse as parse_version
+from pip import __version__ as pip_version
+from piptools._compat import PackageFinder, install_req_from_line
 
 from piptools.repositories.pypi import PyPIRepository
 from piptools.scripts._repo import get_pip_command
+import pytest
 
 
 def test_pypirepo_build_dir_is_str():
@@ -13,6 +16,10 @@ def test_pypirepo_source_dir_is_str():
     assert isinstance(get_pypi_repository().source_dir, str)
 
 
+@pytest.mark.skipif(
+    parse_version(pip_version) >= parse_version('10.0.0'),
+    reason="RequirementSet objects don't take arguments after pip 10."
+)
 def test_pypirepo_calls_reqset_with_str_paths():
     """
     Make sure that paths passed to RequirementSet init are str.
@@ -23,7 +30,7 @@ def test_pypirepo_calls_reqset_with_str_paths():
     """
     with patch('piptools.repositories.pypi.RequirementSet') as mocked_init:
         repo = get_pypi_repository()
-        ireq = InstallRequirement.from_line('ansible==2.4.0.0')
+        ireq = install_req_from_line('ansible==2.4.0.0')
 
         # Setup a mock object to be returned from the RequirementSet call
         mocked_reqset = MagicMock()

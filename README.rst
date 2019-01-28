@@ -1,4 +1,4 @@
-|buildstatus-travis| |buildstatus-appveyor| |jazzband| |pypi|
+|buildstatus-travis| |buildstatus-appveyor| |codecov| |coveralls| |jazzband| |pypi|
 
 ==================================
 pip-tools = pip-compile + pip-sync
@@ -16,6 +16,12 @@ even when you've pinned them.  `You do pin them, right?`_
 .. |buildstatus-appveyor| image:: https://img.shields.io/appveyor/ci/jazzband/pip-tools/master.svg
    :alt: Appveyor build status
    :target: https://ci.appveyor.com/project/jazzband/pip-tools
+.. |codecov| image:: https://codecov.io/gh/jazzband/pip-tools/branch/master/graph/badge.svg
+   :alt: Codecov
+   :target: https://codecov.io/gh/jazzband/pip-tools
+.. |coveralls| image:: https://coveralls.io/repos/github/jazzband/pip-tools/badge.svg?branch=master
+   :alt: Coveralls
+   :target: https://coveralls.io/github/jazzband/pip-tools?branch=master
 .. |jazzband| image:: https://jazzband.co/static/img/badge.svg
    :alt: Jazzband
    :target: https://jazzband.co/
@@ -155,7 +161,7 @@ To update a specific package to the latest or a specific version use the
 
     $ pip-compile --upgrade-package flask  # only update the flask package
     $ pip-compile --upgrade-package flask --upgrade-package requests  # update both the flask and requests packages
-    $ pip-compile -P flask -P requests  # same as above, but shorter
+    $ pip-compile -P flask -P requests==2.0.0  # update the flask package to the latest, and requests to v2.0.0
 
 If you use multiple Python versions, you can run ``pip-compile`` as
 ``py -X.Y -m piptools compile ...`` on Windows and
@@ -224,17 +230,6 @@ If you use multiple Python versions, you can run ``pip-sync`` as
 **Note**: ``pip-sync`` will not upgrade or uninstall packaging tools like
 ``setuptools``, ``pip``, or ``pip-tools`` itself. Use ``pip install --upgrade``
 to upgrade those packages.
-
-
-Note about ``pip``
-==================
-
-As of v2.0.0, pip-tools has vendored ``pip v9.0.3`` in its codebase.
-This was done to keep ``pip-tools`` working for users with ``pip v10.0.0``.
-Only the ``pip-sync`` command still use the ``pip`` found in the ``virtualenv``,
-and only for the ``pip install`` and ``pip uninstall`` commands issued as shell-outs
-by ``pip-sync``.
-
 
 Other useful tools
 ==================

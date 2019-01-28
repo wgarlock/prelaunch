@@ -7,7 +7,7 @@ import sys
 import tempfile
 
 from .._compat import (
-    InstallRequirement,
+    install_req_from_line,
     parse_requirements,
     cmdoptions,
     Command,
@@ -108,15 +108,18 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
         find_links=find_links, cert=cert, client_cert=client_cert,
         pre=pre, trusted_host=trusted_host)
 
+    upgrade_install_reqs = {}
     # Proxy with a LocalRequirementsRepository if --upgrade is not specified
     # (= default invocation)
     if not upgrade and os.path.exists(dst_file):
         ireqs = parse_requirements(dst_file, finder=repository.finder, session=repository.session, options=pip_options)
         # Exclude packages from --upgrade-package/-P from the existing pins: We want to upgrade.
-        upgrade_pkgs_key = {key_from_req(InstallRequirement.from_line(pkg).req) for pkg in upgrade_packages}
+        upgrade_reqs_gen = (install_req_from_line(pkg) for pkg in upgrade_packages)
+        upgrade_install_reqs = {key_from_req(install_req.req): install_req for install_req in upgrade_reqs_gen}
+
         existing_pins = {key_from_req(ireq.req): ireq
                          for ireq in ireqs
-                         if is_pinned_requirement(ireq) and key_from_req(ireq.req) not in upgrade_pkgs_key}
+                         if is_pinned_requirement(ireq) and key_from_req(ireq.req) not in upgrade_install_reqs}
         repository = LocalRequirementsRepository(existing_pins, repository)
 
     log.debug('Using indexes:')
@@ -156,6 +159,8 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
         else:
             constraints.extend(parse_requirements(
                 src_file, finder=repository.finder, session=repository.session, options=pip_options))
+
+    constraints.extend(upgrade_install_reqs.values())
 
     # Filter out pip environment markers which do not match (PEP496)
     constraints = [req for req in constraints
@@ -216,15 +221,15 @@ def cli(verbose, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
                           index_urls=repository.finder.index_urls,
                           trusted_hosts=pip_options.trusted_hosts,
                           find_links=repository.finder.find_links,
-                          format_control=repository.finder.format_control)
+                          format_control=repository.finder.format_control,
+                          allow_unsafe=allow_unsafe)
     writer.write(results=results,
                  unsafe_requirements=resolver.unsafe_constraints,
                  reverse_dependencies=reverse_dependencies,
                  primary_packages={key_from_req(ireq.req) for ireq in constraints if not ireq.constraint},
                  markers={key_from_req(ireq.req): ireq.markers
                           for ireq in constraints if ireq.markers},
-                 hashes=hashes,
-                 allow_unsafe=allow_unsafe)
+                 hashes=hashes)
 
     if dry_run:
         log.warning('Dry-run, so nothing updated.')
