@@ -161,7 +161,7 @@ def test_conf_merging(pip_conf):
         assert _read_text_file('requirements.txt') == (
             txt_prelude + 'small-fake-a==0.2\n')
         assert _read_text_file('requirements-local.txt') == (
-            txt_prelude + 'small-fake-b==0.2\n')
+            txt_prelude + 'small-fake-b==0.3\n')
         assert _read_text_file('requirements-dev.txt') == (
             txt_prelude + 'tiny-dependee==1.0\n')
 
@@ -182,7 +182,7 @@ def test_only_in_files(pip_conf_with_wheeldir):
         assert _read_text_file('requirements.txt') == (
             txt_prelude + 'small-fake-a==0.2\n')
         assert _read_text_file('requirements-test.txt') == (
-            txt_prelude + 'small-fake-b==0.2\n')
+            txt_prelude + 'small-fake-b==0.3\n')
 
 
 def test_no_conf(pip_conf):

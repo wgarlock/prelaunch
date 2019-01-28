@@ -326,27 +326,31 @@ def test_sync_requirement_file_with_hashes(from_line, from_editable, mocked_tmp_
         mocked_tmp_req_file.write.assert_called_once_with(expected)
 
 
-def test_sync_with_editable_uses_abspath(from_editable, small_fake_package_dir):
+def test_sync_with_editable_uses_abspath(
+        from_editable, small_fake_package_dir, mocked_tmp_req_file):
     ireq = from_editable(small_fake_package_dir)
     rel_path = os.path.relpath(url_to_path(ireq.link.url))
     ireq.link.url = 'file:{}'.format(rel_path.replace(os.path.sep, '/'))
-    with mock.patch('prequ.sync.check_call') as check_call:
+    with mock.patch('prequ.sync.check_call'):
         sync({ireq}, set())
-        check_call.assert_called_once_with(
-            ['pip', 'install', '-q',
-             '-e', path_to_url(os.path.abspath(small_fake_package_dir))])
+
+        fake_pkg_url = path_to_url(os.path.abspath(small_fake_package_dir))
+        mocked_tmp_req_file.write.assert_called_once_with(
+            '-e {}'.format(fake_pkg_url))
 
 
-def test_sync_sorting_ireqs(from_line):
-    with mock.patch('prequ.sync.check_call') as check_call:
+def test_sync_sorting_ireqs(from_line, mocked_tmp_req_file):
+    with mock.patch('prequ.sync.check_call'):
         to_install = {from_line('django==1.8'), from_line('first==2.0.1')}
         sync(to_install, {})
-        check_call.assert_called_once_with(
-            ['pip', 'install', '-q', 'django==1.8', 'first==2.0.1'])
+        mocked_tmp_req_file.write.assert_called_once_with(
+            'django==1.8\n'
+            'first==2.0.1')
 
 
-def test_sync_sorting_ireqs_with_editable(from_line, from_editable):
-    with mock.patch('prequ.sync.check_call') as check_call:
+def test_sync_sorting_ireqs_with_editable(
+        from_line, from_editable, mocked_tmp_req_file):
+    with mock.patch('prequ.sync.check_call'):
         path_to_package = os.path.join(os.path.dirname(__file__),
                                        'test_data', 'small_fake_package')
         editable_ireq = from_editable(path_to_package)
@@ -356,6 +360,9 @@ def test_sync_sorting_ireqs_with_editable(from_line, from_editable):
             editable_ireq,
         }
         sync(to_install, {})
-        check_call.assert_called_once_with(
-            ['pip', 'install', '-q',
-             'django==1.8', 'first==2.0.1', '-e', str(editable_ireq.link)])
+        mocked_tmp_req_file.write.assert_called_once_with(
+            (
+                'django==1.8\n'
+                'first==2.0.1\n'
+                '-e {}'
+            ).format(editable_ireq.link))

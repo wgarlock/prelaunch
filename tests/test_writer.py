@@ -102,6 +102,7 @@ def test_iter_lines__unsafe_dependencies(from_line, allow_unsafe):
         generate_hashes=False,
         default_index_url=None, index_urls=[],
         trusted_hosts=[],
+        find_links=[],
         format_control=FormatControl(set(), set()),
         allow_unsafe=allow_unsafe,
     )
@@ -120,9 +121,7 @@ def test_iter_lines__unsafe_dependencies(from_line, allow_unsafe):
     ))
     assert comment('# The following packages are considered to be unsafe in a requirements file:') in str_lines
     if allow_unsafe:
-        assert comment('#    pip-compile --allow-unsafe --output-file dst_file src_file src_file2') in str_lines
         assert 'setuptools' in str_lines
     else:
-        assert comment('#    pip-compile --output-file dst_file src_file src_file2') in str_lines
         assert comment('# setuptools') in str_lines
     assert 'test==1.2' in str_lines
