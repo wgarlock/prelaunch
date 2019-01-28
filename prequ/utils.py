@@ -154,7 +154,8 @@ def is_subdirectory(base, directory):
     return relpath.split(os.path.sep, 1)[0] != os.path.pardir
 
 
-def format_requirement(ireq, marker='', root_dir=None, find_links_dirs=None):
+def format_requirement(ireq, marker='', hashes=None,
+                       root_dir=None, find_links_dirs=None):
     """
     Generic formatter for pretty printing InstallRequirements to the terminal
     in a less verbose way than using its `__str__` method.
@@ -175,6 +176,10 @@ def format_requirement(ireq, marker='', root_dir=None, find_links_dirs=None):
             line = '{}#egg={}'.format(url_or_path, ireq.req)
     else:
         line = str(ireq.req).lower()
+
+    if hashes:
+        for hash_ in sorted(hashes):
+            line += " \\\n    --hash={}".format(hash_)
 
     if marker:
         line = '{} ; {}'.format(line, marker)
@@ -294,7 +299,7 @@ def get_ireq_version(ireq):
         version for (op, version) in specs
         if (op == '==' or op == '===') and not version.endswith('.*'))
     good_versions = ireq.specifier.filter(versions, prereleases=True)
-    return first(good_versions)
+    return next(iter(good_versions), None)
 
 
 def is_vcs_link(ireq):
@@ -422,3 +427,16 @@ def fs_str(string):
 
 
 _fs_encoding = sys.getfilesystemencoding() or sys.getdefaultencoding()
+
+
+def get_hashes_from_ireq(ireq):
+    """
+    Given an InstallRequirement, return a list of string hashes in the format "{algorithm}:{hash}".
+    Return an empty list if there are no hashes in the requirement options.
+    """
+    result = []
+    ireq_hashes = ireq.options.get('hashes', {})
+    for algorithm, hexdigests in ireq_hashes.items():
+        for hash_ in hexdigests:
+            result.append("{}:{}".format(algorithm, hash_))
+    return result

@@ -1,14 +1,16 @@
 import collections
 import os
 import sys
+import tempfile
 from subprocess import check_call
 
 import click
 
+from ._pip_compat import DEV_PKGS, stdlib_pkgs
 from .exceptions import IncompatibleRequirements, UnsupportedConstraint
 from .utils import (
-    flat_map, format_requirement, is_pinned_requirement, is_vcs_link,
-    key_from_dist, key_from_ireq, key_from_req)
+    flat_map, format_requirement, get_hashes_from_ireq, is_pinned_requirement,
+    is_vcs_link, key_from_dist, key_from_ireq, key_from_req)
 
 PACKAGES_TO_IGNORE = [
     '-markerlib',
@@ -16,9 +18,7 @@ PACKAGES_TO_IGNORE = [
     'prequ',
     'pip-review',
     'pkg-resources',
-    'setuptools',
-    'wheel',
-]
+] + list(stdlib_pkgs) + list(DEV_PKGS)
 
 
 def dependency_tree(installed_keys, root_key):
@@ -160,18 +160,20 @@ def sync(to_install, to_uninstall,  # noqa: C901
             for ireq in to_install:
                 click.echo("  {}".format(format_requirement(ireq)))
         else:
-            package_args = sum((
-                _ireq_to_install_args(ireq)
-                for ireq in sorted(to_install, key=key_from_ireq)), [])
-            check_call([pip, 'install'] + pip_flags + install_flags + package_args)
+            # prepare requirement lines
+            req_lines = []
+            for ireq in sorted(to_install, key=key_from_ireq):
+                ireq_hashes = get_hashes_from_ireq(ireq)
+                req_lines.append(format_requirement(ireq, hashes=ireq_hashes))
+
+            # save requirement lines to a temporary file
+            tmp_req_file = tempfile.NamedTemporaryFile(mode='wt', delete=False)
+            tmp_req_file.write('\n'.join(req_lines))
+            tmp_req_file.close()
+
+            try:
+                check_call([pip, 'install', '-r', tmp_req_file.name] + pip_flags + install_flags)
+            finally:
+                os.unlink(tmp_req_file.name)
+
     return 0
-
-
-def _ireq_to_install_args(ireq):
-    """
-    :type ireq: pip.req.InstallRequirement
-    """
-    line = format_requirement(ireq, root_dir=None)
-    if line.startswith('-e '):
-        return ['-e', line[3:]]
-    return [line]

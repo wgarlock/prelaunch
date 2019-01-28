@@ -27,12 +27,9 @@ try:
     from pip._internal.resolve import Resolver as PipResolver
     from pip._internal.req.req_tracker import RequirementTracker
 except ImportError:
-    class RequirementTracker(object):
-        def __enter__(self):
-            return None
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            pass
+    @contextmanager
+    def RequirementTracker():  # noqa: N802
+        yield
 
 
 class PyPIRepository(BaseRepository):

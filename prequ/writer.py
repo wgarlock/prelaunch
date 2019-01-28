@@ -15,7 +15,7 @@ class OutputWriter(object):
     def __init__(self, src_files, dst_file, dry_run, emit_header, emit_index,
                  emit_trusted_host, annotate, generate_hashes,
                  default_index_url, index_urls, trusted_hosts,
-                 find_links, format_control, silent=False):
+                 find_links, format_control, allow_unsafe, silent=False):
         self.src_files = src_files
         self.dst_file = dst_file
         self.dry_run = dry_run
@@ -29,6 +29,7 @@ class OutputWriter(object):
         self.trusted_hosts = trusted_hosts
         self.find_links = find_links
         self.format_control = format_control
+        self.allow_unsafe = allow_unsafe
         self.silent = silent
 
     def _sort_key(self, ireq):
@@ -86,7 +87,7 @@ class OutputWriter(object):
             yield ''
 
     def _iter_lines(self, results, unsafe_requirements, reverse_dependencies,
-                    primary_packages, markers, hashes, allow_unsafe=False):
+                    primary_packages, markers, hashes):
         for line in self.write_header():
             yield line
         for line in self.write_flags():
@@ -114,20 +115,20 @@ class OutputWriter(object):
                                                primary_packages,
                                                marker=markers.get(key_from_ireq(ireq)),
                                                hashes=hashes)
-                if not allow_unsafe:
+                if not self.allow_unsafe:
                     yield comment('# {}'.format(req))
                 else:
                     yield req
 
     def write(self, results, unsafe_requirements, reverse_dependencies,
-              primary_packages, markers, hashes, allow_unsafe=False):
+              primary_packages, markers, hashes):
         with ExitStack() as stack:
             f = None
             if not self.dry_run:
                 f = stack.enter_context(FileReplacer(self.dst_file))
 
             for line in self._iter_lines(results, unsafe_requirements, reverse_dependencies,
-                                         primary_packages, markers, hashes, allow_unsafe=allow_unsafe):
+                                         primary_packages, markers, hashes):
                 if not self.silent:
                     log.info(line)
                 if f:
@@ -135,16 +136,14 @@ class OutputWriter(object):
                     f.write(os.linesep.encode('utf-8'))
 
     def _format_requirement(self, ireq, reverse_dependencies, primary_packages, marker=None, hashes=None):
+        ireq_hashes = (hashes if hashes is not None else {}).get(ireq)
+
         line = format_requirement(
             ireq,
             marker=marker,
+            hashes=ireq_hashes,
             root_dir=os.path.dirname(self.dst_file),
             find_links_dirs=self.find_links)
-
-        ireq_hashes = (hashes if hashes is not None else {}).get(ireq)
-        if ireq_hashes:
-            for hash_ in sorted(ireq_hashes):
-                line += " \\\n    --hash={}".format(hash_)
 
         if not self.annotate or key_from_ireq(ireq) in primary_packages:
             return line
