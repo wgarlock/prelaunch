@@ -367,8 +367,8 @@ def _parse_req_data(req_data):
 
 
 WHEEL_LINE_RX = re.compile(
-    '^\s*(?P<pkg>(\w|-)+)(?P<verspec>\S*)\s+'
-    '\(\s*wheel from \s*(?P<wheel_src_name>\S+)\)$')
+    r'^\s*(?P<pkg>(\w|-)+)(?P<verspec>\S*)\s+'
+    r'\(\s*wheel from \s*(?P<wheel_src_name>\S+)\)$')
 
 
 def _parse_wheel_match(line, pkg, verspec, wheel_src_name):
