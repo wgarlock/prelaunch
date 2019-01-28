@@ -20,9 +20,18 @@ except ImportError:
     else:
         from pip import cmdoptions
 
+try:
+    from pip._internal.utils.compat import stdlib_pkgs
+except ImportError:
+    try:
+        from pip._internal.compat import stdlib_pkgs
+    except ImportError:
+        from pip.compat import stdlib_pkgs
+
 
 if PIP_10_OR_NEWER:
     from pip._internal.cache import WheelCache
+    from pip._internal.commands.freeze import DEV_PKGS
     from pip._internal.exceptions import InstallationError
     from pip._internal.req.req_install import InstallRequirement
     from pip._internal.req.req_file import parse_requirements
@@ -47,6 +56,8 @@ else:
     from pip.utils import get_installed_distributions
     from pip.models.index import PyPI
 
+    DEV_PKGS = ('pip', 'setuptools', 'distribute', 'wheel')
+
 
 try:
     from pip._internal.req.constructors import install_req_from_editable
@@ -62,6 +73,7 @@ except ImportError:
 
 __all__ = [
     'Command',
+    'DEV_PKGS',
     'FAVORITE_HASH',
     'FormatControl',
     'InstallRequirement',
@@ -79,6 +91,7 @@ __all__ = [
     'is_file_url',
     'parse_requirements',
     'path_to_url',
+    'stdlib_pkgs',
     'url_to_path',
     'user_cache_dir',
 ]
