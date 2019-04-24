@@ -47,7 +47,11 @@ def _patch_supported_tags(func):
 @_patch_supported_tags
 def test_resolving_respects_platform(from_line):
     repository = get_repository()
-    repository.finder.valid_tags = PY27_LINUX64_TAGS
+    if hasattr(repository.finder, 'candidate_evaluator'):
+        repository.finder.candidate_evaluator._valid_tags = PY27_LINUX64_TAGS
+    else:
+        repository.finder.valid_tags = PY27_LINUX64_TAGS
+
     ireq = from_line('cryptography==2.0.3')
     deps = repository.get_dependencies(ireq)
     assert 'enum34' in set(x.name for x in deps)
