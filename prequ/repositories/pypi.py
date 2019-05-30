@@ -23,8 +23,6 @@ from ..utils import (
 from .base import BaseRepository
 
 try:
-    from pip._internal.operations.prepare import RequirementPreparer
-    from pip._internal.resolve import Resolver as PipResolver
     from pip._internal.req.req_tracker import RequirementTracker
 except ImportError:
     class RequirementTracker(object):
@@ -33,6 +31,19 @@ except ImportError:
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
+
+try:
+    from pip._internal.operations.prepare import RequirementPreparer
+except ImportError:
+    pass
+
+try:
+    from pip._internal.resolve import Resolver as PipResolver
+except ImportError:
+    try:
+        from pip._internal.legacy_resolve import Resolver as PipResolver
+    except ImportError:
+        pass
 
 
 class PyPIRepository(BaseRepository):
@@ -64,7 +75,10 @@ class PyPIRepository(BaseRepository):
         if pkg_resources.parse_version(pip.__version__) < pkg_resources.parse_version('19.0'):
             finder_kwargs["process_dependency_links"] = pip_options.process_dependency_links
 
-        self.finder = PackageFinder(**finder_kwargs)
+        create_package_finder = getattr(PackageFinder, 'create', PackageFinder)
+
+        self.finder = create_package_finder(**finder_kwargs)
+        assert isinstance(self.finder, PackageFinder)
 
         # Caches
         # stores project_name => InstallationCandidate mappings for all

@@ -16,11 +16,13 @@ except ImportError:
 
 def get_finder():
     repo = get_pypi_repository()
-    finder = PackageFinder(
+    create_package_finder = getattr(PackageFinder, 'create', PackageFinder)
+    finder = create_package_finder(
         find_links=[],
         index_urls=['pypi.localhost'],
         allow_all_prereleases=False,
         session=repo.session)
+    assert isinstance(finder, PackageFinder)
     return finder
 
 
