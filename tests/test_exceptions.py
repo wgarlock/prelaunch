@@ -1,7 +1,7 @@
 import os
 
 from prequ._pip_compat import (
-    PackageFinder, install_req_from_editable, install_req_from_line)
+    create_package_finder, install_req_from_editable, install_req_from_line)
 from prequ.exceptions import (
     IncompatibleRequirements, NoCandidateFound, UnsupportedConstraint)
 
@@ -16,13 +16,11 @@ except ImportError:
 
 def get_finder():
     repo = get_pypi_repository()
-    create_package_finder = getattr(PackageFinder, 'create', PackageFinder)
     finder = create_package_finder(
         find_links=[],
         index_urls=['pypi.localhost'],
         allow_all_prereleases=False,
         session=repo.session)
-    assert isinstance(finder, PackageFinder)
     return finder
 
 

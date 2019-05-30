@@ -57,7 +57,7 @@ def test_pypirepo_calls_reqset_with_str_paths():
 
 @pytest.mark.skipif(not PIP_10_OR_NEWER, reason="Needs Pip 10 or newer")
 @patch('prequ.repositories.pypi.RequirementSet')
-@patch('prequ.repositories.pypi.PipResolver')
+@patch('prequ.repositories.pypi.Resolver')
 @patch('prequ.repositories.pypi.RequirementPreparer')
 def test_pypirepo_calls_preparer_with_str_paths(
         mocked_init, mocked_resolver, mocked_reqset):
