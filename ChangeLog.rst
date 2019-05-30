@@ -1,6 +1,17 @@
 Prequ Change Log
 ================
 
+1.4.6
+-----
+
+Released on 2019-05-30 12:10 +03:00.
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Add support for Pip master commit 83d813c01e
+
+
 1.4.5
 -----
 
