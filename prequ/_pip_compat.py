@@ -1,8 +1,11 @@
+from contextlib import contextmanager
+
 from pip import __version__ as pip_version
 from pip._vendor.pkg_resources import Requirement, parse_version
 
 PIP_9_OR_NEWER = (parse_version(pip_version) >= parse_version('9.0'))
 PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
+PIP_18_OR_NEWER = (parse_version(pip_version) >= parse_version('18.0'))
 
 try:
     from pip._internal.cli.base_command import Command
@@ -33,6 +36,7 @@ if PIP_10_OR_NEWER:
     from pip._internal.cache import WheelCache
     from pip._internal.commands.freeze import DEV_PKGS
     from pip._internal.exceptions import InstallationError
+    from pip._internal.operations.prepare import RequirementPreparer
     from pip._internal.req.req_install import InstallRequirement
     from pip._internal.req.req_file import parse_requirements
     from pip._internal.req.req_set import RequirementSet
@@ -57,6 +61,24 @@ else:
     from pip.models.index import PyPI
 
     DEV_PKGS = ('pip', 'setuptools', 'distribute', 'wheel')
+    RequirementPreparer = None
+
+
+if PIP_10_OR_NEWER:
+    try:
+        from pip._internal.resolve import Resolver
+    except ImportError:
+        from pip._internal.legacy_resolve import Resolver
+else:
+    Resolver = None
+
+
+if PIP_18_OR_NEWER:
+    from pip._internal.req.req_tracker import RequirementTracker
+else:
+    @contextmanager
+    def RequirementTracker():  # noqa: N802
+        yield
 
 
 try:
@@ -70,6 +92,8 @@ try:
 except ImportError:
     install_req_from_line = InstallRequirement.from_line
 
+create_package_finder = getattr(PackageFinder, 'create', PackageFinder)
+
 
 __all__ = [
     'Command',
@@ -78,13 +102,20 @@ __all__ = [
     'FormatControl',
     'InstallRequirement',
     'InstallationError',
+    'PIP_10_OR_NEWER',
+    'PIP_18_OR_NEWER',
+    'PIP_9_OR_NEWER',
     'PackageFinder',
     'PyPI',
     'Requirement',
+    'RequirementPreparer',
     'RequirementSet',
+    'RequirementTracker',
+    'Resolver',
     'Wheel',
     'WheelCache',
     'cmdoptions',
+    'create_package_finder',
     'get_installed_distributions',
     'install_req_from_editable',
     'install_req_from_line',

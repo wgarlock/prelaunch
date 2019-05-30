@@ -13,23 +13,15 @@ import pkg_resources
 from .._compat import TemporaryDirectory
 from .._log_utils import collect_logs
 from .._pip_compat import (
-    FAVORITE_HASH, PIP_10_OR_NEWER, InstallationError, PackageFinder, PyPI,
-    RequirementSet, WheelCache, is_file_url, url_to_path)
+    FAVORITE_HASH, InstallationError, PackageFinder, PyPI, RequirementPreparer,
+    RequirementSet, RequirementTracker, Resolver, WheelCache,
+    create_package_finder, is_file_url, url_to_path)
 from ..cache import CACHE_DIR
 from ..exceptions import DependencyResolutionFailed, NoCandidateFound
 from ..utils import (
     check_is_hashable, fs_str, is_vcs_link, lookup_table,
     make_install_requirement)
 from .base import BaseRepository
-
-try:
-    from pip._internal.operations.prepare import RequirementPreparer
-    from pip._internal.resolve import Resolver as PipResolver
-    from pip._internal.req.req_tracker import RequirementTracker
-except ImportError:
-    @contextmanager
-    def RequirementTracker():  # noqa: N802
-        yield
 
 
 class PyPIRepository(BaseRepository):
@@ -61,7 +53,8 @@ class PyPIRepository(BaseRepository):
         if pkg_resources.parse_version(pip.__version__) < pkg_resources.parse_version('19.0'):
             finder_kwargs["process_dependency_links"] = pip_options.process_dependency_links
 
-        self.finder = PackageFinder(**finder_kwargs)
+        self.finder = create_package_finder(**finder_kwargs)
+        assert isinstance(self.finder, PackageFinder)
 
         # Caches
         # stores project_name => InstallationCandidate mappings for all
@@ -185,7 +178,7 @@ class PyPIRepository(BaseRepository):
             if not os.path.isdir(self._wheel_download_dir):
                 os.makedirs(self._wheel_download_dir)
 
-            if not PIP_10_OR_NEWER:
+            if not RequirementPreparer:
                 # Pip < 9 and below
                 reqset = RequirementSet(
                     self.build_dir,
@@ -216,7 +209,7 @@ class PyPIRepository(BaseRepository):
                 reqset = RequirementSet()
                 ireq.is_direct = True
                 reqset.add_requirement(ireq)
-                self.resolver = PipResolver(
+                self.resolver = Resolver(
                     preparer=preparer,
                     finder=self.finder,
                     session=self.session,
