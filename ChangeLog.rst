@@ -1,6 +1,14 @@
 Prequ Change Log
 ================
 
+This version of Prequ contains all the changes from pip-tools 3.3.2 and
+is in sync with pip-tools master commit c14bcca.
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Updates to Tox, Travis and AppVeyor configuration
+
 1.4.6
 -----
 
