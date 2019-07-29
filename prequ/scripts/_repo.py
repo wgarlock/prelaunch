@@ -46,7 +46,10 @@ def get_pip_command():
     # Use pip's parser for pip.conf management and defaults.
     # General options (find_links, index_url, extra_index_url, trusted_host,
     # and pre) are defered to pip.
-    pip_command = PipCommand()
+    try:
+        pip_command = PipCommand()
+    except TypeError:
+        pip_command = PipCommand(name="dummy", summary="dummy")
     pip_command.parser.add_option(cmdoptions.no_binary())
     pip_command.parser.add_option(cmdoptions.only_binary())
     index_opts = cmdoptions.make_option_group(
