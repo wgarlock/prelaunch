@@ -1,6 +1,17 @@
 Prequ Change Log
 ================
 
+1.4.7
+-----
+
+Released on 2019-07-29 21:55 +03:00.
+
+General Changes
+~~~~~~~~~~~~~~~
+
+- Add support for Pip 19.2
+
+
 1.4.6
 -----
 
