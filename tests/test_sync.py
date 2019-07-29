@@ -330,7 +330,11 @@ def test_sync_with_editable_uses_abspath(
         from_editable, small_fake_package_dir, mocked_tmp_req_file):
     ireq = from_editable(small_fake_package_dir)
     rel_path = os.path.relpath(url_to_path(ireq.link.url))
-    ireq.link.url = 'file:{}'.format(rel_path.replace(os.path.sep, '/'))
+    url = 'file:{}'.format(rel_path.replace(os.path.sep, '/'))
+    if hasattr(ireq.link, '_url'):
+        ireq.link._url = url
+    else:
+        ireq.link.url = url
     with mock.patch('prequ.sync.check_call'):
         sync({ireq}, set())
 
