@@ -3,7 +3,7 @@ import os
 import mock
 import pytest
 
-from prequ._pip_compat import PIP_10_OR_NEWER, path_to_url
+from prequ._pip_compat import PIP_10_OR_NEWER, PIP_192_OR_NEWER, path_to_url
 from prequ.exceptions import DependencyResolutionFailed
 from prequ.repositories.pypi import PyPIRepository
 from prequ.scripts._repo import get_pip_command
@@ -35,8 +35,11 @@ def _patch_supported_tags(func):
                                impl=None, abi=None):
             return PY27_LINUX64_TAGS
 
+        to_patch = 'pip._internal.' + (
+            'models.target_python.get_supported' if PIP_192_OR_NEWER else
+            'pep425tags.get_supported')
         return mock.patch(
-            'pip._internal.pep425tags.get_supported',
+            to_patch,
             new=get_supported_tags)(func)
     else:
         return mock.patch(
@@ -145,7 +148,13 @@ def test_failing_setup_script(from_editable):
             url=failing_package_url))
 
     egg_info_failed = 'Command "python setup.py egg_info" failed'
-    assert egg_info_failed in error_message
+    command_errored = (
+        'Command errored out with exit status 1:'
+        ' python setup.py egg_info Check the logs for full command output.')
+    assert (
+        egg_info_failed in error_message
+        or
+        command_errored in error_message)
 
     import_error = "No module named 'non_existing_setup_helper'"
     import_error2 = import_error.replace("'", '')  # On Python 2

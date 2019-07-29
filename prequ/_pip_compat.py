@@ -4,6 +4,7 @@ from pip._vendor.pkg_resources import Requirement, parse_version
 PIP_9_OR_NEWER = (parse_version(pip_version) >= parse_version('9.0'))
 PIP_10_OR_NEWER = (parse_version(pip_version) >= parse_version('10.0'))
 PIP_18_OR_NEWER = (parse_version(pip_version) >= parse_version('18.0'))
+PIP_192_OR_NEWER = (parse_version(pip_version) >= parse_version('19.2'))
 
 try:
     from pip._internal.cli.base_command import Command
@@ -83,7 +84,32 @@ try:
 except ImportError:
     install_req_from_line = InstallRequirement.from_line
 
-create_package_finder = getattr(PackageFinder, 'create', PackageFinder)
+
+if not hasattr(PackageFinder, 'create'):
+    create_package_finder = PackageFinder
+else:
+    try:
+        from pip._internal.models.search_scope import SearchScope
+        from pip._internal.models.selection_prefs import SelectionPreferences
+    except ImportError:
+        create_package_finder = PackageFinder.create
+    else:
+        def create_package_finder(**kwargs):
+            find_links = kwargs.pop('find_links', None)
+            index_urls = kwargs.pop('index_urls', None)
+            allow_all_prereleases = kwargs.pop('allow_all_prereleases', None)
+            if find_links is not None:
+                kwargs.setdefault('search_scope', SearchScope(
+                    find_links=find_links,
+                    index_urls=index_urls,
+                ))
+            if allow_all_prereleases is not None:
+                kwargs.setdefault('selection_prefs', SelectionPreferences(
+                    allow_yanked=True,
+                    allow_all_prereleases=allow_all_prereleases,
+                ))
+
+            return PackageFinder.create(**kwargs)
 
 
 __all__ = [

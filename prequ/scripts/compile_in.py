@@ -127,15 +127,13 @@ def cli(verbose, silent, dry_run, pre, rebuild, find_links, index_url,
         repository = LocalRequirementsRepository(existing_pins, repository)
 
     log.debug('Using indexes:')
-    # remove duplicate index urls before processing
-    repository.finder.index_urls = list(dedup(repository.finder.index_urls))
-    for index_url in repository.finder.index_urls:
+    for index_url in dedup(repository.finder.index_urls):
         log.debug('  {}'.format(index_url))
 
     if repository.finder.find_links:
         log.debug('')
         log.debug('Configuration:')
-        for find_link in repository.finder.find_links:
+        for find_link in dedup(repository.finder.find_links):
             log.debug('  -f {}'.format(find_link))
 
     ###

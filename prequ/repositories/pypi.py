@@ -121,9 +121,13 @@ class PyPIRepository(BaseRepository):
             best_candidate = max(
                 matching_candidates, key=self.finder._candidate_sort_key
             )
-        # pip >= 19.1
-        else:
+        # pip == 19.1.*
+        elif hasattr(self.finder, "candidate_evaluator"):
             evaluator = self.finder.candidate_evaluator
+            best_candidate = evaluator.get_best_candidate(matching_candidates)
+        # pip >= 19.2
+        else:
+            evaluator = self.finder.make_candidate_evaluator(ireq.name)
             best_candidate = evaluator.get_best_candidate(matching_candidates)
 
         # Turn the candidate into a pinned InstallRequirement
@@ -252,8 +256,13 @@ class PyPIRepository(BaseRepository):
             ireq.specifier.filter((candidate.version for candidate in all_candidates)))
         matching_candidates = candidates_by_version[matching_versions[0]]
 
+        def get_candidate_link(candidate):
+            if hasattr(candidate, "link"):
+                return candidate.link
+            return candidate.location
+
         return {
-            self._get_file_hash(candidate.location)
+            self._get_file_hash(get_candidate_link(candidate))
             for candidate in matching_candidates
         }
 
