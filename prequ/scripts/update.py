@@ -1,6 +1,6 @@
 import click
 
-from . import build_wheels, compile
+from . import build_wheels, compile, compile_yaml, compile_packagejson, update_versions
 
 click.disable_unicode_literals_warning = True
 
@@ -15,3 +15,6 @@ def main(ctx, verbose, silent):
     """
     ctx.invoke(build_wheels.main, silent=silent)
     ctx.invoke(compile.main, verbose=verbose, silent=silent)
+    ctx.invoke(compile_yaml.main, verbose=verbose, silent=silent)
+    ctx.invoke(compile_packagejson.main, verbose=verbose, silent=silent)
+    ctx.invoke(update_versions.main, verbose=verbose, silent=silent)
