@@ -9,6 +9,7 @@ from ..configuration import PrequConfiguration, CheckerPrequConfiguration
 from ..exceptions import FileOutdated, PrequError
 from ..logging import log
 import yaml
+import re
 
 click.disable_unicode_literals_warning = True
 
@@ -30,6 +31,97 @@ def main(ctx, verbose, silent, check):
             log.error('{}'.format(error))
         raise SystemExit(1)
 
+class ActionResolver(yaml.resolver.BaseResolver):
+    pass
+
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:bool',
+        re.compile(r'''^(?:yes|Yes|YES|no|No|NO
+                    |true|True|TRUE|false|False|FALSE
+                    |off|Off|OFF)$''', re.X),
+        list('yYnNtTfFoO'))
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:float',
+        re.compile(r'''^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?
+                    |\.[0-9_]+(?:[eE][-+][0-9]+)?
+                    |[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*
+                    |[-+]?\.(?:inf|Inf|INF)
+                    |\.(?:nan|NaN|NAN))$''', re.X),
+        list('-+0123456789.'))
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:int',
+        re.compile(r'''^(?:[-+]?0b[0-1_]+
+                    |[-+]?0[0-7_]+
+                    |[-+]?(?:0|[1-9][0-9_]*)
+                    |[-+]?0x[0-9a-fA-F_]+
+                    |[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$''', re.X),
+        list('-+0123456789'))
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:merge',
+        re.compile(r'^(?:<<)$'),
+        ['<'])
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:null',
+        re.compile(r'''^(?: ~
+                    |null|Null|NULL
+                    | )$''', re.X),
+        ['~', 'n', 'N', ''])
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:timestamp',
+        re.compile(r'''^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]
+                    |[0-9][0-9][0-9][0-9] -[0-9][0-9]? -[0-9][0-9]?
+                     (?:[Tt]|[ \t]+)[0-9][0-9]?
+                     :[0-9][0-9] :[0-9][0-9] (?:\.[0-9]*)?
+                     (?:[ \t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$''', re.X),
+        list('0123456789'))
+
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:value',
+        re.compile(r'^(?:=)$'),
+        ['='])
+
+# The following resolver is only for documentation purposes. It cannot work
+# because plain scalars cannot start with '!', '&', or '*'.
+ActionResolver.add_implicit_resolver(
+        'tag:yaml.org,2002:yaml',
+        re.compile(r'^(?:!|&|\*)$'),
+        list('!&*'))
+
+
+class GithubLoader(yaml.reader.Reader, yaml.scanner.Scanner, yaml.parser.Parser, yaml.composer.Composer, yaml.constructor.Constructor, ActionResolver):
+    def __init__(self, stream):
+        yaml.reader.Reader.__init__(self, stream)
+        yaml.scanner.Scanner.__init__(self)
+        yaml.parser.Parser.__init__(self)
+        yaml.composer.Composer.__init__(self)
+        yaml.constructor.Constructor.__init__(self)
+        ActionResolver.__init__(self)
+
+
+
+class GithubDumper(yaml.emitter.Emitter, yaml.serializer.Serializer, yaml.representer.Representer, ActionResolver):
+    def __init__(self, stream,
+            default_style=None, default_flow_style=False,
+            canonical=None, indent=None, width=None,
+            allow_unicode=None, line_break=None,
+            encoding=None, explicit_start=None, explicit_end=None,
+            version=None, tags=None, sort_keys=True):
+        yaml.emitter.Emitter.__init__(self, stream, canonical=canonical,
+                indent=indent, width=width,
+                allow_unicode=allow_unicode, line_break=line_break)
+        yaml.serializer.Serializer.__init__(self, encoding=encoding,
+                explicit_start=explicit_start, explicit_end=explicit_end,
+                version=version, tags=tags)
+        yaml.representer.Representer.__init__(self, default_style=default_style,
+                default_flow_style=default_flow_style, sort_keys=sort_keys)
+        ActionResolver.__init__(self)
+
 
 def compile(ctx, verbose, silent, check):
     info = log.info if not silent else (lambda x: None)
@@ -50,8 +142,10 @@ def compile(ctx, verbose, silent, check):
                 info('*** Compiling {}'.format(
                     conf.get_output_file_for_nonreq(filename)))
                 with open(filename) as file:
-                    action_obj = yaml.load(file, Loader=yaml.FullLoader)
+                    action_obj = yaml.load(file, Loader=GithubLoader)
                 
+                print(action_obj)
+
                 docker_loc = [
                     d for d in action_obj["jobs"]["main"]["steps"] if d['name'] == "Build and push"
                 ][0]["with"]["tags"].split(conf.app_name)
@@ -59,8 +153,10 @@ def compile(ctx, verbose, silent, check):
                 docker_path = "".join([docker_loc[0], docker_tag])
                 action_obj["jobs"]["main"]["steps"][3]["with"]["tags"] = docker_path
 
+                
+
                 with open(filename, 'w') as file:
-                    yaml.dump(action_obj, file)
+                    yaml.dump(action_obj, file, default_flow_style=False, sort_keys=False, Dumper=GithubDumper)
 
 
 
