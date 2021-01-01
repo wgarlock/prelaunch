@@ -147,11 +147,11 @@ def compile(ctx, verbose, silent, check):
                 print(action_obj)
 
                 docker_loc = [
-                    d for d in action_obj["jobs"]["main"]["steps"] if d['name'] == "Build and push"
+                    d for d in action_obj["jobs"]["docker-build-push"]["steps"] if d['name'] == "Build and push"
                 ][0]["with"]["tags"].split(conf.app_name)
                 docker_tag = conf.app_name + ":v" + version_number
                 docker_path = "".join([docker_loc[0], docker_tag])
-                action_obj["jobs"]["main"]["steps"][3]["with"]["tags"] = docker_path
+                action_obj["jobs"]["docker-build-push"]["steps"][3]["with"]["tags"] = docker_path
 
                 
 
