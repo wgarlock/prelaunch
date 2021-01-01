@@ -138,23 +138,22 @@ def compile(ctx, verbose, silent, check):
             version_number = [x[2]  for x in conf.wheels_to_build if x[1] == conf.app_name][0]
             
             for action in conf.github_actions:
-                key-append = "prod"
+                key_append = "prod"
                 if 'dev' in action:
                     version_number = f"{version_number}dev"
-                    key-append = "dev"
+                    key_append = "dev"
 
                 filename = os.path.join('.', conf.github_actions_directory, action)
                 info('*** Compiling {}'.format(
                     conf.get_output_file_for_nonreq(filename)))
                 with open(filename) as file:
                     action_obj = yaml.load(file, Loader=GithubLoader)
-    å
                 docker_loc = [
-                    d for d in action_obj["jobs"][f"docker-build-push-{key-append}"]["steps"] if d['name'] == "Build and push"
+                    d for d in action_obj["jobs"][f"docker-build-push-{key_append}"]["steps"] if d['name'] == "Build and push"
                 ][0]["with"]["tags"].split(conf.app_name)
                 docker_tag = f"{conf.app_name}:v{version_number}"
                 docker_path = "".join([docker_loc[0], docker_tag])
-                action_obj["jobs"]["docker-build-push"]["steps"][3]["with"]["tags"] = docker_path
+                action_obj["jobs"][f"docker-build-push-{key_append}"]["steps"][3]["with"]["tags"] = docker_path
 
                 
 
