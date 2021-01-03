@@ -13,8 +13,9 @@ def main(ctx, verbose, silent):
     """
     Build wheels and compile requirements.
     """
-    ctx.invoke(build_wheels.main, silent=silent)
-    ctx.invoke(compile.main, verbose=verbose, silent=silent)
     ctx.invoke(compile_yaml.main, verbose=verbose, silent=silent)
     ctx.invoke(compile_packagejson.main, verbose=verbose, silent=silent)
     ctx.invoke(update_versions.main, verbose=verbose, silent=silent)
+    ctx.invoke(build_wheels.main, silent=silent)
+    ctx.invoke(compile.main, verbose=verbose, silent=silent)
+    
