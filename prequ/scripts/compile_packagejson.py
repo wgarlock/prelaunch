@@ -48,13 +48,14 @@ def compile(ctx, verbose, silent, check):
             info('*** Compiling {}'.format(
                     conf.get_output_file_for_nonreq(filename)))
             data = dict()
-            with open(filename) as file:
-                data = json.load(file) 
-            
-            data["version"] = version_number
+            if os.path.exists(filename):
+                with open(filename) as file:
+                    data = json.load(file) 
+                
+                data["version"] = version_number
 
-            with open(filename, 'w') as file:
-                json.dump(data, file)
+                with open(filename, 'w') as file:
+                    json.dump(data, file)
 
 
         if isinstance(conf, CheckerPrequConfiguration):
